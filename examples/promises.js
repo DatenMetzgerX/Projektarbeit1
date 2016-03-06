@@ -1,3 +1,5 @@
+// @flow
+
 function asyncFunction () {
     return Promise.resolve("Test");
 }
@@ -16,3 +18,4 @@ function chainedPromise () {
     asyncFunction();
 }
 
+// no errors detected by flow

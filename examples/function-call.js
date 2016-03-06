@@ -2,7 +2,7 @@ function count(x) {
     return x.length;
 }
 
-// missing argument x, x is not optional
+// missing argument x, x is not optional, supported by flow
 count();
 
 // too many arguments, most probably this cannot be identified as a function might have been replaced?
@@ -12,7 +12,7 @@ function filter(array, condition, context) {
     const result = [];
 
     for (const element of array) {
-        if (condition.call(context, condition)) {
+        if (condition.call(context, element)) {
             result.push(element);
         }
     }
@@ -29,9 +29,9 @@ function forEach(array, operation, context) {
     }
 }
 
-// accessing missing property of result
+// accessing missing property of result, detected by flow
 const filtered = filter([1, 2, 3, 4], x => x % 2 === 0);
 console.log(filtered.count);
 
-// accessing result of void function is always undefined
+// accessing result of void function is always undefined, no error
 const alwaysUndefined = forEach([1, 2, 3, 4], x => x*x);

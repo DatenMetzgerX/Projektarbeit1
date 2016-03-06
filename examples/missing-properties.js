@@ -14,3 +14,5 @@ count(1);
 // missing version property for option
 const options = defaultOptions();
 console.log(options.version);
+
+// all cases supported by flow
