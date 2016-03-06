@@ -3,7 +3,7 @@ function asyncFunction () {
 }
 
 function syncFunction () {
-    let result;
+    var result;
 
     asyncFunction().then(r => result = r);
 
@@ -16,3 +16,4 @@ function chainedPromise () {
     asyncFunction();
 }
 
+// no errors found

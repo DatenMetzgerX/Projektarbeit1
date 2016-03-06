@@ -1,19 +1,21 @@
+// const not supported
+
 function count(x) {
     return x.length;
 }
 
-// missing argument x, x is not optional
+// missing argument x, x is not optional, dedected
 count();
 
 // too many arguments, most probably this cannot be identified as a function might have been replaced?
 count("test", "another argument");
 
 function filter(array, condition, context) {
-    const result = [];
+    var result = [];
 
-    for (const element of array) {
-        if (condition.call(context, condition)) {
-            result.push(element);
+    for (var i = 0; i < array.length; ++i) {
+        if (condition.call(context, array[i])) {
+            result.push(array[i]);
         }
     }
 
@@ -24,14 +26,15 @@ function filter(array, condition, context) {
 filter([1, 2, 3, 4], x => x % 2 === 0);
 
 function forEach(array, operation, context) {
-    for (const element of array) {
-        operation.call(context, element);
+    for (var i = 0; i < array.length; ++i) {
+        operation.call(context, array[i]);
     }
 }
 
-// accessing missing property of result
-const filtered = filter([1, 2, 3, 4], x => x % 2 === 0);
+// accessing missing property of result, not found
+var filtered = filter([1, 2, 3, 4], x => x % 2 === 0);
 console.log(filtered.count);
 
-// accessing result of void function is always undefined
-const alwaysUndefined = forEach([1, 2, 3, 4], x => x*x);
+// accessing result of void function is always undefined, not found
+var alwaysUndefined = forEach([1, 2, 3, 4], x => x*x);
+console.log(alwaysUndefined.x);

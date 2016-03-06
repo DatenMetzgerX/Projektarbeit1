@@ -7,11 +7,11 @@ Square.prototype.area = function() {
     return this.width * this.length;
 };
 
-const square = new Square(10, 20);
+var square = new Square(10, 20);
 // valid call
 square.area();
 
-const area = square.area();
+var area = square.area;
 // non valid call, area is invoked with this = window or undefined
 console.log(area());
 
@@ -23,6 +23,8 @@ console.log(area.apply(square, []));
 console.log(area.call());
 console.log(area.call({ length: 10 }));
 
-const boundedArea = square.area.bind(square);
+var boundedArea = square.area.bind(square);
 // valid call, this is bound to square
 console.log(boundedArea());
+
+// no errors found

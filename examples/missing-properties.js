@@ -4,13 +4,13 @@ function count(x) {
 
 function defaultOptions() {
     return {
-        name: "default"
+        name: "default" // dead code detected
     };
 }
 
-// missing length property for 1
+// missing length property for 1, detected
 count(1);
 
 // missing version property for option
-const options = defaultOptions();
+var options = defaultOptions();
 console.log(options.version);

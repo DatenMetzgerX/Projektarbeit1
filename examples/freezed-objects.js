@@ -1,3 +1,5 @@
+// Freezing not yet supported
+
 class Position {
     constructor(x, y) {
         this.x = x;
