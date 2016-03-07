@@ -12,7 +12,7 @@ function filter(array, condition, context) {
     const result = [];
 
     for (const element of array) {
-        if (condition.call(context, condition)) {
+        if (condition.call(context, element)) {
             result.push(element);
         }
     }

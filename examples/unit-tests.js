@@ -1,4 +1,4 @@
-import * as jasmine from "jasmine";
+import * as jasmine from "jasmine-core";
 
 const spyObject = jasmine.createSpyObj("myService", [ "save", "delete" ]);
 

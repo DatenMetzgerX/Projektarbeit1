@@ -11,7 +11,7 @@ const square = new Square(10, 20);
 // valid call
 square.area();
 
-const area = square.area();
+const area = square.area;
 // non valid call, area is invoked with this = window or undefined
 console.log(area());
 
