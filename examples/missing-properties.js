@@ -1,3 +1,5 @@
+// @flow
+
 function count(x) {
     return x.length;
 }
