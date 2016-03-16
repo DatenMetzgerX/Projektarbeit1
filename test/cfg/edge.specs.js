@@ -1,6 +1,6 @@
 import {assert} from "chai";
-import Edge from "../../src/cfg/edge";
-import Node from "../../src/cfg/node";
+import Edge from "../../lib/cfg/edge";
+import Node from "../../lib/cfg/node";
 
 describe("Edge", () => {
 	describe("constructor", () => {

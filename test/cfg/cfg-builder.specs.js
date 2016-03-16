@@ -1,8 +1,8 @@
 import {parse} from "babylon";
 import {assert} from "chai";
 
-import {BRANCHES} from "../../src/cfg/control-flow-graph";
-import createControlFlowGraph from "../../src/cfg/cfg-builder";
+import {BRANCHES} from "../../lib/cfg/control-flow-graph";
+import createControlFlowGraph from "../../lib/cfg/cfg-builder";
 
 describe("createControlFlowGraph", function () {
 	it("returns a cfg", function () {
@@ -107,7 +107,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("IfStatement", function () {
+	describe("IfStatement", () => {
 		it("creates a conditional Branch from the if statement to following sibling node if the if statement has no else branch", function () {
 			// act
 			const {ast, cfg} = toCfg(`
@@ -184,7 +184,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("WhileStatement", function () {
+	describe("WhileStatement", () => {
 		it("connects the first statement in the while statement as direct successor with the while statement (TRUE Branch)", () => {
 			const {ast, cfg} = toCfg(`
 			while (x < 10) {
@@ -210,6 +210,11 @@ describe("createControlFlowGraph", function () {
 			const whileStatement = ast.program.body[0];
 
 			assert.isTrue(cfg.isConnected(whileStatement, null, BRANCHES.FALSE));
+		});
+	});
+
+	describe("ForStatement", () => {
+		describe("for (init; condition; update)", () => {
 		});
 	});
 });
