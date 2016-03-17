@@ -1,8 +1,8 @@
 import {assert} from "chai";
 import _ from "lodash";
-import ControlFlowGraph from "../../src/cfg/control-flow-graph";
-import Node from "../../src/cfg/node";
-import {Edge} from "../../src/cfg/edge";
+import ControlFlowGraph from "../../lib/cfg/control-flow-graph";
+import Node from "../../lib/cfg/node";
+import {Edge} from "../../lib/cfg/edge";
 
 describe("ControlFlowGraph", () => {
 	let cfg;

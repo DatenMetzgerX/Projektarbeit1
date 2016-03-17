@@ -6,25 +6,20 @@ const babel = require("gulp-babel");
 const eslint = require("gulp-eslint");
 
 const paths = {
-	scripts: "src/**/*.js"
+	scripts: ["./lib/**/*.js", "./test/**/*.js"]
 };
 
 gulp.task("default", ["build"]);
 
 function transpile () {
 	return gulp
-		.src(paths.scripts)
+		.src(paths.scripts, { base: "." })
 		.pipe(sourcemaps.init())
 		.pipe(babel())
 		.pipe(sourcemaps.write(".", {
-			sourceRoot: function (file) {
-				const destination = path.join(file.cwd, "dist", file.relative);
-				const destDir = path.dirname(destination);
-				return path.relative(destDir, path.join(file.cwd, "src"));
-			},
 			includeContent: false
 		}))
-		.pipe(gulp.dest("dist"));
+		.pipe(gulp.dest("es5"));
 }
 
 gulp.task("build", [ "build:babel", "lint"]);
@@ -44,5 +39,5 @@ gulp.task("watch", ["default"], function () {
 });
 
 gulp.task("clean", function () {
-	return del(["dist"]);
+	return del(["es5"]);
 });
