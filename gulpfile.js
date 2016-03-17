@@ -1,4 +1,3 @@
-const path = require("path");
 const gulp = require("gulp");
 const del = require("del");
 const sourcemaps = require("gulp-sourcemaps");
