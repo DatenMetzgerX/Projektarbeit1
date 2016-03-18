@@ -177,6 +177,26 @@ describe("computeSuccessor", () => {
 			assert.equal(successor, forStatement);
 		});
 	});
+
+	describe("DoWhileStatement", () => {
+		it("returns the do while statement as successor of the last statement in a do while loop", () => {
+			// arrange
+			const path = getPath(`
+			do 
+				x = Math.pow(x, i);
+			while (x < 10);
+			`);
+
+			const doWhileStatement = path.get("body")[0];
+			const assignment = doWhileStatement.get("body");
+
+			// act
+			const successor = computeSuccessor(assignment);
+
+			// assert
+			assert.equal(successor, doWhileStatement);
+		});
+	});
 });
 
 function getPath (code) {

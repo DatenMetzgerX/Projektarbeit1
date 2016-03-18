@@ -38,6 +38,24 @@ describe("computeFallthrough", () => {
 			assert.equal(fallthrough, forStatement);
 		});
 	});
+
+	describe("DoWhileStatement", () => {
+		it("returns the body of the do while statement", () => {
+			// arrange
+			const program = getPath(`
+			do {
+				++x;
+			} while (x < 10)`);
+
+			const doWhileStatement = program.get("body")[0];
+
+			// act
+			const fallthrough = computeFallThrough(doWhileStatement);
+
+			// assert
+			assert.equal(fallthrough, doWhileStatement.get("body"));
+		});
+	});
 });
 
 function getPath (code) {

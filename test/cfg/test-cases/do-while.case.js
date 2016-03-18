@@ -1,7 +1,8 @@
 let x = 10;
 
 do {
-	console.log(--x);
+	let y = Math.pow(x, x);
+	console.log(y);
 
 	if (x === 2) {
 		continue;

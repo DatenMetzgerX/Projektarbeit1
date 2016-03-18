@@ -386,6 +386,36 @@ describe("createControlFlowGraph", function () {
 			assert.isTrue(cfg.isConnected(forOfStatement, endStatement, BRANCHES.FALSE));
 		});
 	});
+
+	describe("DoWhileStatement", () => {
+		it("connects the do while statement with a true branch to it's body", () => {
+			const {ast, cfg} = toCfg(`
+			do {
+				console.log(p++);
+			} while (p < 10);
+			`);
+
+			// assert
+			const doWhileStatement = ast.program.body[0];
+
+			assert.isTrue(cfg.isConnected(doWhileStatement, doWhileStatement.body, BRANCHES.TRUE));
+		});
+
+		it("connects the do while statement with a false branch to it's successor", () => {
+			const {ast, cfg} = toCfg(`
+			do {
+				console.log(p++);
+			} while (p < 10);
+			console.log("end");
+			`);
+
+			// assert
+			const doWhileStatement = ast.program.body[0];
+			const endStatement = ast.program.body[1];
+
+			assert.isTrue(cfg.isConnected(doWhileStatement, endStatement, BRANCHES.FALSE));
+		});
+	});
 });
 
 function toCfg (code) {
