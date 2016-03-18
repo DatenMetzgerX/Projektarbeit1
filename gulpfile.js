@@ -32,7 +32,7 @@ gulp.task("build:babel", ["clean"], transpile);
 
 gulp.task("lint", function () {
 	return gulp
-		.src(paths.scripts)
+		.src(paths.scripts.concat(["!test/cfg/test-cases/**"]))
 		.pipe(eslint())
 		.pipe(eslint.format());
 });
