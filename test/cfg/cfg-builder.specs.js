@@ -1,8 +1,10 @@
 import {parse} from "babylon";
-import {assert} from "chai";
+import {expect} from "chai";
 
 import {BRANCHES} from "../../lib/cfg/control-flow-graph";
 import createControlFlowGraph from "../../lib/cfg/cfg-builder";
+
+/* eslint */
 
 describe("createControlFlowGraph", function () {
 	it("returns a cfg", function () {
@@ -10,7 +12,7 @@ describe("createControlFlowGraph", function () {
 		const {cfg} = toCfg("");
 
 		// assert
-		assert.isNotNull(cfg);
+		expect(cfg).not.to.be.null;
 	});
 
 	describe("ExpressionStatement", () => {
@@ -20,7 +22,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const expression = ast.program.body[0];
-			assert.isTrue(cfg.isConnected(expression, null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(expression, null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -30,7 +32,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const variableDeclaration = ast.program.body[0];
-			assert.isTrue(cfg.isConnected(variableDeclaration, null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(variableDeclaration, null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -40,7 +42,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const emptyStatement = ast.program.body[0];
-			assert.isTrue(cfg.isConnected(emptyStatement, null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(emptyStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -57,7 +59,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const breakStatement = ast.program.body[0].body.body[0].consequent.body[0];
-			assert.isTrue(cfg.isConnected(breakStatement, null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(breakStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -75,7 +77,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forLoop = ast.program.body[0];
 			const continueStatement = forLoop.body.body[0].consequent.body[0];
-			assert.isTrue(cfg.isConnected(continueStatement, forLoop, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(continueStatement, forLoop, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -90,7 +92,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const blockStatement = ast.program.body[0];
 			const assignment = blockStatement.body[0];
-			assert.isTrue(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
 		it("connects the next sibling of the block statement as successor if the block statement is empty", () => {
@@ -103,7 +105,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const blockStatement = ast.program.body[0];
 			const assignment = ast.program.body[1];
-			assert.isTrue(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -119,7 +121,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const ifStatement = ast.program.body[1];
-			assert.isTrue(cfg.isConnected(ifStatement, null, BRANCHES.FALSE), "The if statement should have a edge to the following sibling node for the case the condition is false.");
+			expect(cfg.isConnected(ifStatement, null, BRANCHES.FALSE)).to.be.true;
 		});
 
 		it("creates a conditional true branch from the if statement to the consequent body", function () {
@@ -133,7 +135,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const ifStatement = ast.program.body[1];
-			assert.isTrue(cfg.isConnected(ifStatement, ifStatement.consequent, BRANCHES.TRUE));
+			expect(cfg.isConnected(ifStatement, ifStatement.consequent, BRANCHES.TRUE)).to.be.true;
 		});
 
 		it("creates an unconditional branch from the last statement in the consequent to successor of the if statement", function () {
@@ -147,7 +149,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const ifStatement = ast.program.body[1];
-			assert.isTrue(cfg.isConnected(ifStatement.consequent.body[0], null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(ifStatement.consequent.body[0], null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
 		it("creates a conditional false branch from the if statement to the else branch for an if statement with an else branch", function () {
@@ -163,8 +165,8 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const ifStatement = ast.program.body[1];
-			assert.isTrue(cfg.isConnected(ifStatement, ifStatement.alternate, BRANCHES.FALSE));
-			assert.isFalse(cfg.isConnected(ifStatement, null));
+			expect(cfg.isConnected(ifStatement, ifStatement.alternate, BRANCHES.FALSE)).to.be.true;
+			expect(cfg.isConnected(ifStatement, null)).to.be.false;
 		});
 
 		it("creates an unconditional branch from the last statement in the alternate to the successor of the if statement", function () {
@@ -180,7 +182,7 @@ describe("createControlFlowGraph", function () {
 
 			// assert
 			const ifStatement = ast.program.body[1];
-			assert.isTrue(cfg.isConnected(ifStatement.alternate.body[0], null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(ifStatement.alternate.body[0], null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
@@ -196,7 +198,7 @@ describe("createControlFlowGraph", function () {
 			const whileStatement = ast.program.body[0];
 			const blockStatement = whileStatement.body;
 
-			assert.isTrue(cfg.isConnected(whileStatement, blockStatement, BRANCHES.TRUE));
+			expect(cfg.isConnected(whileStatement, blockStatement, BRANCHES.TRUE)).to.be.true;
 		});
 
 		it("connects the successor of the while statement with a false branch", () => {
@@ -209,7 +211,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const whileStatement = ast.program.body[0];
 
-			assert.isTrue(cfg.isConnected(whileStatement, null, BRANCHES.FALSE));
+			expect(cfg.isConnected(whileStatement, null, BRANCHES.FALSE)).to.be.true;
 		});
 	});
 
@@ -224,7 +226,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forStatement = ast.program.body[0];
 
-			assert.isTrue(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
 		it("connects the body statement of the for loop as successor of the for loop itself (TRUE Branch)", () => {
@@ -238,7 +240,7 @@ describe("createControlFlowGraph", function () {
 			const forStatement = ast.program.body[0];
 			const blockStatement = forStatement.body;
 
-			assert.isTrue(cfg.isConnected(forStatement, blockStatement, BRANCHES.TRUE));
+			expect(cfg.isConnected(forStatement, blockStatement, BRANCHES.TRUE)).to.be.true;
 		});
 
 		it("connects the update statement as successor of the last statement in the body of the for loop", () => {
@@ -252,7 +254,7 @@ describe("createControlFlowGraph", function () {
 			const forStatement = ast.program.body[0];
 			const assignmentStatement = forStatement.body.body[0];
 
-			assert.isTrue(cfg.isConnected(assignmentStatement, forStatement.update, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(assignmentStatement, forStatement.update, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
 		it("connects the for statement with the successor of the for statement (FALSE)", () => {
@@ -265,7 +267,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forStatement = ast.program.body[0];
 
-			assert.isTrue(cfg.isConnected(forStatement, null, BRANCHES.FALSE));
+			expect(cfg.isConnected(forStatement, null, BRANCHES.FALSE)).to.be.true;
 		});
 
 		it("connects the last statement in the loop directly with the for statement and not with the update statement, if the for statement has no update statement", () => {
@@ -279,8 +281,8 @@ describe("createControlFlowGraph", function () {
 			const forStatement = ast.program.body[0];
 			const expressionStatement = forStatement.body.body[0];
 
-			assert.isTrue(cfg.isConnected(expressionStatement, forStatement, BRANCHES.UNCONDITIONAL));
-			assert.isFalse(cfg.isConnected(expressionStatement, null, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(expressionStatement, forStatement, BRANCHES.UNCONDITIONAL)).to.be.true;
+			expect(cfg.isConnected(expressionStatement, null, BRANCHES.UNCONDITIONAL)).to.be.false;
 		});
 
 		it("does not connect the successor of the for statement as false branch of the for statement if the for statement has no condition and therefore is always true", () => {
@@ -295,7 +297,7 @@ describe("createControlFlowGraph", function () {
 			const forStatement = ast.program.body[0];
 			const assignment = ast.program.body[1];
 
-			assert.isFalse(cfg.isConnected(forStatement, assignment, BRANCHES.FALSE));
+			expect(cfg.isConnected(forStatement, assignment, BRANCHES.FALSE)).to.be.false;
 		});
 
 		it("does not connect the for statement init statement (null) with the for statement if the for statement has no init statement and therefore is null (EOF)", () => {
@@ -309,7 +311,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forStatement = ast.program.body[0];
 
-			assert.isFalse(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL)).to.be.false;
 		});
 
 		it("does not connect the ForStatement update (null) with the for statement if the for statement has no update statement and therefore is null (EOF)", () => {
@@ -323,7 +325,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forStatement = ast.program.body[0];
 
-			assert.isFalse(cfg.isConnected(forStatement.update, forStatement, BRANCHES.UNCONDITIONAL));
+			expect(cfg.isConnected(forStatement.update, forStatement, BRANCHES.UNCONDITIONAL)).to.be.false;
 		});
 	});
 
@@ -338,7 +340,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forInStatement = ast.program.body[0];
 
-			assert.isTrue(cfg.isConnected(forInStatement, forInStatement.body, BRANCHES.TRUE));
+			expect(cfg.isConnected(forInStatement, forInStatement.body, BRANCHES.TRUE)).to.be.true;
 		});
 
 		it("connects the for statement with a false branch to it's successor", () => {
@@ -353,7 +355,7 @@ describe("createControlFlowGraph", function () {
 			const forInStatement = ast.program.body[0];
 			const endStatement = ast.program.body[1];
 
-			assert.isTrue(cfg.isConnected(forInStatement, endStatement, BRANCHES.FALSE));
+			expect(cfg.isConnected(forInStatement, endStatement, BRANCHES.FALSE)).to.be.true;
 		});
 	});
 
@@ -368,7 +370,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const forOfStatement = ast.program.body[0];
 
-			assert.isTrue(cfg.isConnected(forOfStatement, forOfStatement.body, BRANCHES.TRUE));
+			expect(cfg.isConnected(forOfStatement, forOfStatement.body, BRANCHES.TRUE)).to.be.true;
 		});
 
 		it("connects the for statement with a false branch to it's successor", () => {
@@ -383,7 +385,7 @@ describe("createControlFlowGraph", function () {
 			const forOfStatement = ast.program.body[0];
 			const endStatement = ast.program.body[1];
 
-			assert.isTrue(cfg.isConnected(forOfStatement, endStatement, BRANCHES.FALSE));
+			expect(cfg.isConnected(forOfStatement, endStatement, BRANCHES.FALSE)).to.be.true;
 		});
 	});
 
@@ -398,7 +400,7 @@ describe("createControlFlowGraph", function () {
 			// assert
 			const doWhileStatement = ast.program.body[0];
 
-			assert.isTrue(cfg.isConnected(doWhileStatement, doWhileStatement.body, BRANCHES.TRUE));
+			expect(cfg.isConnected(doWhileStatement, doWhileStatement.body, BRANCHES.TRUE)).to.be.true;
 		});
 
 		it("connects the do while statement with a false branch to it's successor", () => {
@@ -413,7 +415,228 @@ describe("createControlFlowGraph", function () {
 			const doWhileStatement = ast.program.body[0];
 			const endStatement = ast.program.body[1];
 
-			assert.isTrue(cfg.isConnected(doWhileStatement, endStatement, BRANCHES.FALSE));
+			expect(cfg.isConnected(doWhileStatement, endStatement, BRANCHES.FALSE)).to.be.true;
+		});
+	});
+
+	describe("SwitchStatement", () => {
+		it("connects the switch statement with the first case statement", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+				default:
+					y = null;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const firstCase = switchStatement.cases[0];
+
+			expect(cfg.isConnected(switchStatement, firstCase, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("connects the switch statement with the first case statement even when the default statement is first in order", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				default:
+					y = null;
+				case "A":
+					y = 2;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const defaultStatement = switchStatement.cases[0];
+			const firstCase = switchStatement.cases[1];
+
+			expect(cfg.isConnected(switchStatement, defaultStatement, BRANCHES.UNCONDITIONAL)).to.be.false;
+			expect(cfg.isConnected(switchStatement, firstCase, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("connects the switch statement with it's successor and not with null (first case) if the switch statement has no cases", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+			}
+			
+			console.log(x);
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const logStatement = ast.program.body[1];
+
+			expect(cfg.isConnected(switchStatement, null, BRANCHES.UNCONDITIONAL)).to.be.false;
+			expect(cfg.isConnected(switchStatement, logStatement, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+	});
+
+	describe("SwitchCase", () => {
+		it("connects the case with a true branch to it's consequent", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+				default:
+					y = null;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const firstCase = switchStatement.cases[0];
+
+			expect(cfg.isConnected(firstCase, firstCase.consequent[0], BRANCHES.TRUE)).to.be.true;
+		});
+
+		it("connects the case with a false branch to the next case", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+				default:
+					y = null;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const firstCase = switchStatement.cases[0];
+			const defaultCase = switchStatement.cases[1];
+
+			expect(cfg.isConnected(firstCase, defaultCase, BRANCHES.FALSE)).to.be.true;
+		});
+
+		it("connects the case with a false branch to the successor of the switch statement if it is the last case in the switch", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+			}
+			console.log("A");
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const caseA = switchStatement.cases[0];
+			const logStatement = ast.program.body[1];
+
+			expect(cfg.isConnected(caseA, logStatement, BRANCHES.FALSE)).to.be.true;
+		});
+
+		it("connects the case with a false branch to the next case even when default is the next 'case' in order", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+				default:
+					y = null;
+				case "B":
+					y = 3;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const firstCase = switchStatement.cases[0];
+			const defaultCase = switchStatement.cases[1];
+			const secondCase = switchStatement.cases[2];
+
+			expect(cfg.isConnected(firstCase, defaultCase, BRANCHES.FALSE)).to.be.false;
+			expect(cfg.isConnected(firstCase, secondCase, BRANCHES.FALSE)).to.be.true;
+		});
+
+		it("connects the case with a false branch to the default case the case is the last in order", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+				default:
+					y = null;
+				case "B":
+					y = 3;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+
+			const defaultCase = switchStatement.cases[1];
+			const secondCase = switchStatement.cases[2];
+
+			expect(cfg.isConnected(secondCase, defaultCase, BRANCHES.FALSE)).to.be.true;
+		});
+
+		it("connects the default case consequent with an unconditional branch", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+					y = 2;
+				default:
+					y = null;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const defaultCase = switchStatement.cases[1];
+
+			expect(cfg.isConnected(defaultCase, defaultCase.consequent[0], BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("does not connect the default case with a false branch to any following case statements", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				default:
+					y = null;
+				case "A":
+					y = 2;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const defaultCase = switchStatement.cases[0];
+			const secondCase = switchStatement.cases[1];
+
+			expect(cfg.isConnected(defaultCase, secondCase, BRANCHES.FALSE)).to.be.false;
+		});
+
+		it("connects the case without a consequent to the consequent of a following case statement", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+				default:
+					y = null;
+			}
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const firstCase = switchStatement.cases[0];
+			const defaultCase = switchStatement.cases[1];
+
+			expect(cfg.isConnected(firstCase, defaultCase.consequent[0], BRANCHES.TRUE)).to.be.true;
+		});
+
+		it("connects the successor statement of the switch case as true branch for a case without a consequent and any following cases without a consequent", () => {
+			const {ast, cfg} = toCfg(`
+			switch (x) {
+				case "A":
+				default:
+			}
+			console.log(y);
+			`);
+
+			// assert
+			const switchStatement = ast.program.body[0];
+			const firstCase = switchStatement.cases[0];
+			const logStatement = ast.program.body[1];
+
+			expect(cfg.isConnected(firstCase, null, BRANCHES.TRUE)).to.be.false;
+			expect(cfg.isConnected(firstCase, logStatement, BRANCHES.TRUE)).to.be.true;
 		});
 	});
 });

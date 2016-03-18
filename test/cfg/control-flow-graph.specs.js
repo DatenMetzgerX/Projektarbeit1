@@ -1,4 +1,4 @@
-import {assert, expect} from "chai";
+import {expect} from "chai";
 import _ from "lodash";
 import ControlFlowGraph from "../../lib/cfg/control-flow-graph";
 import Node from "../../lib/cfg/node";
@@ -13,7 +13,7 @@ describe("ControlFlowGraph", () => {
 
 	describe("createNode", () => {
 		it("returns the created node", () => {
-			assert.instanceOf(cfg.createNode("x"), Node);
+			expect(cfg.createNode("x")).to.be.instanceOf(Node);
 		});
 
 		it("returns the existing node if a node for the given value already exists", () => {
@@ -24,14 +24,14 @@ describe("ControlFlowGraph", () => {
 			const created = cfg.createNode("x");
 
 			// assert
-			assert.equal(created, existing);
+			expect(created).to.equal(existing);
 		});
 	});
 
 	describe("getNode", () => {
 		it("returns undefined if no node for the given value exists", () => {
 			// act, assert
-			assert.isUndefined(cfg.getNode("x"));
+			expect(cfg.getNode("x")).to.be.undefined;
 		});
 
 		it("returns the node for the given value", () => {
@@ -42,7 +42,7 @@ describe("ControlFlowGraph", () => {
 			const actual = cfg.getNode("x");
 
 			// assert
-			assert.equal(actual, node);
+			expect(actual).to.equal(node);
 		});
 	});
 
@@ -52,7 +52,7 @@ describe("ControlFlowGraph", () => {
 			const nodes = cfg.getNodes();
 
 			// assert
-			assert.isTrue(nodes.next().done);
+			expect(Array.from(nodes)).to.empty;
 		});
 
 		it("returns an iterator with the nodes for a non empty graph", () => {
@@ -64,7 +64,7 @@ describe("ControlFlowGraph", () => {
 			const nodes = cfg.getNodes();
 
 			// assert
-			assert.sameMembers(Array.from(nodes), [x1, x2]);
+			expect(Array.from(nodes)).to.have.members([x1, x2]);
 		});
 	});
 
@@ -74,7 +74,7 @@ describe("ControlFlowGraph", () => {
 			const edges = cfg.getEdges();
 
 			// assert
-			expect(Array.from(edges)).to.eql([]);
+			expect(Array.from(edges)).to.be.empty;
 		});
 
 		it("returns all the edges in the graph", () => {
@@ -106,7 +106,7 @@ describe("ControlFlowGraph", () => {
 			cfg.connectIfNotFound(nodeA, "T", nodeB);
 
 			// assert
-			assert.isTrue(nodeB.isSuccessorOf(nodeA, "T"));
+			expect(nodeB.isSuccessorOf(nodeA, "T")).to.be.true;
 		});
 
 		it("adds the edge to the successors of A and to the predecessors of B", () => {
@@ -116,8 +116,8 @@ describe("ControlFlowGraph", () => {
 			// assert
 			const edge = _.first(Array.from(nodeA.successors));
 
-			assert.isNotNull(edge);
-			assert.equal(edge, _.first(Array.from(nodeB.predecessors)));
+			expect(edge).not.to.be.null;
+			expect(edge).to.equal(_.first(Array.from(nodeB.predecessors)));
 		});
 
 		it("does not create a connection between two nodes if the same connection already exists", () => {
@@ -128,8 +128,8 @@ describe("ControlFlowGraph", () => {
 			cfg.connectIfNotFound(nodeA, "T", nodeB);
 
 			// assert
-			assert.equal(nodeA.successors.size, 1);
-			assert.equal(nodeB.predecessors.size, 1);
+			expect(nodeA.successors.size).to.equal(1);
+			expect(nodeB.predecessors.size).to.equal(1);
 		});
 
 		it("looks up the nodes if a value is passed and not a graph node", () => {
@@ -137,7 +137,7 @@ describe("ControlFlowGraph", () => {
 			cfg.connectIfNotFound("A", "T", "B");
 
 			// assert
-			assert.isTrue(cfg.isConnected(nodeA, nodeB, "T"));
+			expect(cfg.isConnected(nodeA, nodeB, "T")).to.be.true;
 		});
 
 		it("creates new nodes when the node for a passed in value does not yet exist", () => {
@@ -145,7 +145,7 @@ describe("ControlFlowGraph", () => {
 			cfg.connectIfNotFound("X", "T", "Y");
 
 			// assert
-			assert.isTrue(cfg.isConnected("X", "Y", "T"));
+			expect(cfg.isConnected("X", "Y", "T")).to.be.true;
 		});
 	});
 
@@ -158,7 +158,7 @@ describe("ControlFlowGraph", () => {
 		});
 
 		it("returns false if no connection between the two nodes exist", () => {
-			assert.isFalse(cfg.isConnected(nodeA, nodeB));
+			expect(cfg.isConnected(nodeA, nodeB)).to.be.false;
 		});
 
 		it("returns true if a connection between the passed in nodes exist", () => {
@@ -168,7 +168,7 @@ describe("ControlFlowGraph", () => {
 			nodeB.predecessors.add(edge);
 
 			// asssert, act
-			assert.isTrue(cfg.isConnected(nodeA, nodeB));
+			expect(cfg.isConnected(nodeA, nodeB)).to.be.true;
 		});
 
 		it("returns true if the connection with the same label exists", () => {
@@ -178,7 +178,7 @@ describe("ControlFlowGraph", () => {
 			nodeB.predecessors.add(edge);
 
 			// asssert, act
-			assert.isTrue(cfg.isConnected(nodeA, nodeB, "T"));
+			expect(cfg.isConnected(nodeA, nodeB, "T")).to.be.true;
 		});
 
 		it("returns false if the connection has another branch label", () => {
@@ -188,7 +188,7 @@ describe("ControlFlowGraph", () => {
 			nodeB.predecessors.add(edge);
 
 			// asssert, act
-			assert.isFalse(cfg.isConnected(nodeA, nodeB, "C"));
+			expect(cfg.isConnected(nodeA, nodeB, "C")).to.be.false;
 		});
 
 		it("returns false if the connection is in the reverse direction", () => {
@@ -198,7 +198,7 @@ describe("ControlFlowGraph", () => {
 			nodeB.successors.add(edge);
 
 			// asssert, act
-			assert.isFalse(cfg.isConnected(nodeA, nodeB, "T"));
+			expect(cfg.isConnected(nodeA, nodeB, "T")).to.be.false;
 		});
 	});
 });

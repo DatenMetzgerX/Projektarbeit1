@@ -1,4 +1,4 @@
-import {assert} from "chai";
+import {expect} from "chai";
 import Node from "../../lib/cfg/node";
 import Edge from "../../lib/cfg/edge";
 
@@ -9,8 +9,8 @@ describe("Node", () => {
 			const node = new Node("x");
 
 			// assert
-			assert.equal(node.predecessors.size, 0);
-			assert.equal(node.successors.size, 0);
+			expect(node.predecessors.size).to.equal(0);
+			expect(node.successors.size).to.equal(0);
 		});
 
 		it("stores the value", () => {
@@ -18,7 +18,7 @@ describe("Node", () => {
 			const node = new Node("x");
 
 			// assert
-			assert.equal(node.value, "x");
+			expect(node).to.have.property("value").that.is.equal("x");
 		});
 	});
 
@@ -30,7 +30,7 @@ describe("Node", () => {
 		});
 
 		it("returns false when nodes have no common edge", () => {
-			assert.isFalse(nodeA.isSuccessorOf(nodeB));
+			expect(nodeA.isSuccessorOf(nodeB)).to.be.false;
 		});
 
 		it("returns true when the graph node is a successor and the Branch type matches", () => {
@@ -38,7 +38,7 @@ describe("Node", () => {
 			nodeA.successors.add(new Edge(nodeA, "T", nodeB));
 
 			// act, assert
-			assert.isTrue(nodeB.isSuccessorOf(nodeA, "T"));
+			expect(nodeB.isSuccessorOf(nodeA, "T")).to.be.true;
 		});
 
 		it("returns false when the graph node is a successor but the branch type doesn't match", () => {
@@ -46,7 +46,7 @@ describe("Node", () => {
 			nodeA.successors.add(new Edge(nodeA, "T", nodeB));
 
 			// act, assert
-			assert.isFalse(nodeB.isSuccessorOf(nodeA, "F"));
+			expect(nodeB.isSuccessorOf(nodeA, "F")).to.be.false;
 		});
 
 		it("returns true for predecessor when the function is called without a branch type", () => {
@@ -54,7 +54,7 @@ describe("Node", () => {
 			nodeA.successors.add(new Edge(nodeA, "F", nodeB));
 
 			// act, assert
-			assert.isTrue(nodeB.isSuccessorOf(nodeA));
+			expect(nodeB.isSuccessorOf(nodeA)).to.be.true;
 		});
 
 		it("returns false when the nodes have an edge but in the opposite direction", () => {
@@ -62,7 +62,7 @@ describe("Node", () => {
 			nodeB.successors.add(new Edge(nodeB, "F", nodeA));
 
 			// act, assert
-			assert.isFalse(nodeB.isSuccessorOf(nodeA));
+			expect(nodeB.isSuccessorOf(nodeA)).to.be.false;
 		});
 	});
 });

@@ -1,7 +1,8 @@
 import traverse from "babel-traverse";
 import {parse } from "babylon";
-import { assert } from "chai";
+import { expect } from "chai";
 
+import "./chai-path-helper";
 import computeFallThrough from "../../lib/cfg/fallthrough";
 
 describe("computeFallthrough", () => {
@@ -19,7 +20,7 @@ describe("computeFallthrough", () => {
 			const fallthrough = computeFallThrough(forStatement);
 
 			// assert
-			assert.equal(fallthrough, forStatement.get("init"));
+			expect(fallthrough).to.equalPath(forStatement.get("init"));
 		});
 
 		it("returns the for statement if the for statement has no init", () => {
@@ -35,7 +36,7 @@ describe("computeFallthrough", () => {
 			const fallthrough = computeFallThrough(forStatement);
 
 			// assert
-			assert.equal(fallthrough, forStatement);
+			expect(fallthrough).to.equalPath(forStatement);
 		});
 	});
 
@@ -53,7 +54,7 @@ describe("computeFallthrough", () => {
 			const fallthrough = computeFallThrough(doWhileStatement);
 
 			// assert
-			assert.equal(fallthrough, doWhileStatement.get("body"));
+			expect(fallthrough).to.equalPath(doWhileStatement.get("body"));
 		});
 	});
 });
