@@ -214,118 +214,176 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("ForStatement", () => {
-		describe("for (init; condition; update)", () => {
-			it("connects the init statement with the for statement (which represents the condition)", () => {
-				const {ast, cfg} = toCfg(`
-				for (let x = 0; x < 10; ++x) {
-					console.log(x);
-				}
-				`);
+		it("connects the init statement with the for statement (which represents the condition)", () => {
+			const {ast, cfg} = toCfg(`
+			for (let x = 0; x < 10; ++x) {
+				console.log(x);
+			}
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
+			// assert
+			const forStatement = ast.program.body[0];
 
-				assert.isTrue(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
-			});
+			assert.isTrue(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
+		});
 
-			it("connects the body statement of the for loop as successor of the for loop itself (TRUE Branch)", () => {
-				const {ast, cfg} = toCfg(`
-				for (let x = 0; x < 10; ++x) {
-					console.log(x);
-				}
-				`);
+		it("connects the body statement of the for loop as successor of the for loop itself (TRUE Branch)", () => {
+			const {ast, cfg} = toCfg(`
+			for (let x = 0; x < 10; ++x) {
+				console.log(x);
+			}
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
-				const blockStatement = forStatement.body;
+			// assert
+			const forStatement = ast.program.body[0];
+			const blockStatement = forStatement.body;
 
-				assert.isTrue(cfg.isConnected(forStatement, blockStatement, BRANCHES.TRUE));
-			});
+			assert.isTrue(cfg.isConnected(forStatement, blockStatement, BRANCHES.TRUE));
+		});
 
-			it("connects the update statement as successor of the last statement in the body of the for loop", () => {
-				const {ast, cfg} = toCfg(`
-				for (let x = 0; x < 10; ++x) {
-					console.log(x);
-				}
-				`);
+		it("connects the update statement as successor of the last statement in the body of the for loop", () => {
+			const {ast, cfg} = toCfg(`
+			for (let x = 0; x < 10; ++x) {
+				console.log(x);
+			}
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
-				const assignmentStatement = forStatement.body.body[0];
+			// assert
+			const forStatement = ast.program.body[0];
+			const assignmentStatement = forStatement.body.body[0];
 
-				assert.isTrue(cfg.isConnected(assignmentStatement, forStatement.update, BRANCHES.UNCONDITIONAL));
-			});
+			assert.isTrue(cfg.isConnected(assignmentStatement, forStatement.update, BRANCHES.UNCONDITIONAL));
+		});
 
-			it("connects the for statement with the successor of the for statement (FALSE)", () => {
-				const {ast, cfg} = toCfg(`
-				for (let x = 0; x < 10; ++x) {
-					console.log(x);
-				}
-				`);
+		it("connects the for statement with the successor of the for statement (FALSE)", () => {
+			const {ast, cfg} = toCfg(`
+			for (let x = 0; x < 10; ++x) {
+				console.log(x);
+			}
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
+			// assert
+			const forStatement = ast.program.body[0];
 
-				assert.isTrue(cfg.isConnected(forStatement, null, BRANCHES.FALSE));
-			});
+			assert.isTrue(cfg.isConnected(forStatement, null, BRANCHES.FALSE));
+		});
 
-			it("connects the last statement in the loop directly with the for statement and not with the update statement, if the for statement has no update statement", () => {
-				const {ast, cfg} = toCfg(`
-				for (;;) {
-					console.log(x);
-				}
-				`);
+		it("connects the last statement in the loop directly with the for statement and not with the update statement, if the for statement has no update statement", () => {
+			const {ast, cfg} = toCfg(`
+			for (;;) {
+				console.log(x);
+			}
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
-				const expressionStatement = forStatement.body.body[0];
+			// assert
+			const forStatement = ast.program.body[0];
+			const expressionStatement = forStatement.body.body[0];
 
-				assert.isTrue(cfg.isConnected(expressionStatement, forStatement, BRANCHES.UNCONDITIONAL));
-				assert.isFalse(cfg.isConnected(expressionStatement, null, BRANCHES.UNCONDITIONAL));
-			});
+			assert.isTrue(cfg.isConnected(expressionStatement, forStatement, BRANCHES.UNCONDITIONAL));
+			assert.isFalse(cfg.isConnected(expressionStatement, null, BRANCHES.UNCONDITIONAL));
+		});
 
-			it("does not connect the successor of the for statement as false branch of the for statement if the for statement has no condition and therefore is always true", () => {
-				const {ast, cfg} = toCfg(`
-				for (;;) {
-					console.log(x);
-				}
-				x = 10;
-				`);
+		it("does not connect the successor of the for statement as false branch of the for statement if the for statement has no condition and therefore is always true", () => {
+			const {ast, cfg} = toCfg(`
+			for (;;) {
+				console.log(x);
+			}
+			x = 10;
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
-				const assignment = ast.program.body[1];
+			// assert
+			const forStatement = ast.program.body[0];
+			const assignment = ast.program.body[1];
 
-				assert.isFalse(cfg.isConnected(forStatement, assignment, BRANCHES.FALSE));
-			});
+			assert.isFalse(cfg.isConnected(forStatement, assignment, BRANCHES.FALSE));
+		});
 
-			it("does not connect the for statement init statement (null) with the for statement if the for statement has no init statement and therefore is null (EOF)", () => {
-				const {ast, cfg} = toCfg(`
-				for (;;x++) {
-					console.log(x);
-				}
-				x = 10;
-				`);
+		it("does not connect the for statement init statement (null) with the for statement if the for statement has no init statement and therefore is null (EOF)", () => {
+			const {ast, cfg} = toCfg(`
+			for (;;x++) {
+				console.log(x);
+			}
+			x = 10;
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
+			// assert
+			const forStatement = ast.program.body[0];
 
-				assert.isFalse(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
-			});
+			assert.isFalse(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
+		});
 
-			it("does not connect the ForStatement update (null) with the for statement if the for statement has no update statement and therefore is null (EOF)", () => {
-				const {ast, cfg} = toCfg(`
-				for (let y = 0; y < 10;) {
-					console.log(x);
-				}
-				x = 10;
-				`);
+		it("does not connect the ForStatement update (null) with the for statement if the for statement has no update statement and therefore is null (EOF)", () => {
+			const {ast, cfg} = toCfg(`
+			for (let y = 0; y < 10;) {
+				console.log(x);
+			}
+			x = 10;
+			`);
 
-				// assert
-				const forStatement = ast.program.body[0];
+			// assert
+			const forStatement = ast.program.body[0];
 
-				assert.isFalse(cfg.isConnected(forStatement.update, forStatement, BRANCHES.UNCONDITIONAL));
-			});
+			assert.isFalse(cfg.isConnected(forStatement.update, forStatement, BRANCHES.UNCONDITIONAL));
+		});
+	});
+
+	describe("ForInStatement", () => {
+		it("connects the for statement with a true branch to it's body", () => {
+			const {ast, cfg} = toCfg(`
+			for (let p in o) {
+				console.log(p);
+			}
+			`);
+
+			// assert
+			const forInStatement = ast.program.body[0];
+
+			assert.isTrue(cfg.isConnected(forInStatement, forInStatement.body, BRANCHES.TRUE));
+		});
+
+		it("connects the for statement with a false branch to it's successor", () => {
+			const {ast, cfg} = toCfg(`
+			for (let p in o) {
+				console.log(p);
+			}
+			console.log("end");
+			`);
+
+			// assert
+			const forInStatement = ast.program.body[0];
+			const endStatement = ast.program.body[1];
+
+			assert.isTrue(cfg.isConnected(forInStatement, endStatement, BRANCHES.FALSE));
+		});
+	});
+
+	describe("ForOfStatement", () => {
+		it("connects the for statement with a true branch to it's body", () => {
+			const {ast, cfg} = toCfg(`
+			for (let p of o) {
+				console.log(p);
+			}
+			`);
+
+			// assert
+			const forOfStatement = ast.program.body[0];
+
+			assert.isTrue(cfg.isConnected(forOfStatement, forOfStatement.body, BRANCHES.TRUE));
+		});
+
+		it("connects the for statement with a false branch to it's successor", () => {
+			const {ast, cfg} = toCfg(`
+			for (let p of o) {
+				console.log(p);
+			}
+			console.log("end");
+			`);
+
+			// assert
+			const forOfStatement = ast.program.body[0];
+			const endStatement = ast.program.body[1];
+
+			assert.isTrue(cfg.isConnected(forOfStatement, endStatement, BRANCHES.FALSE));
 		});
 	});
 });

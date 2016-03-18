@@ -39,8 +39,8 @@ describe("dot", () => {
 			// assert
 			expect(dot).to.equal(
 `digraph cfg {
-  "0" [ label = "2 const x = 10;" ];
-  "1" [ label = "3 const y = 11;" ];
+  "0" [ label = "2 const x = 10" ];
+  "1" [ label = "3 const y = 11" ];
 }`);
 		});
 
@@ -67,9 +67,9 @@ describe("dot", () => {
 			// assert
 			expect(dot).to.equal(
 `digraph cfg {
-  "0" [ label = "2 const x = 10;" ];
-  "1" [ label = "3 const y = 11;" ];
-  "2" [ label = "4 const z = 12;" ];
+  "0" [ label = "2 const x = 10" ];
+  "1" [ label = "3 const y = 11" ];
+  "2" [ label = "4 const z = 12" ];
   "3" [ label = "EOF" ];
   "0" -> "1" [ label = "Unconditional" ];
   "1" -> "2" [ label = "Unconditional" ];

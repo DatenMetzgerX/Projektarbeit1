@@ -1,13 +1,13 @@
 digraph cfg {
   "0" [ label = "1 if (x === 10)" ];
   "1" [ label = "1 { ... }" ];
-  "2" [ label = "2 console.log(\"A\");" ];
+  "2" [ label = "2 console.log(\"A\")" ];
   "3" [ label = "3 if (x < 2)" ];
   "4" [ label = "3 { ... }" ];
-  "5" [ label = "4 console.log(\"x is less then 2\");" ];
+  "5" [ label = "4 console.log(\"x is less then 2\")" ];
   "6" [ label = "5 { ... }" ];
-  "7" [ label = "6 console.log(\"B\");" ];
-  "8" [ label = "9 console.log(\"Almost complete\");" ];
+  "7" [ label = "6 console.log(\"B\")" ];
+  "8" [ label = "9 console.log(\"Almost complete\")" ];
   "9" [ label = "EOF" ];
   "0" -> "1" [ label = "True" ];
   "0" -> "3" [ label = "False" ];
