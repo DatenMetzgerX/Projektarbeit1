@@ -14,7 +14,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("ExpressionStatement", () => {
-		it("creates an edge to the next sibling statement as successor", () => {
+		it("creates an edge to the successor node", () => {
 			// act
 			const {ast, cfg} = toCfg("x++;");
 
@@ -25,7 +25,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("VariableDeclaration", () => {
-		it("creates an edge to the next sibling statement as successor", () => {
+		it("creates an edge to the successor node", () => {
 			const {ast, cfg} = toCfg("let x = 10;");
 
 			// assert
@@ -35,7 +35,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("EmptyStatement", () => {
-		it("creates an edge to the next sibling statement as successor", () => {
+		it("creates an edge to the successor node", () => {
 			const {ast, cfg} = toCfg(";");
 
 			// assert
@@ -45,7 +45,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("BreakStatement", () => {
-		it("creates an edge to the next sibling statement of the parent loop statement", () => {
+		it("creates an edge to the successor statement of the parent loop statement", () => {
 			const {ast, cfg} = toCfg(`
 				for (let i = 0; i < 10; ++i) {
 					if (y) {
@@ -80,7 +80,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("BlockStatement", () => {
-		it("connects the first statement in the block statement as direct successor", () => {
+		it("connects the first statement in the block statement as successor node", () => {
 			const {ast, cfg} = toCfg(`
 			{
 				const x = 10;
@@ -93,7 +93,7 @@ describe("createControlFlowGraph", function () {
 			assert.isTrue(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL));
 		});
 
-		it("connects the next sibling of the block statement as direct successor if the block statement is empty", () => {
+		it("connects the next sibling of the block statement as successor if the block statement is empty", () => {
 			const {ast, cfg} = toCfg(`
 			{
 			}
@@ -108,7 +108,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("IfStatement", () => {
-		it("creates a conditional Branch from the if statement to following sibling node if the if statement has no else branch", function () {
+		it("creates a conditional false branch from the if statement to following sibling node if the if statement has no else branch", function () {
 			// act
 			const {ast, cfg} = toCfg(`
 			let x = 0;
@@ -122,7 +122,7 @@ describe("createControlFlowGraph", function () {
 			assert.isTrue(cfg.isConnected(ifStatement, null, BRANCHES.FALSE), "The if statement should have a edge to the following sibling node for the case the condition is false.");
 		});
 
-		it("creates a conditional Branch from the if statement to the consequent body of the if statement", function () {
+		it("creates a conditional true branch from the if statement to the consequent body", function () {
 			// act
 			const {ast, cfg} = toCfg(`
 			let x = 0;
@@ -136,7 +136,7 @@ describe("createControlFlowGraph", function () {
 			assert.isTrue(cfg.isConnected(ifStatement, ifStatement.consequent, BRANCHES.TRUE));
 		});
 
-		it("creates an unconditional branch from the last statement in the consequent to the following node of the if statement", function () {
+		it("creates an unconditional branch from the last statement in the consequent to successor of the if statement", function () {
 			// act
 			const {ast, cfg} = toCfg(`
 			let x = 0;
@@ -150,7 +150,7 @@ describe("createControlFlowGraph", function () {
 			assert.isTrue(cfg.isConnected(ifStatement.consequent.body[0], null, BRANCHES.UNCONDITIONAL));
 		});
 
-		it("creates a conditional Branch from the if statement to the else branch for an if statement with an else branch", function () {
+		it("creates a conditional false branch from the if statement to the else branch for an if statement with an else branch", function () {
 			// act
 			const {ast, cfg} = toCfg(`
 			let x = 0;
@@ -167,7 +167,7 @@ describe("createControlFlowGraph", function () {
 			assert.isFalse(cfg.isConnected(ifStatement, null));
 		});
 
-		it("creates an unconditional branch from the last statement in the alternate to the following node of the if statement", function () {
+		it("creates an unconditional branch from the last statement in the alternate to the successor of the if statement", function () {
 			// act
 			const {ast, cfg} = toCfg(`
 			let x = 0;
@@ -185,7 +185,7 @@ describe("createControlFlowGraph", function () {
 	});
 
 	describe("WhileStatement", () => {
-		it("connects the first statement in the while statement as direct successor with the while statement (TRUE Branch)", () => {
+		it("connects the first statement in the while statement as successor (TRUE Branch)", () => {
 			const {ast, cfg} = toCfg(`
 			while (x < 10) {
 				++x;
@@ -199,7 +199,7 @@ describe("createControlFlowGraph", function () {
 			assert.isTrue(cfg.isConnected(whileStatement, blockStatement, BRANCHES.TRUE));
 		});
 
-		it("connects the next statement following the while statement as direct successor of the while statement (FALSE Branch)", () => {
+		it("connects the successor of the while statement with a false branch", () => {
 			const {ast, cfg} = toCfg(`
 			while (x < 10) {
 				++x;
@@ -215,6 +215,117 @@ describe("createControlFlowGraph", function () {
 
 	describe("ForStatement", () => {
 		describe("for (init; condition; update)", () => {
+			it("connects the init statement with the for statement (which represents the condition)", () => {
+				const {ast, cfg} = toCfg(`
+				for (let x = 0; x < 10; ++x) {
+					console.log(x);
+				}
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+
+				assert.isTrue(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
+			});
+
+			it("connects the body statement of the for loop as successor of the for loop itself (TRUE Branch)", () => {
+				const {ast, cfg} = toCfg(`
+				for (let x = 0; x < 10; ++x) {
+					console.log(x);
+				}
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+				const blockStatement = forStatement.body;
+
+				assert.isTrue(cfg.isConnected(forStatement, blockStatement, BRANCHES.TRUE));
+			});
+
+			it("connects the update statement as successor of the last statement in the body of the for loop", () => {
+				const {ast, cfg} = toCfg(`
+				for (let x = 0; x < 10; ++x) {
+					console.log(x);
+				}
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+				const assignmentStatement = forStatement.body.body[0];
+
+				assert.isTrue(cfg.isConnected(assignmentStatement, forStatement.update, BRANCHES.UNCONDITIONAL));
+			});
+
+			it("connects the for statement with the successor of the for statement (FALSE)", () => {
+				const {ast, cfg} = toCfg(`
+				for (let x = 0; x < 10; ++x) {
+					console.log(x);
+				}
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+
+				assert.isTrue(cfg.isConnected(forStatement, null, BRANCHES.FALSE));
+			});
+
+			it("connects the last statement in the loop directly with the for statement and not with the update statement, if the for statement has no update statement", () => {
+				const {ast, cfg} = toCfg(`
+				for (;;) {
+					console.log(x);
+				}
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+				const expressionStatement = forStatement.body.body[0];
+
+				assert.isTrue(cfg.isConnected(expressionStatement, forStatement, BRANCHES.UNCONDITIONAL));
+				assert.isFalse(cfg.isConnected(expressionStatement, null, BRANCHES.UNCONDITIONAL));
+			});
+
+			it("does not connect the successor of the for statement as false branch of the for statement if the for statement has no condition and therefore is always true", () => {
+				const {ast, cfg} = toCfg(`
+				for (;;) {
+					console.log(x);
+				}
+				x = 10;
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+				const assignment = ast.program.body[1];
+
+				assert.isFalse(cfg.isConnected(forStatement, assignment, BRANCHES.FALSE));
+			});
+
+			it("does not connect the for statement init statement (null) with the for statement if the for statement has no init statement and therefore is null (EOF)", () => {
+				const {ast, cfg} = toCfg(`
+				for (;;x++) {
+					console.log(x);
+				}
+				x = 10;
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+
+				assert.isFalse(cfg.isConnected(forStatement.init, forStatement, BRANCHES.UNCONDITIONAL));
+			});
+
+			it("does not connect the ForStatement update (null) with the for statement if the for statement has no update statement and therefore is null (EOF)", () => {
+				const {ast, cfg} = toCfg(`
+				for (let y = 0; y < 10;) {
+					console.log(x);
+				}
+				x = 10;
+				`);
+
+				// assert
+				const forStatement = ast.program.body[0];
+
+				assert.isFalse(cfg.isConnected(forStatement.update, forStatement, BRANCHES.UNCONDITIONAL));
+			});
 		});
 	});
 });

@@ -1,4 +1,4 @@
-import {assert} from "chai";
+import {assert, expect} from "chai";
 import _ from "lodash";
 import ControlFlowGraph from "../../lib/cfg/control-flow-graph";
 import Node from "../../lib/cfg/node";
@@ -65,6 +65,31 @@ describe("ControlFlowGraph", () => {
 
 			// assert
 			assert.sameMembers(Array.from(nodes), [x1, x2]);
+		});
+	});
+
+	describe("getEdges", () => {
+		it("returns an empty iterator by default", () => {
+			// act
+			const edges = cfg.getEdges();
+
+			// assert
+			expect(Array.from(edges)).to.eql([]);
+		});
+
+		it("returns all the edges in the graph", () => {
+			// arrange
+			const x1 = cfg.createNode("x1");
+			const x2 = cfg.createNode("x2");
+
+			cfg.connectIfNotFound(x1, "New", x2);
+			cfg.connectIfNotFound(x2, "Reverse", x1);
+
+			// act
+			const edges = cfg.getEdges();
+
+			// assert
+			expect(Array.from(edges)).to.have.lengthOf(2);
 		});
 	});
 
