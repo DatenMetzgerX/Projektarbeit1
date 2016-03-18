@@ -12,8 +12,8 @@
   "scripts": {
     "start": "gulp watch",
     "build": "gulp default",
-    "test": "mocha --inline-diffs --compilers js:babel-register -r babel-polyfill './test/**/*.specs.js'",
-    "testWatch": "mocha --watch --compilers js:babel-register -r babel-polyfill --watch-extensions dot './test/**/*.specs.js'",
+    "test": "mocha --inline-diffs --compilers js:babel-register './test/**/*.specs.js'",
+    "testWatch": "mocha --watch --compilers js:babel-register --watch-extensions dot './test/**/*.specs.js'",
     "coverage": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha -- './test/**/*.specs.js'",
     "coveralljs": "npm run coverage && cat ./coverage/lcov.info | node_modules/coveralls/bin/coveralls.js && rm -rf coverage"
   },
