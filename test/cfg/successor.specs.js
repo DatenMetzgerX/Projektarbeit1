@@ -3,7 +3,7 @@ import traverse from "babel-traverse";
 import {parse} from "babylon";
 import computeSuccessor from "../../lib/cfg/successor";
 
-describe("successor", () => {
+describe("computeSuccessor", () => {
 	describe("Statement", () => {
 		it("returns the directly following statement by default", () => {
 			// arrange
@@ -158,6 +158,23 @@ describe("successor", () => {
 
 			// assert
 			assert.equal(successor, updateStatement);
+		});
+
+		it("returns the loop statement for the last statement in the loop if the for loop has no update statement", () => {
+			// arrange
+			const path = getPath(`
+			for (let i = 0; i < y;)
+				x = Math.pow(x, i);
+			`);
+
+			const forStatement = path.get("body")[0];
+			const assignment = forStatement.get("body");
+
+			// act
+			const successor = computeSuccessor(assignment);
+
+			// assert
+			assert.equal(successor, forStatement);
 		});
 	});
 });
