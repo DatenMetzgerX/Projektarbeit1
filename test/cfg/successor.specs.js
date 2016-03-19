@@ -1,6 +1,7 @@
-import {assert} from "chai";
+import {expect} from "chai";
 import traverse from "babel-traverse";
 import {parse} from "babylon";
+import "./chai-path-helper";
 import computeSuccessor from "../../lib/cfg/successor";
 
 describe("computeSuccessor", () => {
@@ -16,7 +17,7 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(path.get("body")[0]);
 
 			// assert
-			assert.equal(successor, path.get("body")[1]);
+			expect(successor).to.equalPath(path.get("body")[1]);
 		});
 
 		it("returns null (EOF) when the statement is the last in the program", () => {
@@ -29,7 +30,7 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(path.get("body")[0]);
 
 			// assert
-			assert.isNull(successor);
+			expect(successor).to.be.null;
 		});
 
 		it("returns the successor of the parent node, if the statement is the last on it's level (e.g. inside a block statement)", () => {
@@ -48,33 +49,12 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(declaration);
 
 			// assert
-			assert.equal(successor, path.get("body")[1]);
+			expect(successor).to.equalPath(path.get("body")[1]);
 		});
 	});
 
-	describe("LoopStatement", () => {
-
-		it("returns the initial statement of a for loop when the following statement is a for loop.", () => {
-			// arrange
-			const path = getPath(`
-			let x = 10;
-			for (let i = 0; i < 10; ++i) {
-				x = Math.pow(x, i);
-			}
-			`);
-
-			const assignment = path.get("body")[0];
-			const forStatement = path.get("body")[1];
-			const initStatement = forStatement.get("init");
-
-			// act
-			const successor = computeSuccessor(assignment);
-
-			// assert
-			assert.equal(successor, initStatement);
-		});
-
-		it("returns the successor of the loop when a break statement is passed to the function", () => {
+	describe("BreakStatement", () => {
+		it("returns the successor of the loop for a break statement inside a loop", () => {
 			// arrange
 			const path = getPath(`
 			for (let i = 0; i < 10; ++i) {
@@ -95,10 +75,38 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(breakStatement);
 
 			// assert
-			assert.equal(successor, logStatement);
+			expect(successor).to.equalPath(logStatement);
 		});
 
-		it("returns the loop when a continue statement is passed to the function", () => {
+		it("returns the successor of the switch statement if a break statement is used inside a switch", function () {
+			// arrange
+			const path = getPath(`
+			switch (x) {
+				case "a":
+				    y = 0;
+					break;
+				
+				default:
+					y = 10;
+			}
+			console.log(x);
+			`);
+
+			const switchStatement = path.get("body")[0];
+			const caseA = switchStatement.get("cases")[0];
+			const breakStatement = caseA.get("consequent")[1];
+			const logStatement = path.get("body")[1];
+
+			// act
+			const successor = computeSuccessor(breakStatement);
+
+			// assert
+			expect(successor).to.equalPath(logStatement);
+		});
+	});
+
+	describe("ContinueStatement", () => {
+		it("returns the loop for a continue statement inside a loop", () => {
 			// arrange
 			const path = getPath(`
 			for (let i = 0; i < 10; ++i) {
@@ -117,7 +125,29 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(continueStatement);
 
 			// assert
-			assert.equal(successor, forStatement);
+			expect(successor).to.equalPath(forStatement);
+		});
+	});
+
+	describe("LoopStatement", () => {
+		it("returns the initial statement of a for loop when the following statement is a for loop.", () => {
+			// arrange
+			const path = getPath(`
+			let x = 10;
+			for (let i = 0; i < 10; ++i) {
+				x = Math.pow(x, i);
+			}
+			`);
+
+			const assignment = path.get("body")[0];
+			const forStatement = path.get("body")[1];
+			const initStatement = forStatement.get("init");
+
+			// act
+			const successor = computeSuccessor(assignment);
+
+			// assert
+			expect(successor).to.equalPath(initStatement);
 		});
 	});
 
@@ -137,7 +167,7 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(assignment);
 
 			// assert
-			assert.equal(successor, whileStatement);
+			expect(successor).to.equalPath(whileStatement);
 		});
 	});
 
@@ -157,7 +187,7 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(assignment);
 
 			// assert
-			assert.equal(successor, updateStatement);
+			expect(successor).to.equalPath(updateStatement);
 		});
 
 		it("returns the loop statement for the last statement in the loop if the for loop has no update statement", () => {
@@ -174,7 +204,7 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(assignment);
 
 			// assert
-			assert.equal(successor, forStatement);
+			expect(successor).to.equalPath(forStatement);
 		});
 	});
 
@@ -194,7 +224,73 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(assignment);
 
 			// assert
-			assert.equal(successor, doWhileStatement);
+			expect(successor).to.equalPath(doWhileStatement);
+		});
+	});
+
+	describe("SwitchCase", () => {
+		it("returns the next statement for the same consequent", () => {
+			// arrange
+			const path = getPath(`
+			switch (x) {
+			case "A":
+				y = 1;
+				z = 2;
+			case "B":
+			}
+			`);
+
+			const switchStatement = path.get("body")[0];
+			const caseA = switchStatement.get("cases")[0];
+
+			// act
+			const successor = computeSuccessor(caseA.get("consequent")[0]);
+
+			// assert
+			expect(successor).to.equalPath(caseA.get("consequent")[1]);
+		});
+
+		it("returns the consequent of the next case statement for the last statement in a SwitchCase", () => {
+			// arrange
+			const path = getPath(`
+			switch (x) {
+			case "A":
+				y = 1;
+			case "B":
+				y = 2;
+			}
+			`);
+
+			const switchStatement = path.get("body")[0];
+			const caseA = switchStatement.get("cases")[0];
+			const caseB = switchStatement.get("cases")[1];
+
+			// act
+			const successor = computeSuccessor(caseA.get("consequent")[0]);
+
+			// assert
+			expect(successor).to.equalPath(caseB.get("consequent")[0]);
+		});
+
+		it("returns the successor of the switch statement if it is the last statement in a consequent", () => {
+			// arrange
+			const path = getPath(`
+			switch (x) {
+			case "A":
+				y = 1;
+			}
+			console.log("B");
+			`);
+
+			const switchStatement = path.get("body")[0];
+			const caseA = switchStatement.get("cases")[0];
+			const logStatement = path.get("body")[1];
+
+			// act
+			const successor = computeSuccessor(caseA.get("consequent")[0]);
+
+			// assert
+			expect(successor).to.equalPath(logStatement);
 		});
 	});
 });
