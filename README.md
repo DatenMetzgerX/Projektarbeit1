@@ -1,7 +1,6 @@
-[![Coverage
-Status](https://coveralls.io/repos/github/DatenMetzgerX/Projektarbeit1/badge.svg?branch=master)](https://coveralls.io/github/DatenMetzgerX/Projektarbeit1?branch=master)
-[![bitHound Overall Score](https://www.bithound.io/github/DatenMetzgerX/Projektarbeit1/badges/score.svg)](https://www.bithound.io/github/DatenMetzgerX/Projektarbeit1)
-[![Build Status](https://travis-ci.org/DatenMetzgerX/Projektarbeit1.svg?branch=master)](https://travis-ci.org/DatenMetzgerX/Projektarbeit1)
+[![Coverage Status](https://coveralls.io/repos/github/DatenMetzgerX/ESChecker/badge.svg?branch=master)](https://coveralls.io/github/DatenMetzgerX/ESChecker?branch=master)
+[![bitHound Overall Score](https://www.bithound.io/github/DatenMetzgerX/ESChecker/badges/score.svg)](https://www.bithound.io/github/DatenMetzgerX/ESChecker)
+[![Build Status](https://travis-ci.org/DatenMetzgerX/ESChecker.svg?branch=master)](https://travis-ci.org/DatenMetzgerX/ESChecker)
 
 # ESChecker
 
