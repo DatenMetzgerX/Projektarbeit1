@@ -95,6 +95,24 @@ describe("createControlFlowGraph", function () {
 			expect(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
+		it("does not connect the block statment with a function declaration, if the function declaration is the first statement in the block", function () {
+			const {ast, cfg} = toCfg(`
+			{
+				function hy () {
+					console.log("Hello world");
+				}
+				const x = 10;
+			}
+			`);
+
+			// assert
+			const blockStatement = ast.program.body[0];
+			const functionDeclaration = blockStatement.body[0];
+			const assignment = blockStatement.body[1];
+			expect(cfg.isConnected(blockStatement, functionDeclaration, BRANCHES.UNCONDITIONAL)).to.be.false;
+			expect(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
 		it("connects the next sibling of the block statement as successor if the block statement is empty", () => {
 			const {ast, cfg} = toCfg(`
 			{
@@ -637,6 +655,42 @@ describe("createControlFlowGraph", function () {
 
 			expect(cfg.isConnected(firstCase, null, BRANCHES.TRUE)).to.be.false;
 			expect(cfg.isConnected(firstCase, logStatement, BRANCHES.TRUE)).to.be.true;
+		});
+	});
+
+	describe("FunctionDeclaration", function () {
+		it("connects the function declaration with the body statement", function () {
+			const {ast, cfg} = toCfg(`
+			function x (z) {
+				console.log(z);
+			}
+			`);
+
+			// assert
+			const functionStatement = ast.program.body[0];
+
+			expect(cfg.isConnected(functionStatement, functionStatement.body, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+	});
+
+	describe("ReturnStatement", function () {
+		it("returns null as successor", function () {
+			//
+			const { ast, cfg } = toCfg(`
+			function x() {
+				return 10;
+				console.log("A");
+			}
+			console.log("B");
+			`);
+
+			// assert
+			const functionDeclaration = ast.program.body[0];
+			const returnStatement = functionDeclaration.body.body[0];
+			const logStatement = functionDeclaration.body.body[1];
+
+			expect(cfg.isConnected(returnStatement, logStatement, BRANCHES.UNCONDITIONAL)).to.be.false;
+			expect(cfg.isConnected(returnStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 });

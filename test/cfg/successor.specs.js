@@ -51,6 +51,40 @@ describe("computeSuccessor", () => {
 			// assert
 			expect(successor).to.equalPath(path.get("body")[1]);
 		});
+
+		it("skips function declarations", () => {
+			// arrange
+			const path = getPath(`
+			let x = 10;
+			function hy () {
+				console.log("Hello world");
+			}
+			++x;
+			`);
+
+			// act
+			const successor = computeSuccessor(path.get("body")[0]);
+
+			// assert
+			expect(successor).to.equalPath(path.get("body")[2]);
+		});
+
+		it("returns null (EOF) when the node is a function declaration", () => {
+			// arrange
+			const path = getPath(`
+			let x = 10;
+			function hy () {
+				console.log("Hello world");
+			}
+			++x;
+			`);
+
+			// act
+			const successor = computeSuccessor(path.get("body")[1]);
+
+			// assert
+			expect(successor).to.be.null;
+		});
 	});
 
 	describe("BreakStatement", () => {

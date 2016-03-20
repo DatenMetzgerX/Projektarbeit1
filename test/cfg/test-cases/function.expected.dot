@@ -1,0 +1,28 @@
+digraph cfg {
+  "0" [ label = "1 console.log(10)" ];
+  "1" [ label = "3 hy(\"User\")" ];
+  "2" [ label = "5 function hy (firstname, lastname)" ];
+  "3" [ label = "5 { ... }" ];
+  "4" [ label = "6 function computeFullName ()" ];
+  "5" [ label = "6 { ... }" ];
+  "6" [ label = "7 if (lastname)" ];
+  "7" [ label = "7 { ... }" ];
+  "8" [ label = "8 return `{$firstname} ${ lastname }`" ];
+  "9" [ label = "11 return firstname" ];
+  "10" [ label = "14 console.log(`Hy ${ computeFullName() }`)" ];
+  "11" [ label = "17 console.log(\"Complete\")" ];
+  "12" [ label = "EOF" ];
+  "0" -> "1" [ label = "Unconditional" ];
+  "1" -> "11" [ label = "Unconditional" ];
+  "2" -> "3" [ label = "Unconditional" ];
+  "3" -> "10" [ label = "Unconditional" ];
+  "4" -> "5" [ label = "Unconditional" ];
+  "5" -> "6" [ label = "Unconditional" ];
+  "6" -> "7" [ label = "True" ];
+  "6" -> "9" [ label = "False" ];
+  "7" -> "8" [ label = "Unconditional" ];
+  "8" -> "12" [ label = "Unconditional" ];
+  "9" -> "12" [ label = "Unconditional" ];
+  "10" -> "12" [ label = "Unconditional" ];
+  "11" -> "12" [ label = "Unconditional" ];
+}
