@@ -57,6 +57,44 @@ describe("computeFallthrough", () => {
 			expect(fallthrough).to.equalPath(doWhileStatement.get("body"));
 		});
 	});
+
+	describe("LabelStatement", () => {
+		it("returns the body element", () => {
+			// arrange
+			const program = getPath(`
+			checkiandj: while (i < 4) {
+			  console.log("i: " + i);
+			  i += 1;
+			}`);
+
+			const labelStatement = program.get("body")[0];
+			const whileLoop = labelStatement.get("body");
+
+			// act
+			const fallthrough = computeFallThrough(labelStatement);
+
+			// assert
+			expect(fallthrough).to.equalPath(whileLoop);
+		});
+	});
+
+	it("returns the fallthrough of the fallthrough", () => {
+		// arrange
+		const program = getPath(`
+			loop1:
+				for (i = 0; i < 3; i++) {
+					console.log(i);
+				}`);
+
+		const labelStatement = program.get("body")[0];
+		const forLoop = labelStatement.get("body");
+
+		// act
+		const fallthrough = computeFallThrough(labelStatement);
+
+		// assert
+		expect(fallthrough).to.equalPath(forLoop.get("init"));
+	});
 });
 
 function getPath (code) {

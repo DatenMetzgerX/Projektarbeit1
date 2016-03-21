@@ -137,6 +137,31 @@ describe("computeSuccessor", () => {
 			// assert
 			expect(successor).to.equalPath(logStatement);
 		});
+
+		it("returns the successor of the labeled statement that has the same label as the break statement", function () {
+			// arrange
+			const path = getPath(`
+			outer_block: {
+				inner_block: {
+			        console.log('1');
+			        break outer_block; // breaks out of both inner_block and outer_block
+			        console.log(':-('); // skipped
+			    }
+			    console.log('2'); // skipped
+			}
+			console.log("Outer block successor");
+			`);
+
+			const [ outerBlockLabel, outerBlockSuccessor ] = path.get("body");
+			const innerBlock = outerBlockLabel.get("body.body")[0];
+			const breakStatement = innerBlock.get("body.body")[1];
+
+			// act
+			const successor = computeSuccessor(breakStatement);
+
+			// assert
+			expect(successor).to.equalPath(outerBlockSuccessor);
+		});
 	});
 
 	describe("ContinueStatement", () => {
@@ -160,6 +185,40 @@ describe("computeSuccessor", () => {
 
 			// assert
 			expect(successor).to.equalPath(forStatement);
+		});
+
+		it("returns the continue statement with the matching label as successor", function () {
+			// arrange
+			const path = getPath(`
+			var i = 0;
+			var j = 8;
+			
+			checkiandj: while (i < 4) {
+			  console.log("i: " + i);
+			  i += 1;
+			
+			  checkj: while (j > 4) {
+			    console.log("j: "+ j);
+			    j -= 1;
+			
+			    if ((j % 2) == 0)
+			      continue checkiandj;
+			    console.log(j + " is odd.");
+			  }
+			  console.log("i = " + i);
+			  console.log("j = " + j);
+			}
+			`);
+
+			const iWhileLabel = path.get("body")[2];
+			const jWhileLabel = iWhileLabel.get("body.body.body")[2];
+			const continueStatement = jWhileLabel.get("body.body.body")[2].get("consequent");
+
+			// act
+			const successor = computeSuccessor(continueStatement);
+
+			// assert
+			expect(successor).to.equalPath(iWhileLabel.get("body"));
 		});
 	});
 
