@@ -386,6 +386,115 @@ describe("computeSuccessor", () => {
 			expect(successor).to.equalPath(logStatement);
 		});
 	});
+
+	describe("TryStatement", function () {
+		it("returns the finalizer for the last statement in the body", () => {
+			// arrange
+			const path = getPath(`
+			try {
+				x = 1;
+			} catch (e) {
+			} finally {
+				y = 2;
+			}
+			console.log(x);
+			`);
+
+			const tryStatement = path.get("body")[0];
+			const assignment = tryStatement.get("block.body")[0];
+
+			// act
+			const successor = computeSuccessor(assignment);
+
+			// assert
+			expect(successor).to.equalPath(tryStatement.get("finalizer"));
+		});
+
+		it("returns the successor of the try statement for the last statement in the body if the try statement has no finalizer", () => {
+			// arrange
+			const path = getPath(`
+			try {
+				x = 1;
+			} catch (e) {
+			} 
+			console.log(x);
+			`);
+
+			const [ tryStatement, logStatement ] = path.get("body");
+			const assignment = tryStatement.get("block.body")[0];
+
+			// act
+			const successor = computeSuccessor(assignment);
+
+			// assert
+			expect(successor).to.equalPath(logStatement);
+		});
+
+		it("returns the finalizer for the last statement in the catch clause", () => {
+			// arrange
+			const path = getPath(`
+			try {
+				x = 1;
+			} catch (e) {
+				x = 2;
+			} finally {
+				y = 2;
+			}
+			console.log(x);
+			`);
+
+			const tryStatement = path.get("body")[0];
+			const catchAssignment = tryStatement.get("handler.body.body")[0];
+
+			// act
+			const successor = computeSuccessor(catchAssignment);
+
+			// assert
+			expect(successor).to.equalPath(tryStatement.get("finalizer"));
+		});
+
+		it("returns the successor of the try statement for the last statement in the catch clause if the try statement has no finalizer", function () {
+			// arrange
+			const path = getPath(`
+			try {
+				x = 1;
+			} catch (e) {
+				x = 2;
+			}
+			console.log(x);
+			`);
+
+			const [tryStatement, logStatement] = path.get("body");
+			const catchAssignment = tryStatement.get("handler.body.body")[0];
+
+			// act
+			const successor = computeSuccessor(catchAssignment);
+
+			// assert
+			expect(successor).to.equalPath(logStatement);
+		});
+
+		it("returns the successor of the try statement for the last statement in the finalizer", () => {
+			// arrange
+			const path = getPath(`
+			try {
+				x = 1;
+			} finally {
+				x = 2;
+			}
+			console.log(x);
+			`);
+
+			const [tryStatement, logStatement] = path.get("body");
+			const finallyAssignment = tryStatement.get("finalizer.body")[0];
+
+			// act
+			const successor = computeSuccessor(finallyAssignment);
+
+			// assert
+			expect(successor).to.equalPath(logStatement);
+		});
+	});
 });
 
 function getPath (code) {
