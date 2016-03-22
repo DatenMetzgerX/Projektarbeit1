@@ -1,0 +1,9 @@
+{
+  "source": "./lib",
+  "destination": "./esdoc",
+  "test": {
+	"type": "mocha",
+	"includes": ["(spec|specs|Spec|test|Test)\\.(js|es6)$"],
+	"source": "./test"
+  }
+}

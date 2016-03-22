@@ -15,7 +15,8 @@
     "test": "mocha --inline-diffs --compilers js:babel-register './test/**/*.specs.js'",
     "testWatch": "mocha --watch --compilers js:babel-register --watch-extensions dot './test/**/*.specs.js'",
     "coverage": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha -- './test/**/*.specs.js'",
-    "coveralljs": "npm run coverage && cat ./coverage/lcov.info | node_modules/coveralls/bin/coveralls.js && rm -rf coverage"
+    "coveralljs": "npm run coverage && cat ./coverage/lcov.info | node_modules/coveralls/bin/coveralls.js && rm -rf coverage",
+    "esdoc": "esdoc -c .esdoc.json"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "chai": "^3.5.0",
     "coveralls": "^2.11.8",
     "del": "^2.2.0",
+    "esdoc": "^0.4.6",
     "eslint": "^2.3.0",
     "glob": "^7.0.3",
     "graphviz": "0.0.8",
