@@ -15,7 +15,7 @@ describe("createControlFlowGraph", function () {
 		expect(cfg).not.to.be.null;
 	});
 
-	describe("ExpressionStatement", () => {
+	describe("ExpressionStatement", function () {
 		it("creates an edge to the successor node", () => {
 			// act
 			const {ast, cfg} = toCfg("x++;");
@@ -26,7 +26,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("VariableDeclaration", () => {
+	describe("VariableDeclaration", function () {
 		it("creates an edge to the successor node", () => {
 			const {ast, cfg} = toCfg("let x = 10;");
 
@@ -36,7 +36,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("EmptyStatement", () => {
+	describe("EmptyStatement", function () {
 		it("creates an edge to the successor node", () => {
 			const {ast, cfg} = toCfg(";");
 
@@ -46,7 +46,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("BreakStatement", () => {
+	describe("BreakStatement", function () {
 		it("creates an edge to the successor statement of the parent loop statement", () => {
 			const {ast, cfg} = toCfg(`
 				for (let i = 0; i < 10; ++i) {
@@ -61,9 +61,21 @@ describe("createControlFlowGraph", function () {
 			const breakStatement = ast.program.body[0].body.body[0].consequent.body[0];
 			expect(cfg.isConnected(breakStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
+
+		it("fails if a break statement is used inside of try finally", function () {
+			expect(() => toCfg(`
+			while(true) {
+				try {
+					break;
+				} finally {
+					console.log("A");
+				}
+			}
+			`)).to.throw();
+		});
 	});
 
-	describe("ContinueStatement", () => {
+	describe("ContinueStatement", function () {
 		it("creates an edge to the direct parent loop statement", () => {
 			const {ast, cfg} = toCfg(`
 			for (let i = 0; i < 10; ++i) {
@@ -79,9 +91,21 @@ describe("createControlFlowGraph", function () {
 			const continueStatement = forLoop.body.body[0].consequent.body[0];
 			expect(cfg.isConnected(continueStatement, forLoop, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
+
+		it("fails if a continue statement is used inside of try finally", function () {
+			expect(() => toCfg(`
+			while (true) {
+				try {
+					continue;
+				} finally {
+					console.log("A");
+				}
+			}
+			`)).to.throw();
+		});
 	});
 
-	describe("BlockStatement", () => {
+	describe("BlockStatement", function () {
 		it("connects the first statement in the block statement as successor node", () => {
 			const {ast, cfg} = toCfg(`
 			{
@@ -127,7 +151,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("IfStatement", () => {
+	describe("IfStatement", function () {
 		it("creates a conditional false branch from the if statement to following sibling node if the if statement has no else branch", function () {
 			// act
 			const {ast, cfg} = toCfg(`
@@ -204,7 +228,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("WhileStatement", () => {
+	describe("WhileStatement", function () {
 		it("connects the first statement in the while statement as successor (TRUE Branch)", () => {
 			const {ast, cfg} = toCfg(`
 			while (x < 10) {
@@ -233,7 +257,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("ForStatement", () => {
+	describe("ForStatement", function () {
 		it("connects the init statement with the for statement (which represents the condition)", () => {
 			const {ast, cfg} = toCfg(`
 			for (let x = 0; x < 10; ++x) {
@@ -347,7 +371,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("ForInStatement", () => {
+	describe("ForInStatement", function () {
 		it("connects the for statement with a true branch to it's body", () => {
 			const {ast, cfg} = toCfg(`
 			for (let p in o) {
@@ -377,7 +401,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("ForOfStatement", () => {
+	describe("ForOfStatement", function () {
 		it("connects the for statement with a true branch to it's body", () => {
 			const {ast, cfg} = toCfg(`
 			for (let p of o) {
@@ -407,7 +431,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("DoWhileStatement", () => {
+	describe("DoWhileStatement", function () {
 		it("connects the do while statement with a true branch to it's body", () => {
 			const {ast, cfg} = toCfg(`
 			do {
@@ -437,7 +461,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("SwitchStatement", () => {
+	describe("SwitchStatement", function () {
 		it("connects the switch statement with the first case statement", () => {
 			const {ast, cfg} = toCfg(`
 			switch (x) {
@@ -491,7 +515,7 @@ describe("createControlFlowGraph", function () {
 		});
 	});
 
-	describe("SwitchCase", () => {
+	describe("SwitchCase", function () {
 		it("connects the case with a true branch to it's consequent", () => {
 			const {ast, cfg} = toCfg(`
 			switch (x) {
@@ -691,6 +715,140 @@ describe("createControlFlowGraph", function () {
 
 			expect(cfg.isConnected(returnStatement, logStatement, BRANCHES.UNCONDITIONAL)).to.be.false;
 			expect(cfg.isConnected(returnStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("fails if a return statement is used inside of try finally", function () {
+			expect(() => toCfg(`
+			function x() {
+				try {
+					return 10;
+				} finally {
+					console.log("A");
+				}
+			}
+			`)).to.throw();
+		});
+	});
+
+	describe("TryStatement", function () {
+		it("connects the try statement with the block", () => {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+				callZ();
+			} catch (e) {
+				console.log(e);
+			} 
+			`);
+
+			// assert
+			const tryStatement = ast.program.body[0];
+
+			expect(cfg.isConnected(tryStatement, tryStatement.block, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("adds an exception connection from a call expression inside the try block to the exception handler", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+				callZ();
+			} catch (e) {
+				console.log(e);
+			} 
+			`);
+
+			// assert
+			const tryStatement = ast.program.body[0];
+			const callStatement = tryStatement.block.body[0];
+			const catchStatement = tryStatement.handler;
+
+			expect(cfg.isConnected(callStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
+			expect(cfg.isConnected(callStatement, catchStatement, BRANCHES.EXCEPTION)).to.be.true;
+		});
+
+		it("does not add exception connection handler for statements in the catch block", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+				callZ();
+			} catch (e) {
+				console.log(e);
+			} 
+			`);
+
+			// assert
+			const tryStatement = ast.program.body[0];
+			const catchStatement = tryStatement.handler;
+			const logStatement = catchStatement.body.body[0];
+
+			expect(cfg.isConnected(logStatement, catchStatement)).to.be.false;
+		});
+
+		it("Adds exception connection to statements in a finally clause if this is part of another try catch statement", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+				try {
+					callZ();
+				} finally {
+					console.log(e);
+				}
+			} catch (y) {
+				console.log(x);
+			}
+			`);
+
+			// assert
+			const outerTryStatement = ast.program.body[0];
+			const outerCatchStatement = outerTryStatement.handler;
+			const innerTryStatement = outerTryStatement.block.body[0];
+			const innerFinallyStatement = innerTryStatement.finalizer;
+			const innerLogStatement = innerFinallyStatement.body[0];
+
+			expect(cfg.isConnected(innerLogStatement, outerCatchStatement, BRANCHES.EXCEPTION)).to.be.true;
+		});
+	});
+
+	describe("CatchClause", function () {
+		it("connects the catch clause with it's body", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+				callZ();
+			} catch (e) {
+				console.log(e);
+			} 
+			`);
+
+			// assert
+			const tryStatement = ast.program.body[0];
+			const catchStatement = tryStatement.handler;
+
+			expect(cfg.isConnected(catchStatement, catchStatement.body, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("Adds exception connection to statements in a catch clause if this is part of another try catch statement", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+				try {
+					callZ();
+				} catch (e) {
+					console.log(e);
+				}
+			} catch (y) {
+				console.log(x);
+			}
+			`);
+
+			// assert
+			const outerTryStatement = ast.program.body[0];
+			const outerCatchStatement = outerTryStatement.handler;
+			const innerTryStatement = outerTryStatement.block.body[0];
+			const innerCatchStatement = innerTryStatement.handler;
+			const innerLogStatement = innerCatchStatement.body.body[0];
+
+			expect(cfg.isConnected(innerLogStatement, outerCatchStatement, BRANCHES.EXCEPTION)).to.be.true;
 		});
 	});
 });
