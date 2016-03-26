@@ -4,10 +4,11 @@ import glob from "glob";
 import path from "path";
 
 import {cfgToDot} from "../../lib/cfg/dot";
-import {parse} from "../../lib/parser";
-import createControlFlowGraph from "../../lib/cfg/cfg-builder";
+import {parse} from "babylon";
+import traverse from "babel-traverse";
+import CfgBuilder from "../../lib/cfg/cfg-builder";
 
-describe("cfg-builder integration tests", () => {
+describe("cfg-analyzer integration tests", () => {
 	const testCasesDirectory = "./test/cfg/test-cases";
 	const cases = glob.sync("**/*.case.js", { cwd: testCasesDirectory });
 
@@ -20,12 +21,14 @@ describe("cfg-builder integration tests", () => {
 			it("creates the control flow graph correctly", () => {
 				// arrange
 				const ast = parse(sourceCode);
+				const builder = new CfgBuilder(ast);
 
 				// act
-				const cfg = createControlFlowGraph(ast);
+				builder.init();
+				traverse(ast, builder.visitor, null, builder.state);
 
 				// assert
-				const dot = cfgToDot(cfg, {stable: true});
+				const dot = cfgToDot(ast.cfg, {stable: true});
 				expect(dot).to.equal(expected);
 			});
 		});

@@ -1,8 +1,9 @@
 import {parse} from "babylon";
+import traverse from "babel-traverse";
 import {expect} from "chai";
 
 import {BRANCHES} from "../../lib/cfg/control-flow-graph";
-import createControlFlowGraph from "../../lib/cfg/cfg-builder";
+import CfgBuilder from "../../lib/cfg/cfg-builder";
 
 /* eslint */
 
@@ -856,5 +857,9 @@ describe("createControlFlowGraph", function () {
 function toCfg (code) {
 	const ast = parse(code);
 
-	return { cfg: createControlFlowGraph(ast), ast: ast};
+	const builder = new CfgBuilder(ast);
+	builder.init();
+	traverse(ast, builder.visitor, null, builder.state);
+
+	return { cfg: ast.cfg, ast: ast};
 }
