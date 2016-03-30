@@ -5,9 +5,7 @@ import {expect} from "chai";
 import {BRANCHES} from "../../lib/cfg/control-flow-graph";
 import CfgBuilder from "../../lib/cfg/cfg-builder";
 
-/* eslint */
-
-describe("createControlFlowGraph", function () {
+describe("CfgBuilder", function () {
 	it("returns a cfg", function () {
 		// act
 		const {cfg} = toCfg("");

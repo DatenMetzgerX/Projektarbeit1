@@ -2,14 +2,14 @@ import {expect} from "chai";
 import traverse from "babel-traverse";
 import {parse} from "babylon";
 
-import {Scope} from "../../lib/semantic-model/scope";
 import {SymbolExtractor} from "../../lib/semantic-model/symbol-extractor";
+import {Program} from "../../lib/semantic-model/program";
 
 describe("SymbolExtractor", function () {
-	let globalScope;
+	let program;
 
 	beforeEach(function () {
-		globalScope = new Scope(null);
+		program = new Program();
 	});
 
 	describe("Block", function () {
@@ -140,10 +140,79 @@ describe("SymbolExtractor", function () {
 		});
 	});
 
+	describe("FunctionExpression", function () {
+		it("creates a new scope", function () {
+			// act
+			const ast = extractSymbols(`
+			function dump(count) {
+				console.log(count);
+			}
+			`);
+
+			// assert
+			expect(ast.program.body[0].scope).to.be.ok;
+		});
+
+		it("creates a symbol for each parameter", function () {
+			// act
+			const ast = extractSymbols(`
+			function dump(count) {
+				console.log(count);
+			}
+			`);
+
+			// assert
+			const x = ast.program.body[0].scope.resolveSymbol("count");
+
+			expect(ast.program.body[0].scope.hasOwnSymbol("count")).to.be.true;
+			expect(x).to.have.property("name").that.equals("count");
+			expect(x).to.have.property("declaration").that.is.equal(ast.program.body[0]);
+		});
+
+		it("does not create a symbol for the parameters in the outer scope", function () {
+			// act
+			const ast = extractSymbols(`
+			function dump(count) {
+				console.log(count);
+			}
+			`);
+
+			// assert
+			expect(ast.program.scope.hasOwnSymbol("count")).to.be.false;
+		});
+
+		it("creates a symbol for the function", function () {
+			// act
+			const ast = extractSymbols(`
+			function dump(count) {
+				console.log(count);
+			}
+			`);
+
+			// assert
+			const dump = ast.program.scope.resolveSymbol("dump");
+			expect(ast.program.scope.hasOwnSymbol("dump")).to.be.true;
+			expect(dump).to.have.property("name").that.equals("dump");
+			expect(dump).to.have.property("declaration").that.equals(ast.program.body[0]);
+		});
+
+		it("does not create a symbol for the function in the function scope", function () {
+			// act
+			const ast = extractSymbols(`
+			function dump(count) {
+				console.log(count);
+			}
+			`);
+
+			// assert
+			expect(ast.program.body[0].scope.hasOwnSymbol("dump")).to.be.false;
+		});
+	});
+
 	function extractSymbols(source) {
 		const ast = parse(source);
 
-		const symbolExtractor = new SymbolExtractor(globalScope);
+		const symbolExtractor = new SymbolExtractor(program);
 		traverse(ast, symbolExtractor.visitor, null, symbolExtractor.state);
 		return ast;
 	}

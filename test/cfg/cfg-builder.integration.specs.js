@@ -8,7 +8,7 @@ import {parse} from "babylon";
 import traverse from "babel-traverse";
 import CfgBuilder from "../../lib/cfg/cfg-builder";
 
-describe("cfg-analyzer integration tests", () => {
+describe("CfgBuilder integration tests", () => {
 	const testCasesDirectory = "./test/cfg/test-cases";
 	const cases = glob.sync("**/*.case.js", { cwd: testCasesDirectory });
 

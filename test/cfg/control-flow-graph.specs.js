@@ -93,6 +93,42 @@ describe("ControlFlowGraph", () => {
 		});
 	});
 
+	describe("getExitEdges", function () {
+		it("returns the edges that are direct predecessors of the node with the null value", function () {
+			// arrange
+			const x1 = cfg.createNode("x1");
+			const x2 = cfg.createNode("x2");
+
+			cfg.connectIfNotFound(x1, "New", x2);
+			cfg.connectIfNotFound(x2, "Exit", null);
+
+			// act
+			const exitEdges = Array.from(cfg.getExitEdges(x1));
+
+			// assert
+			expect(exitEdges).to.deep.equal(Array.from(x2.successors.values()));
+		});
+
+		it("detects and prevents cycles", function () {
+			// arrange
+			const x1 = cfg.createNode("x1");
+			const x2 = cfg.createNode("x2");
+			const x3 = cfg.createNode("x3");
+
+			cfg.connectIfNotFound(x1, "New", x2);
+			cfg.connectIfNotFound(x2, "Default", x3);
+			cfg.connectIfNotFound(x3, "False", null);
+			const expectedExitEdges = Array.from(x3.successors.values());
+			cfg.connectIfNotFound(x3, "True", x1);
+
+			// act
+			const exitEdges = Array.from(cfg.getExitEdges(x1));
+
+			// assert
+			expect(exitEdges).to.deep.equal(expectedExitEdges);
+		});
+	});
+
 	describe("connectIfNotFound", () => {
 		let nodeA, nodeB;
 
