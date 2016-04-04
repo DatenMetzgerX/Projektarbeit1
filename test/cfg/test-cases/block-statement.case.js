@@ -3,4 +3,4 @@
 	console.log(x); // next is the successor of the parent block
 }
 
-const y = 10; 
+const y = 10;
