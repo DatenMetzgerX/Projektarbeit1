@@ -1,6 +1,6 @@
 import {expect} from "chai";
 
-import NumberNullUnificationRule from "../../../lib/type-inference/unification-rules/number-null-unification-rule";
+import NumberNullUnificationRule from "../../../lib/type-inference/unification-rules/t-null-unification-rule";
 import {NullType, NumberType, Type, MaybeType} from "../../../lib/semantic-model/types/index";
 
 describe("NullMaybeUnificationRule", function () {
