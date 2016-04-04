@@ -14,6 +14,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
 		context = new RefinementContext();
+		sandbox.stub(context, "unify");
 		sandbox.stub(context, "infer");
 		sandbox.stub(context, "getSymbol");
 		sandbox.stub(context, "setType");
@@ -36,11 +37,11 @@ describe("AssignmentExpressionRefinementRule", function () {
 	});
 
 	describe("refine", function () {
-		it("returns the type of the right hand side", function () {
+		it("returns the type of the right hand side if the left hand side is a type variable", function () {
 			// arrange
 			const xSymbol = new Symbol("x", SymbolFlags.Variable);
 			context.getSymbol.returns(xSymbol);
-
+			context.unify.returnsArg(0);
 			context.infer.returns(new NumberType());
 
 			// act, assert
@@ -51,6 +52,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 			// arrange
 			const xSymbol = new Symbol("x", SymbolFlags.Variable);
 			context.getSymbol.returns(xSymbol);
+			context.unify.returnsArg(0);
 			context.infer.returns(new NumberType());
 
 			// act
