@@ -2,6 +2,7 @@ import {expect} from "chai";
 import traverse from "babel-traverse";
 import {parse} from "babylon";
 
+import {SymbolFlags} from "../../lib/semantic-model/symbol";
 import {SymbolExtractor} from "../../lib/semantic-model/symbol-extractor";
 import {Program} from "../../lib/semantic-model/program";
 
@@ -206,6 +207,54 @@ describe("SymbolExtractor", function () {
 
 			// assert
 			expect(ast.program.body[0].scope.hasOwnSymbol("dump")).to.be.false;
+		});
+	});
+
+	describe("ObjectExpression", function () {
+		const code = `let micha = {
+			name: "Micha",
+			lastName: "Reiser",
+			age: 26,
+			fullName() {
+				return \`${this.name} ${this.lastName}\`;
+			}
+		};`;
+
+		it("creates a symbol for the object", function () {
+			// act
+			const ast = extractSymbols(code);
+
+			// assert
+			expect(ast.program.scope.hasOwnSymbol("micha")).to.be.true;
+		});
+
+		it("creates a member for each object property", function () {
+			// act
+			const ast = extractSymbols(code);
+
+			// assert
+			const object = ast.program.scope.resolveSymbol("micha");
+			expect(object.getMember("name")).to.have.property("flags", SymbolFlags.Property);
+			expect(object.getMember("age")).to.have.property("flags", SymbolFlags.Property);
+			expect(object.getMember("fullName")).to.have.property("flags", SymbolFlags.Property);
+		});
+
+		it("supports nested objects", function () {
+			// act
+			const ast = extractSymbols(`let micha = {
+				name: "Micha",
+				lastName: "Reiser",
+				age: 26,
+				address: {
+					street: "XY"
+				}
+			};`);
+
+			// assert
+			const object = ast.program.scope.resolveSymbol("micha");
+			const address = object.getMember("address");
+			expect(address).not.to.be.undefined;
+			expect(address.getMember("street")).to.have.property("flags", SymbolFlags.Property);
 		});
 	});
 
