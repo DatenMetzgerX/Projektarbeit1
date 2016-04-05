@@ -80,21 +80,4 @@ describe("TypeEnvironment", function () {
 			expect(environment.getType(symbol)).to.be.undefined;
 		});
 	});
-
-	describe("assignTypeToSymbols", function () {
-		it("assigns the type to each symbol", function () {
-			const x = new Symbol("x", SymbolFlags.BlockScopedVariable);
-			environment = environment.setType(x, new Type("number"));
-
-			const y = new Symbol("x", SymbolFlags.Variable);
-			environment = environment.setType(y, new Type("string"));
-
-			// act
-			environment.assignTypeToSymbols();
-
-			// assert
-			expect(x.type).to.have.property("name").that.equals("number");
-			expect(y.type).to.have.property("name").that.equals("string");
-		});
-	});
 });

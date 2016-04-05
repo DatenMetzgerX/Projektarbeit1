@@ -26,7 +26,7 @@ describe("Type Inference Integration Tests", function () {
 		expect(scope.resolveSymbol("hero").type).to.be.instanceOf(VoidType);
 	});
 
-	it("changes the type of a variable to Maybe<number> when it is initialized with null but later assigned a number", function () {
+	it("changes the type of a variable to number when it is initialized with null but later assigned a number", function () {
 		// act
 		const sourceFile = inferTypes(`
 		let age = null;
@@ -34,7 +34,7 @@ describe("Type Inference Integration Tests", function () {
 		`);
 
 		// assert
-		expect(sourceFile.scope.resolveSymbol("age").type).to.be.instanceOf(MaybeType);
+		expect(sourceFile.scope.resolveSymbol("age").type).to.be.instanceOf(NumberType);
 	});
 
 	it("the type of a function parameter can be inferred if it is used in a numeric calculation", function () {
@@ -50,17 +50,6 @@ describe("Type Inference Integration Tests", function () {
 		const functionScope = functionNode.scope;
 
 		expect(functionScope.resolveSymbol("x").type).to.be.instanceOf(MaybeType);
-	});
-
-	it("fails if a string is assigned to a number variable", function () {
-		// arrange
-		const source = `
-		let x = 10;
-		x = "test";
-		`;
-
-		// act, assert
-		expect(() => inferTypes(source)).to.throw("Type inference failure: Unification for type 'number' and 'string' failed because there exists no rule that can be used to unify the given types.");
 	});
 
     /**
