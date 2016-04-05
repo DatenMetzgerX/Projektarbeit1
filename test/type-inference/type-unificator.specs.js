@@ -154,33 +154,5 @@ describe("TypeUnificator", function () {
 			// act, assert
 			expect(() => typeUnificator.unify(numberType, maybeType)).to.throw("Unification for type 'number' and 'Maybe<number>' failed because unification rule to use is ambiguous(Object,Object).");
 		});
-
-		it("throws if the two types are from the same kind (e.g. both Function) but have a different number of type parameters", function () {
-			// arrange
-			const f1 = new Type("Function", new NumberType());
-			const f2 = new Type("Function", new NumberType(), new NumberType());
-
-			// act, assert
-			expect(() => typeUnificator.unify(f1, f2)).to.throw("Unification for type 'Function<number>' and 'Function<number, number>' failed because the types have a different number of type parameters.");
-		});
-
-		it("unifies the type parameters of the two types if both types have the same number of type parameters", function () {
-			// arrange
-			const numberType = new NumberType();
-			const maybeType = new MaybeType(numberType);
-			const f1 = new Type("Function", maybeType);
-			const f2 = new Type("Function", numberType);
-
-			rule1.canUnify.withArgs(numberType, maybeType).returns(true);
-			rule1.unify.returns(maybeType);
-			rule2.canUnify.returns(false);
-
-			// act, resolves f2 to Function(maybe<number>)
-			const unified = typeUnificator.unify(f2, f1);
-
-			// assert
-			expect(unified).to.equal(f2);
-			expect(f2.typeParameters.get(0).resolved).to.equal(maybeType);
-		});
 	});
 });
