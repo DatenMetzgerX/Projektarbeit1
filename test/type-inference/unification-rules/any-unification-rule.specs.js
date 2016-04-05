@@ -25,9 +25,9 @@ describe("AnyUnificationRule", function () {
 	});
 
 	describe("unify", function () {
-		it("returns the specific type", function () {
+		it("returns any", function () {
 			// act, assert
-			expect(rule.unify(new NumberType(), new AnyType())).to.be.instanceOf(NumberType);
+			expect(rule.unify(new NumberType(), new AnyType())).to.be.instanceOf(AnyType);
 		});
 	});
 });
