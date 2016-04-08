@@ -29,23 +29,6 @@ describe("TypeUnificator", function () {
 			// assert
 			expect(unified).to.equal(numberType);
 		});
-
-		it("unifies the resolved types and not on the passed in types", function () {
-			// arrange
-			const variable1 = new TypeVariable();
-			variable1.resolvesTo(new Type("number"));
-
-			const variable2 = new TypeVariable();
-			variable2.resolvesTo(new Type("number"));
-
-			const unificator = new TypeUnificator();
-
-			// act
-			const unified = unificator.unify(variable1, variable2);
-
-			// assert
-			expect(unified.name).to.equal("number");
-		});
 	});
 
 	describe("unifying type variable with base type", function () {
@@ -60,7 +43,6 @@ describe("TypeUnificator", function () {
 
 			// assert
 			expect(unified).to.equal(numberType);
-			expect(typeVariable.resolved).to.equal(numberType);
 		});
 
 		it("returns the base type when the first type is a type variable and the second is a base type", function () {
@@ -74,13 +56,12 @@ describe("TypeUnificator", function () {
 
 			// assert
 			expect(unified).to.equal(numberType);
-			expect(typeVariable.resolved).to.equal(numberType);
 		});
 
 		it("throws when the type variable is part of the other type definition with which it should be unified", function () {
 			// arrange
 			const typeUnificator = new TypeUnificator();
-			const typeVariable = new TypeVariable();
+			const typeVariable = new TypeVariable(1);
 			const maybeType = new MaybeType(typeVariable);
 
 			// act, assert
@@ -100,7 +81,6 @@ describe("TypeUnificator", function () {
 
 			// assert
 			expect(unified).to.equal(secondTypeVariable);
-			expect(typeVariable.resolved).to.equal(secondTypeVariable);
 		});
 	});
 

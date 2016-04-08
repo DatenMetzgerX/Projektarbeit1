@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as t from "babel-types";
 
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {TypeVariable, StringType} from "../../../lib/semantic-model/types";
+import {StringType, RecordType, VoidType} from "../../../lib/semantic-model/types";
 import {RefinementContext} from "../../../lib/type-inference/refinment-context";
 import {MemberExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/member-expression-refinement-rule";
 
@@ -14,9 +14,9 @@ describe("MemberExpressionRefinementRule", function () {
 		sandbox = sinon.sandbox.create();
 		context = new RefinementContext();
 
-		sandbox.stub(context, "setType");
 		sandbox.stub(context, "getType");
 		sandbox.stub(context, "getSymbol");
+		sandbox.stub(context, "unify");
 
 		rule = new MemberExpressionRefinementRule();
 		memberExpression = t.memberExpression(t.identifier("person"), t.identifier("name"));
@@ -37,7 +37,8 @@ describe("MemberExpressionRefinementRule", function () {
 	});
 
 	describe("refine", function () {
-		it("creates a fresh type variable and assigns it with the member symbol in the type environment", function () {
+
+		it("returns the type of the member for known properties", function () {
 			const personSymbol = new Symbol("person", SymbolFlags.Variable);
 			const nameSymbol = new Symbol("name", SymbolFlags.Property);
 			personSymbol.addMember(nameSymbol);
@@ -45,21 +46,10 @@ describe("MemberExpressionRefinementRule", function () {
 			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
 			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
 
-			// act
-			rule.refine(memberExpression, context);
+			const personType = RecordType.withProperties([[nameSymbol, new StringType()]]);
+			context.getType.withArgs(personSymbol).returns(personType);
 
-			// assert
-			sinon.assert.calledWith(context.setType, nameSymbol, sinon.match.instanceOf(TypeVariable));
-		});
-
-		it("returns the type from the type environment if the member symbol has a type assigned in the type environment", function () {
-			const personSymbol = new Symbol("person", SymbolFlags.Variable);
-			const nameSymbol = new Symbol("name", SymbolFlags.Property);
-			personSymbol.addMember(nameSymbol);
-
-			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
-			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
-			context.getType.withArgs(nameSymbol).returns(new StringType());
+			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
 
 			// act
 			const refined = rule.refine(memberExpression, context);
@@ -71,11 +61,10 @@ describe("MemberExpressionRefinementRule", function () {
 		/**
 		 * The forward analysis infers what is known about a type and not what is required about a type.
 		 * Therefore if a member is accessed before it's explicit declaration (e.g. assignment, object literal...), then
-		 * we won't create a property for the record as it is not 100% sure if the record has this type. But
-		 * a new type variable is created and associated with the symbol of this member in the type environment.
-		 * This to ensure that the type can be merged if a backward analysis is performed too.
+		 * we won't create a property for the record as it is not 100% sure if the record has this type. All that is known
+		 * is that the property therefor mgiht be of the type undefined, so lets return undefined.
 		 */
-		it("initializes the type in the type environment for unknown members", function () {
+		it("returns void for unknown members", function () {
 			// arrange
 			const nameSymbol = new Symbol("name", SymbolFlags.Property);
 			const personSymbol = new Symbol("person", SymbolFlags.Variable);
@@ -84,12 +73,38 @@ describe("MemberExpressionRefinementRule", function () {
 			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
 			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
 
+			const personType = new RecordType();
+			context.getType.withArgs(personSymbol).returns(personType);
+
+			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
+
 			// act
 			const refined = rule.refine(memberExpression, context);
 
 			// assert
-			expect(refined).to.be.instanceOf(TypeVariable);
-			sinon.assert.calledWith(context.setType, nameSymbol, sinon.match.instanceOf(TypeVariable));
+			expect(refined).to.be.instanceOf(VoidType);
+		});
+
+		/**
+		 * This can only be the case if a variable is accessed that has not been declared in this scope and therefore is invalid
+		 * anyway. In this case we return undefined as we assume that the member does not exist and therefor will not have a value
+		 */
+		it("returns void if the object type is not yet known", function () {
+			// arrange
+			const nameSymbol = new Symbol("name", SymbolFlags.Property);
+			const personSymbol = new Symbol("person", SymbolFlags.Variable);
+			personSymbol.addMember(nameSymbol);
+
+			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
+			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
+
+			context.unify.withArgs(RecordType.ANY).returns(new RecordType());
+
+			// act
+			const refined = rule.refine(memberExpression, context);
+
+			// assert
+			expect(refined).to.be.instanceOf(VoidType);
 		});
 	});
 });

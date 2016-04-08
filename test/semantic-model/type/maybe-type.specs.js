@@ -24,17 +24,31 @@ describe("MaybeType", function () {
 			// assert
 			expect(maybe.typeParameters).to.deep.equal([number]);
 		});
+	});
 
-		it("updates the of type when setting the type parameters", function () {
+	describe("withTypeParameters", function () {
+		it("returns a new instance with the specified id", function () {
+			// arrange
+			const maybe = new MaybeType(new Type("number"));
+
+			// act
+			const newMaybe = maybe.withTypeParameters([new Type("string")], maybe.id);
+
+			// assert
+			expect(newMaybe).not.to.be.equal(maybe);
+			expect(newMaybe.id).to.be.equal(maybe.id);
+		});
+
+		it("is a maybe of the new type parameter", function () {
 			// arrange
 			const maybe = new MaybeType(new Type("string"));
 			const number = new Type("number");
 
 			// act
-			maybe.typeParameters = [number];
+			const newMaybe = maybe.withTypeParameters([number]);
 
 			// assert
-			expect(maybe.of).to.equal(number);
+			expect(newMaybe.of).to.equal(number);
 		});
 	});
 });

@@ -72,7 +72,7 @@ function stringify(options){// (Maybe<number>, Maybe<number>) -> number
 function query(includeAge) {// any -> void
 	const x = { 			// { name: string, lastName: string };
 		name: "Micha", 
-		lastName; "Reiser"
+		lastName: "Reiser"
 	};
 	
 	if (includeAge) {		// includeAge: any

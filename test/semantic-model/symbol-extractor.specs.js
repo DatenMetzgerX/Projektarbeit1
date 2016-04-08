@@ -339,6 +339,22 @@ describe("SymbolExtractor", function () {
 				// assert
 				expect(program.symbolTable.getSymbol(ast.program.body[0])).to.equal(program.symbolTable.getSymbol(ast.program.body[1]));
 			});
+
+			it("creates a symbol for identifiers used in the init expression", function () {
+				// act
+				const ast = extractSymbols("let x = y;");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("y");
+			});
+
+			it("associates the symbol with the identifier node used in the init expression", function () {
+				// act
+				const ast = extractSymbols("let x = y;");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].declarations[0].init)).to.have.property("flags", SymbolFlags.Variable);
+			});
 		});
 
 		describe("ObjectExpression", function () {
@@ -510,6 +526,15 @@ describe("SymbolExtractor", function () {
 				expect(ast.program.scope).to.have.ownSymbol("x");
 				expect(ast.program.scope.getOwnSymbol("x")).to.have.symbolMember("y");
 				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.left.property)).to.equal(ast.program.scope.getOwnSymbol("x").getMember("y"));
+			});
+
+			it("extracts the identifiers used in the right hand side of the assignment expression", function () {
+				// act
+				const ast = extractSymbols("x.y = z");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("z");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.right)).to.equal(ast.program.scope.getOwnSymbol("z"));
 			});
 		});
 

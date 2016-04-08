@@ -56,7 +56,24 @@ describe("IdentifierRefinementRule", function () {
 			// assert
 			sinon.assert.calledWith(context.getSymbol, identifier);
 			sinon.assert.calledWith(context.getType, symbol);
-			expect(refinedType).to.equal(type);
+			expect(refinedType).to.be.instanceOf(NumberType);
+		});
+
+		it("returns a fresh copy of the variable to support cases like `z = null; person.age = z; z = 10;` In this case, z has type number, " +
+			"but this should not be reflected to person.age, whose type still needs to be null as this is the most accurate information known about person.age.", function () {
+			// arrange
+			const identifier = t.identifier("x");
+			const type = new NumberType();
+			const symbol = new Symbol("x", SymbolFlags.Variable);
+
+			sinon.stub(context, "getSymbol").returns(symbol);
+			sinon.stub(context, "getType").returns(type);
+
+			// act
+			const refinedType = rule.refine(identifier, context);
+
+			// assert
+			expect(refinedType).not.to.equal(type);
 		});
 
 		it("throws an error if type of the identifier is not know and therefor the identifier has been used before it's declaration", function () {

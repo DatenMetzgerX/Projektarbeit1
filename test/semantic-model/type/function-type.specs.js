@@ -25,8 +25,22 @@ describe("FunctionType", function () {
 			// act, assert
 			expect(functionType.typeParameters).to.deep.equal([thisType, returnType, param1, param2]);
 		});
+	});
 
-		it("setting the type parameters updates the this, parameter and return type", function () {
+	describe("withTypeParameters", function () {
+		it("returns a new instance with the specified id", function () {
+			// arrange
+			const functionType = new FunctionType(new Type("oldThis"), [new Type("number")], new Type("OldReturn"));
+
+			// act
+			const newFunction = functionType.withTypeParameters([new Type("this"), new VoidType(), new Type("number"), new Type("string")], functionType.id);
+
+			// assert
+			expect(newFunction).not.to.equal(functionType);
+			expect(newFunction.id).to.equal(functionType.id);
+		});
+
+		it("returns a new instance with the given this, param and return types", function () {
 			// arrange
 			const thisType = new Type("this");
 			const param1 = new Type("number");
@@ -35,12 +49,12 @@ describe("FunctionType", function () {
 			const functionType = new FunctionType(new Type("oldThis"), [param1], new Type("OldReturn"));
 
 			// act
-			functionType.typeParameters = [thisType, returnType, param1, param2];
+			const newFunction = functionType.withTypeParameters([thisType, returnType, param1, param2]);
 
 			// assert
-			expect(functionType.thisType).to.equal(thisType);
-			expect(functionType.params).to.deep.equal([param1, param2]);
-			expect(functionType.returnType).to.equal(returnType);
+			expect(newFunction.thisType).to.equal(thisType);
+			expect(newFunction.params).to.deep.equal([param1, param2]);
+			expect(newFunction.returnType).to.equal(returnType);
 		});
 	});
 

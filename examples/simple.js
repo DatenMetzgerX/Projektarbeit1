@@ -2,6 +2,11 @@
 const y = 10;
 
 function hy(x) {
-	let z = { name: "Micha", age: 26};
-	return z.name / 2 + x;
+	let func = hy;
+	let p1 = { name: "Micha", age: null};
+	let person = p1;
+	let z = x;
+
+	person.address = { street: "Nice view 23" };
+	return p1.age / 2 + x;
 }

@@ -65,6 +65,35 @@ describe("RefinementContext", function () {
 		});
 	});
 
+	describe("replaceType", function () {
+		it("replaces the type in the type environment", function () {
+			// arrange
+			const symbol = new Symbol("x", SymbolFlags.Variable);
+			const type = new NumberType();
+			sinon.stub(typeEnvironment, "replaceType");
+
+			// act
+			refinementContext.replaceType(symbol, () => type);
+
+			// assert
+			sinon.assert.calledWith(typeEnvironment.replaceType, symbol);
+		});
+
+		it("replaces the type environment with the returned environment from repalce type", function () {
+			// arrange
+			const symbol = new Symbol("x", SymbolFlags.Variable);
+			const type = new NumberType();
+			const newTypeEnvironment = {};
+			sinon.stub(typeEnvironment, "replaceType").returns(newTypeEnvironment);
+
+			// act
+			refinementContext.replaceType(symbol, () => type);
+
+			// assert
+			expect(hindleyMilner.typeEnvironment).to.equal(newTypeEnvironment);
+		});
+	});
+
 	describe("infer", function () {
 		it("calls the infer function of the hindley milner algorithm", function () {
 			// arrange
