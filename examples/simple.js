@@ -2,7 +2,6 @@
 const y = 10;
 
 function hy(x) {
-	let z = null;
-	let a = z / 2;
-	let b = z * x;
+	let z = { name: "Micha", age: 26};
+	return z.name / 2 + x;
 }

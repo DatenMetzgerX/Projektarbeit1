@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as t from "babel-types";
 
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {TypeVariable, StringType, RecordType, MaybeType} from "../../../lib/semantic-model/types";
+import {TypeVariable, StringType} from "../../../lib/semantic-model/types";
 import {RefinementContext} from "../../../lib/type-inference/refinment-context";
 import {MemberExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/member-expression-refinement-rule";
 

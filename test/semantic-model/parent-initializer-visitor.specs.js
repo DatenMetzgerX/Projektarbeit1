@@ -11,11 +11,9 @@ describe("ParentInitializerVisitor", function () {
 		        this.length = length;
 		        this.width = width;
 			}`);
-
-		const visitor = new ParentInitializerVisitor();
-
+		
 		// act
-		traverse(ast, visitor.visitor);
+		traverse(ast, ParentInitializerVisitor);
 
 		// assert
 		expect(ast.parent).to.be.undefined;

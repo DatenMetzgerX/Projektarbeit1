@@ -4,7 +4,7 @@ import {Program} from "../../lib/semantic-model/program";
 import {infer} from "../../lib/infer";
 import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType} from "../../lib/semantic-model/types";
 
-describe("Type Inference Integration Tests", function () {
+xdescribe("Type Inference Integration Tests", function () {
 
 	it("infers the types for declared variables correctly", function () {
 		// act
@@ -38,7 +38,7 @@ describe("Type Inference Integration Tests", function () {
 	});
 
 	it("the type of a function parameter can be inferred if it is used in a numeric calculation", function () {
-		// act
+		// act 
 		const sourceFile = inferTypes(`
 		function test(x) {
 			return x * 2;
