@@ -5,24 +5,24 @@ import sinon from "sinon";
 import {FunctionRefinementRule} from "../../../lib/type-inference/refinement-rules/function-refinement-rule";
 import {FunctionType, TypeVariable, NullType, VoidType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {ControlFlowGraph, BRANCHES} from "../../../lib/cfg/control-flow-graph";
 import {Edge} from "../../../lib/cfg/edge";
 import {Node} from "../../../lib/cfg/node";
+import {Program} from "../../../lib/semantic-model/program";
+import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
 describe("FunctionRefinementRule", function () {
-	let rule, context, cfg;
+	let rule, context, cfg, program;
 
 	beforeEach(function () {
 		rule = new FunctionRefinementRule();
 		cfg = new ControlFlowGraph();
 		sinon.stub(cfg, "getExitEdges");
 
-		context = new RefinementContext();
-		sinon.stub(context, "getSymbol");
-		sinon.stub(context, "setType");
+		program = new Program();
+		context = new RefinementContext(null, new TypeInferenceContext(program));
 		sinon.stub(context, "getCfg").returns(cfg);
-
 	});
 
 	describe("canRefine", function () {
@@ -73,6 +73,8 @@ describe("FunctionRefinementRule", function () {
 			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
 			cfg.getExitEdges.returns([]);
 
+			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("abcd", SymbolFlags.Function));
+
 			// act, assert
 			expect(rule.refine(functionDeclaration, context)).to.be.instanceOf(FunctionType);
 		});
@@ -83,8 +85,10 @@ describe("FunctionRefinementRule", function () {
 			const x = new Symbol("x", SymbolFlags.Variable);
 			const y = new Symbol("y", SymbolFlags.Variable);
 
-			context.getSymbol.withArgs(functionDeclaration.params[0]).returns(x);
-			context.getSymbol.withArgs(functionDeclaration.params[1]).returns(y);
+			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration.params[0], x);
+			program.symbolTable.setSymbol(functionDeclaration.params[1], y);
+
 			cfg.getExitEdges.returns([]);
 
 			// act
@@ -95,14 +99,18 @@ describe("FunctionRefinementRule", function () {
 			expect(refined.params[0]).to.be.instanceOf(TypeVariable);
 			expect(refined.params[1]).to.be.instanceOf(TypeVariable);
 
-			sinon.assert.calledWithExactly(context.setType, x, sinon.match.instanceOf(TypeVariable));
-			sinon.assert.calledWithExactly(context.setType, y, sinon.match.instanceOf(TypeVariable));
+			expect(context.getType(x)).to.be.instanceOf(TypeVariable);
+			expect(context.getType(y)).to.be.instanceOf(TypeVariable);
 		});
 
 		it("sets the return type to void if no exit edge is an explicit return statement", function () {
 			// arrange
 			const statement = t.expressionStatement(t.assignmentExpression("=", t.identifier("x"), t.identifier("y")));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
+
+			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
+			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
 			const exit1 = new Edge(new Node(statement), BRANCHES.UNCONDITIONAL, new Node(null));
 			cfg.getExitEdges.returns([exit1]);
@@ -118,6 +126,10 @@ describe("FunctionRefinementRule", function () {
 			// arrange
 			const statement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.identifier("y")));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
+
+			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
+			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
 			const exit1 = new Edge(new Node(statement), BRANCHES.UNCONDITIONAL, new Node(null));
 			cfg.getExitEdges.returns([exit1]);
@@ -135,6 +147,10 @@ describe("FunctionRefinementRule", function () {
 			const throwExit = t.throwStatement(t.identifier("z"));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
 
+			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
+			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
+
 			const exit1 = new Edge(new Node(statement), BRANCHES.UNCONDITIONAL, new Node(null));
 			const throwEdge = new Edge(new Node(throwExit), BRANCHES.EXCEPTION, new Node(null));
 			cfg.getExitEdges.returns([exit1, throwEdge]);
@@ -151,6 +167,10 @@ describe("FunctionRefinementRule", function () {
 			const statement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.identifier("y")));
 			const otherExit = t.expressionStatement(t.binaryExpression("*", t.identifier("x"), t.identifier("y")));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
+
+			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
+			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
 			const exit1 = new Edge(new Node(statement), BRANCHES.UNCONDITIONAL, new Node(null));
 			const exit2 = new Edge(new Node(otherExit), BRANCHES.UNCONDITIONAL, new Node(null));

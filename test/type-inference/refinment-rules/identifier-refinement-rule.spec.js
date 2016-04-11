@@ -1,16 +1,18 @@
-import sinon from "sinon";
 import {expect} from "chai";
 import * as t from "babel-types";
 import {IdentifierRefinementRule} from "../../../lib/type-inference/refinement-rules/identifier-refinement-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {VoidType, NumberType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
+import {Program} from "../../../lib/semantic-model/program";
+import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
 describe("IdentifierRefinementRule", function () {
-	let rule, context;
+	let rule, context, program;
 
 	beforeEach(function () {
-		context = new RefinementContext(null);
+		program = new Program();
+		context = new RefinementContext(null, new TypeInferenceContext(program));
 		rule = new IdentifierRefinementRule();
 	});
 
@@ -46,16 +48,13 @@ describe("IdentifierRefinementRule", function () {
 			const identifier = t.identifier("x");
 			const type = new NumberType();
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-
-			sinon.stub(context, "getSymbol").returns(symbol);
-			sinon.stub(context, "getType").returns(type);
+			program.symbolTable.setSymbol(identifier, symbol);
+			context.setType(symbol, type);
 
 			// act
 			const refinedType = rule.refine(identifier, context);
 
 			// assert
-			sinon.assert.calledWith(context.getSymbol, identifier);
-			sinon.assert.calledWith(context.getType, symbol);
 			expect(refinedType).to.be.instanceOf(NumberType);
 		});
 
@@ -64,10 +63,10 @@ describe("IdentifierRefinementRule", function () {
 			// arrange
 			const identifier = t.identifier("x");
 			const type = new NumberType();
-			const symbol = new Symbol("x", SymbolFlags.Variable);
 
-			sinon.stub(context, "getSymbol").returns(symbol);
-			sinon.stub(context, "getType").returns(type);
+			const symbol = new Symbol("x", SymbolFlags.Variable);
+			program.symbolTable.setSymbol(identifier, symbol);
+			context.setType(symbol, type);
 
 			// act
 			const refinedType = rule.refine(identifier, context);
@@ -80,9 +79,7 @@ describe("IdentifierRefinementRule", function () {
 			// arrange
 			const identifier = t.identifier("x");
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-
-			sinon.stub(context, "getSymbol").returns(symbol);
-			sinon.stub(context, "getType").returns(undefined);
+			program.symbolTable.setSymbol(identifier, symbol);
 
 			// act
 			expect(() => rule.refine(identifier, context)).to.throw("Type inference failure: The symbol x is being used before it's declaration");

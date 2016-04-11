@@ -6,7 +6,7 @@ import {ForwardAnalysisTypeInference} from "../../lib/type-inference/forward-ana
 import {Program} from "../../lib/semantic-model/program";
 import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 import {SymbolFlags, Symbol} from "../../lib/semantic-model/symbol";
-import {VoidType, NumberType, StringType, NullType, MaybeType} from "../../lib/semantic-model/types";
+import {VoidType, NullType} from "../../lib/semantic-model/types";
 import {HindleyMilner} from "../../lib/type-inference/hindley-milner";
 
 describe("ForwardAnalysisTypeInference", function () {
@@ -15,8 +15,8 @@ describe("ForwardAnalysisTypeInference", function () {
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
 		program = new Program();
-		hindleyMilner = new HindleyMilner(program);
-		analysis = new ForwardAnalysisTypeInference(hindleyMilner);
+		hindleyMilner = new HindleyMilner();
+		analysis = new ForwardAnalysisTypeInference(program, hindleyMilner);
 	});
 
 	afterEach(function () {
@@ -28,15 +28,14 @@ describe("ForwardAnalysisTypeInference", function () {
 			// arrange
 			const inSet = new TypeEnvironment();
 			const node = t.variableDeclarator(t.identifier("x"));
-			const x = new Symbol("x", SymbolFlags.Variable);
 
-			sandbox.stub(hindleyMilner, "infer", () => hindleyMilner.typeEnvironment = hindleyMilner.typeEnvironment.setType(x, new StringType()));
+			sandbox.stub(hindleyMilner, "infer");
 
 			// act
-			const outSet = analysis.transfer(node, inSet);
+			analysis.transfer(node, inSet);
 
 			// assert
-			expect(outSet.getType(x)).to.be.instanceOf(StringType);
+			sinon.assert.calledWith(hindleyMilner.infer, node, sinon.match.has("typeEnvironment", inSet));
 		});
 	});
 
@@ -68,14 +67,15 @@ describe("ForwardAnalysisTypeInference", function () {
 			const env1 = new TypeEnvironment().setType(name, new VoidType());
 			const env2 = new TypeEnvironment().setType(age, new NullType());
 
-			sandbox.stub(hindleyMilner, "mergeWithTypeEnvironments", () => hindleyMilner.typeEnvironment = hindleyMilner.typeEnvironment.setType(age, new MaybeType(new NumberType())));
+			sandbox.stub(hindleyMilner, "mergeWithTypeEnvironments");
+
+			const node = {};
 
 			// act
-			const joined = analysis.joinBranches(env1, [env2], {});
+			analysis.joinBranches(env1, [env2], node);
 
 			// assert
-			expect(joined.getType(name)).to.be.instanceOf(VoidType);
-			expect(joined.getType(age)).to.be.instanceOf(MaybeType);
+			sinon.assert.calledWith(hindleyMilner.mergeWithTypeEnvironments, [env2], node, sinon.match.has("typeEnvironment", env1));
 		});
 	});
 });

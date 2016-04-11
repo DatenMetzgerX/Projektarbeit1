@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {ExpressionStatementRefinementRule} from "../../../lib/type-inference/refinement-rules/expression-statement-refinement-rule";
 import {VoidType} from "../../../lib/semantic-model/types";
 

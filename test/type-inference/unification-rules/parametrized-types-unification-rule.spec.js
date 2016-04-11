@@ -3,7 +3,7 @@ import sinon from "sinon";
 
 import ParametrizedTypesUnificationRule from "../../../lib/type-inference/unification-rules/parametrized-types-unification-rule";
 import {NumberType, ParametrizedType, StringType} from "../../../lib/semantic-model/types/index";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 
 describe("ParametrizedTypesUnificationRule", function () {
 	let rule, context;

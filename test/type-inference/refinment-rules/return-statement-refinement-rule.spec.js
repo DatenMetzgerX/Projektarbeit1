@@ -4,19 +4,19 @@ import sinon from "sinon";
 
 import {ReturnStatementRefinementRule} from "../../../lib/type-inference/refinement-rules/return-statement-refinement-rule";
 import {FunctionType, TypeVariable, NumberType, VoidType} from "../../../lib/semantic-model/types";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
+import {Program} from "../../../lib/semantic-model/program";
+import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
 describe("ReturnStatementRefinementRule", function () {
-	let rule, context;
+	let rule, context, program;
 
 	beforeEach(function () {
-		context = new RefinementContext();
+		program = new Program();
+		context = new RefinementContext(null, new TypeInferenceContext(program));
 		sinon.stub(context, "infer");
 		sinon.stub(context, "unify");
-		sinon.stub(context, "getSymbol");
-		sinon.stub(context, "getType");
-		sinon.stub(context, "replaceType");
 		rule = new ReturnStatementRefinementRule();
 	});
 
@@ -55,11 +55,12 @@ describe("ReturnStatementRefinementRule", function () {
 			returnStatement.parent = functionDeclaration;
 
 			const functionSymbol = new Symbol("duplicate", SymbolFlags.Function);
-			context.getSymbol.withArgs(functionDeclaration.id).returns(functionSymbol);
+			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
 
 			const functionType = new FunctionType(null, [], new TypeVariable());
-			context.getType.withArgs(functionSymbol).returns(functionType);
+			context.setType(functionSymbol, functionType);
 
+			sinon.spy(context, "replaceType");
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
 			context.unify.returns(new NumberType());
 
@@ -70,9 +71,7 @@ describe("ReturnStatementRefinementRule", function () {
 			sinon.assert.calledWith(context.unify, functionType.returnType, sinon.match.instanceOf(NumberType), returnStatement);
 			sinon.assert.calledWith(context.replaceType, functionSymbol);
 
-			const replaceTypeArgs = context.replaceType.getCall(0).args;
-			const callback = replaceTypeArgs[1];
-			expect(callback(functionType)).to.have.property("returnType").that.is.an.instanceOf(NumberType);
+			expect(context.getType(functionSymbol)).to.have.property("returnType").that.is.an.instanceOf(NumberType);
 		});
 
 		it("sets the return type of the enclosing function to VoidType if the return statement has no argument (just return;)", function () {
@@ -82,11 +81,13 @@ describe("ReturnStatementRefinementRule", function () {
 			returnStatement.parent = functionDeclaration;
 
 			const functionSymbol = new Symbol("duplicate", SymbolFlags.Function);
-			context.getSymbol.withArgs(functionDeclaration.id).returns(functionSymbol);
+			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
 
 			const functionType = new FunctionType(null, [], new TypeVariable());
-			context.getType.withArgs(functionSymbol).returns(functionType);
+			context.setType(functionSymbol, functionType);
 			context.unify.returns(new VoidType());
+
+			sinon.spy(context, "replaceType");
 
 			// act
 			rule.refine(returnStatement, context);
@@ -94,10 +95,7 @@ describe("ReturnStatementRefinementRule", function () {
 			// assert
 			sinon.assert.calledWith(context.unify, functionType.returnType, sinon.match.instanceOf(VoidType), returnStatement);
 			sinon.assert.calledWith(context.replaceType, functionSymbol);
-
-			const replaceTypeArgs = context.replaceType.getCall(0).args;
-			const callback = replaceTypeArgs[1];
-			expect(callback(functionType)).to.have.property("returnType").that.is.an.instanceOf(VoidType);
+			expect(context.getType(functionSymbol)).to.have.property("returnType").that.is.an.instanceOf(VoidType);
 		});
 
 		it("the type of a return statement is void", function () {
@@ -107,10 +105,10 @@ describe("ReturnStatementRefinementRule", function () {
 			returnStatement.parent = functionDeclaration;
 
 			const functionSymbol = new Symbol("duplicate", SymbolFlags.Function);
-			context.getSymbol.withArgs(functionDeclaration.id).returns(functionSymbol);
+			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
 
 			const functionType = new FunctionType(null, [], new TypeVariable());
-			context.getType.withArgs(functionSymbol).returns(functionType);
+			context.setType(functionSymbol, functionType);
 
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
 			context.unify.returns(new NumberType());

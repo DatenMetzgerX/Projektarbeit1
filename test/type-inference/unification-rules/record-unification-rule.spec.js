@@ -2,7 +2,7 @@ import sinon from "sinon";
 import {expect} from "chai";
 
 import {RecordUnificationRule} from "../../../lib/type-inference/unification-rules/record-unification-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import {StringType, RecordType, NumberType, NullType, MaybeType} from "../../../lib/semantic-model/types";
 

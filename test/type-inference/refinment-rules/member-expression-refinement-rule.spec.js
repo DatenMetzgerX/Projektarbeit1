@@ -4,18 +4,19 @@ import * as t from "babel-types";
 
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
 import {StringType, RecordType, VoidType} from "../../../lib/semantic-model/types";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {MemberExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/member-expression-refinement-rule";
+import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
+import {Program} from "../../../lib/semantic-model/program";
 
 describe("MemberExpressionRefinementRule", function () {
-	let rule, context, memberExpression, sandbox;
+	let rule, context, program, memberExpression, sandbox;
 
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
-		context = new RefinementContext();
+		program = new Program();
+		context = new RefinementContext(null, new TypeInferenceContext(program));
 
-		sandbox.stub(context, "getType");
-		sandbox.stub(context, "getSymbol");
 		sandbox.stub(context, "unify");
 
 		rule = new MemberExpressionRefinementRule();
@@ -43,11 +44,11 @@ describe("MemberExpressionRefinementRule", function () {
 			const nameSymbol = new Symbol("name", SymbolFlags.Property);
 			personSymbol.addMember(nameSymbol);
 
-			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
-			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
+			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
+			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
 			const personType = RecordType.withProperties([[nameSymbol, new StringType()]]);
-			context.getType.withArgs(personSymbol).returns(personType);
+			context.setType(personSymbol, personType);
 
 			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
 
@@ -70,11 +71,11 @@ describe("MemberExpressionRefinementRule", function () {
 			const personSymbol = new Symbol("person", SymbolFlags.Variable);
 			personSymbol.addMember(nameSymbol);
 
-			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
-			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
+			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
+			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
 			const personType = new RecordType();
-			context.getType.withArgs(personSymbol).returns(personType);
+			context.setType(personSymbol, personType);
 
 			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
 
@@ -95,8 +96,8 @@ describe("MemberExpressionRefinementRule", function () {
 			const personSymbol = new Symbol("person", SymbolFlags.Variable);
 			personSymbol.addMember(nameSymbol);
 
-			context.getSymbol.withArgs(memberExpression.property).returns(nameSymbol);
-			context.getSymbol.withArgs(memberExpression.object).returns(personSymbol);
+			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
+			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
 			context.unify.withArgs(RecordType.ANY).returns(new RecordType());
 
