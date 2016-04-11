@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import traverse from "babel-traverse";
 import {parse} from "babylon";
-import "./chai-path-helper";
+import "./chai-path-helpe";
 import computeSuccessor from "../../lib/cfg/successor";
 
 describe("computeSuccessor", () => {
