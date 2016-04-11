@@ -2,7 +2,7 @@ import traverse from "babel-traverse";
 import {parse } from "babylon";
 import { expect } from "chai";
 
-import "./chai-path-helper";
+import "./chai-path-helpe";
 import computeFallThrough from "../../lib/cfg/fallthrough";
 
 describe("computeFallthrough", () => {
