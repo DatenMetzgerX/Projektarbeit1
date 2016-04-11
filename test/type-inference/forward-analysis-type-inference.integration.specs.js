@@ -116,6 +116,22 @@ describe("ForwardAnalysisTypeInference Integration Tests", function () {
 		expect(typeEnvironment.getType(y)).to.be.instanceOf(NumberType);
 	});
 
+	it("merges the type definitions from different branches", function () {
+		// act
+		const {typeEnvironment, scope} = inferTypes(`
+			let p1 = { name: null, age: null};
+			
+			if (!p1.name) {
+				p1.name = "Default";
+			}
+		`);
+
+		// assert
+		const p1 = scope.resolveSymbol("p1");
+		const p1Record = typeEnvironment.getType(p1);
+		expect(p1Record.getType(p1.getMember("name"))).to.be.instanceOf(MaybeType).and.to.have.property("of").that.is.an.instanceOf(StringType);
+	});
+
 	it("refines the types between each cfg step", function () {
 		// act
 		const {scope, ast} = inferTypes(`
