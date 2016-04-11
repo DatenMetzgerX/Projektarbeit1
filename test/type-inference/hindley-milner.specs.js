@@ -5,9 +5,10 @@ import {HindleyMilner} from "../../lib/type-inference/hindley-milner";
 import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 import {TypeUnificator} from "../../lib/type-inference/type-unificator";
 import {Program} from "../../lib/semantic-model/program";
-import {NumberType} from "../../lib/semantic-model/types";
+import {NumberType, TypeVariable, StringType, NullType, MaybeType} from "../../lib/semantic-model/types";
 import {RefinementContext} from "../../lib/type-inference/refinment-context";
 import {UnificationError} from "../../lib/type-inference/type-unificator";
+import {SymbolFlags, Symbol} from "../../lib/semantic-model/symbol";
 
 describe("HindleyMilner", function () {
 	let hindleyMilner, refineRule1, refineRule2, typeEnvironment, typeUnificator, program;
@@ -18,7 +19,7 @@ describe("HindleyMilner", function () {
 		typeEnvironment = new TypeEnvironment();
 		typeUnificator = new TypeUnificator();
 		program = new Program();
-		hindleyMilner = new HindleyMilner(typeEnvironment, program, typeUnificator, [refineRule1, refineRule2]);
+		hindleyMilner = new HindleyMilner(program, typeEnvironment, typeUnificator, [refineRule1, refineRule2]);
 	});
 
 	describe("refinementRules", function () {
@@ -87,6 +88,48 @@ describe("HindleyMilner", function () {
 			expect(result).to.equal(t1);
 		});
 
+		it("substitutes the type t1 with the returned type if they are not equal", function () {
+			// arrange
+			const t1 = new TypeVariable();
+			const t2 = new NumberType();
+			sinon.stub(typeUnificator, "unify").returns(t2);
+			sinon.spy(typeEnvironment, "substitute");
+
+			// act
+			hindleyMilner.unify(t1, t2, {});
+
+			// assert
+			sinon.assert.calledWith(typeEnvironment.substitute, t1, t2);
+		});
+
+		it("substitutes the type t2 with the returned type after unification if they are not equal", function () {
+			// arrange
+			const t2 = new TypeVariable();
+			const t1 = new NumberType();
+			sinon.stub(typeUnificator, "unify").returns(t1);
+			sinon.spy(typeEnvironment, "substitute");
+
+			// act
+			hindleyMilner.unify(t1, t2, {});
+
+			// assert
+			sinon.assert.calledWith(typeEnvironment.substitute, t2, t1);
+		});
+
+		it("substitutes the type variable t1 with the type variable t2 after unification", function () {
+			// arrange
+			const t1 = new TypeVariable();
+			const t2 = new TypeVariable();
+			sinon.stub(typeUnificator, "unify").returns(t2);
+			sinon.spy(typeEnvironment, "substitute");
+
+			// act
+			hindleyMilner.unify(t1, t2, {});
+
+			// assert
+			sinon.assert.calledWith(typeEnvironment.substitute, t1, t2);
+		});
+
 		it("catches the unification errors and propagates the error as type inference error", function () {
 			// arrange
 			const t1 = new NumberType();
@@ -95,6 +138,47 @@ describe("HindleyMilner", function () {
 
 			// act, assert
 			expect(() => hindleyMilner.unify(t1, t2, {})).to.throw("Type inference failure: Unification for type 'number' and 'number' failed because Ooops...");
+		});
+	});
+
+	describe("mergeWithTypeEnvironments", function () {
+		it("unions the definitions of both type environments into a new returned type environment", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = new TypeEnvironment().setType(name, new StringType());
+			const env2 = new TypeEnvironment().setType(age, new NumberType());
+
+			hindleyMilner.typeEnvironment = env1;
+
+			// act
+			const merged = hindleyMilner.mergeWithTypeEnvironments([env2], {});
+
+			// assert
+			expect(merged.getType(name)).to.be.instanceOf(StringType);
+			expect(merged.getType(age)).to.be.instanceOf(NumberType);
+		});
+
+		it("unifies the types of conflicting definitions for the same symbol", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = new TypeEnvironment().setType(name, new StringType());
+			const env2 = new TypeEnvironment().setType(age, new NumberType())
+				.setType(name, new NullType());
+
+			sinon.stub(typeUnificator, "unify").withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(new MaybeType(new StringType()));
+
+			hindleyMilner.typeEnvironment = env1;
+
+			// act
+			const merged = hindleyMilner.mergeWithTypeEnvironments([env2], {});
+
+			// assert
+			expect(merged.getType(name)).to.be.instanceOf(MaybeType);
+			expect(merged.getType(age)).to.be.instanceOf(NumberType);
 		});
 	});
 });

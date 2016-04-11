@@ -29,23 +29,6 @@ describe("TypeUnificator", function () {
 			// assert
 			expect(unified).to.equal(numberType);
 		});
-
-		it("unifies the resolved types and not on the passed in types", function () {
-			// arrange
-			const variable1 = new TypeVariable();
-			variable1.resolvesTo(new Type("number"));
-
-			const variable2 = new TypeVariable();
-			variable2.resolvesTo(new Type("number"));
-
-			const unificator = new TypeUnificator();
-
-			// act
-			const unified = unificator.unify(variable1, variable2);
-
-			// assert
-			expect(unified.name).to.equal("number");
-		});
 	});
 
 	describe("unifying type variable with base type", function () {
@@ -60,7 +43,6 @@ describe("TypeUnificator", function () {
 
 			// assert
 			expect(unified).to.equal(numberType);
-			expect(typeVariable.resolved).to.equal(numberType);
 		});
 
 		it("returns the base type when the first type is a type variable and the second is a base type", function () {
@@ -74,13 +56,12 @@ describe("TypeUnificator", function () {
 
 			// assert
 			expect(unified).to.equal(numberType);
-			expect(typeVariable.resolved).to.equal(numberType);
 		});
 
 		it("throws when the type variable is part of the other type definition with which it should be unified", function () {
 			// arrange
 			const typeUnificator = new TypeUnificator();
-			const typeVariable = new TypeVariable();
+			const typeVariable = new TypeVariable(1);
 			const maybeType = new MaybeType(typeVariable);
 
 			// act, assert
@@ -100,7 +81,6 @@ describe("TypeUnificator", function () {
 
 			// assert
 			expect(unified).to.equal(secondTypeVariable);
-			expect(typeVariable.resolved).to.equal(secondTypeVariable);
 		});
 	});
 
@@ -153,34 +133,6 @@ describe("TypeUnificator", function () {
 
 			// act, assert
 			expect(() => typeUnificator.unify(numberType, maybeType)).to.throw("Unification for type 'number' and 'Maybe<number>' failed because unification rule to use is ambiguous(Object,Object).");
-		});
-
-		it("throws if the two types are from the same kind (e.g. both Function) but have a different number of type parameters", function () {
-			// arrange
-			const f1 = new Type("Function", new NumberType());
-			const f2 = new Type("Function", new NumberType(), new NumberType());
-
-			// act, assert
-			expect(() => typeUnificator.unify(f1, f2)).to.throw("Unification for type 'Function<number>' and 'Function<number, number>' failed because the types have a different number of type parameters.");
-		});
-
-		it("unifies the type parameters of the two types if both types have the same number of type parameters", function () {
-			// arrange
-			const numberType = new NumberType();
-			const maybeType = new MaybeType(numberType);
-			const f1 = new Type("Function", maybeType);
-			const f2 = new Type("Function", numberType);
-
-			rule1.canUnify.withArgs(numberType, maybeType).returns(true);
-			rule1.unify.returns(maybeType);
-			rule2.canUnify.returns(false);
-
-			// act, resolves f2 to Function(maybe<number>)
-			const unified = typeUnificator.unify(f2, f1);
-
-			// assert
-			expect(unified).to.equal(f2);
-			expect(f2.typeParameters.get(0).resolved).to.equal(maybeType);
 		});
 	});
 });

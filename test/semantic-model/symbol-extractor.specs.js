@@ -1,9 +1,12 @@
-import {expect} from "chai";
+import {expect, Assertion} from "chai";
 import traverse from "babel-traverse";
 import {parse} from "babylon";
 
+import {SymbolFlags, Symbol} from "../../lib/semantic-model/symbol";
 import {SymbolExtractor} from "../../lib/semantic-model/symbol-extractor";
 import {Program} from "../../lib/semantic-model/program";
+import {createTraverseVisitorWrapper} from "../../lib/util";
+import {Scope} from "../../lib/semantic-model/scope";
 
 describe("SymbolExtractor", function () {
 	let program;
@@ -12,208 +15,709 @@ describe("SymbolExtractor", function () {
 		program = new Program();
 	});
 
-	describe("Block", function () {
-		it("assigns the scope to the node's scope property", function () {
+	describe("Program", function () {
+		it("assigns the global scope to the program statement", function () {
 			// act
 			const ast = extractSymbols("let x");
 
 			// assert
-			expect(ast.program.scope).not.to.be.undefined;
+			expect(ast.program.scope).to.equal(program.globalScope);
+		});
+	});
+
+	describe("Statements", function () {
+		describe("EmptyStatement", function () {
+			it("supports empty statements", function () {
+				// act, assert
+				expect(() => extractSymbols(";")).not.to.throw();
+			});
 		});
 
-		it("creates a new scope for a new block", function () {
-			// act
-			const ast = extractSymbols(`
+		describe("BlockStatement", function () {
+			it("creates a new scope and assigns it to the node", function () {
+				// act
+				const ast = extractSymbols(`
 				{
-					let z = 10;
+					let x = 10;
 				}
-			`);
+				`);
 
-			// assert
-			const programScope = ast.program.scope;
-			const blockScope = ast.program.body[0].scope;
+				// assert
+				expect(ast.program.body[0].scope).to.be.instanceOf(Scope);
+				expect(ast.program.body[0].scope).not.to.equal(program.globalScope);
+			});
 
-			expect(blockScope).not.to.be.undefined.and.not.to.equal(programScope);
+			it("leaves the child scope after visiting the block statement", function () {
+				// act
+				const ast = extractSymbols(`
+				{
+				}
+				let x = 10;
+				`);
+
+				// assert
+				expect(ast.program.body[0].scope).not.to.have.ownSymbol("x");
+				expect(program.globalScope).to.have.ownSymbol("x");
+			});
+		});
+
+		describe("ExpressionStatement", function () {
+			it("registers identifiers directly used inside the expression of an expression statement in the scope", function () {
+				// act
+				const ast = extractSymbols("x");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+			});
+
+			it("assigns the symbol with the identifier node for identifiers directly used inside of an expression statement", function () {
+				// act
+				const ast = extractSymbols("x");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression)).not.to.be.undefined;
+			});
+		});
+
+		describe("IfStatement", function () {
+			it("registers the identifiers used in the test expression of the if statement in the current scope", function () {
+				// act
+				const ast = extractSymbols("if (x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+			});
+
+			it("assigns the symbol to the identifier node in the test expression", function () {
+				// act
+				const ast = extractSymbols("if (x) {}");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].test)).not.to.be.undefined;
+			});
+		});
+
+		describe("LabeledStatement", function () {
+			it("is supported", function () {
+				// act, assert
+				expect(() => extractSymbols("x: y;")).not.to.throw();
+			});
+		});
+
+		describe("BreakStatement", function () {
+			it("is supported", function () {
+				// act, assert
+				expect(() => extractSymbols(`
+				for (let x = 0; x < 1; x++) {
+					break;
+				}
+			`)).not.to.throw();
+			});
+		});
+
+		describe("ContinueStatement", function () {
+			it("is supported", function () {
+				// act, assert
+				expect(() => extractSymbols(`
+				for (let x = 0; x < 1; x++) {
+					continue;
+				}
+				`)).not.to.throw();
+			});
+		});
+
+		describe("ReturnStatement", function () {
+			it("adds an identifier used in the return statement to the current scope", function () {
+				// act
+				const ast = extractSymbols("function x() { return y; }");
+
+				// assert
+				const scope = ast.program.body[0].body.scope;
+				expect(scope).to.have.ownSymbol("y");
+			});
+
+			it("assigns the symbol to the identifier used directly in the return statement", function () {
+				// act
+				const ast = extractSymbols("function x() { return y; }");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].body.body[0].argument)).not.to.be.undefined;
+			});
+		});
+
+		describe("ForStatement", function () {
+			it("adds identifiers used in the init, test or update expression to the current scope", function () {
+				// act
+				extractSymbols("for (x;y;z) {}");
+
+				// assert
+				expect(program.globalScope).to.have.ownSymbol("x");
+				expect(program.globalScope).to.have.ownSymbol("y");
+				expect(program.globalScope).to.have.ownSymbol("z");
+			});
+
+			it("assigns the symbols with the identifiers used in the init, test or update expression", function () {
+				// act
+				const ast = extractSymbols("for (x;y;z) {}");
+
+				// assert
+				const forStatement = ast.program.body[0];
+				expect(program.symbolTable.getSymbol(forStatement.init)).to.be.defined;
+				expect(program.symbolTable.getSymbol(forStatement.test)).to.be.defined;
+				expect(program.symbolTable.getSymbol(forStatement.update)).to.be.defined;
+			});
 		});
 	});
 
-	describe("VariableDeclarator", function () {
-		it("creates a symbol in the current scope for a declared variable", function () {
-			// act
-			const ast = extractSymbols("let x = 10");
+	describe("Expressions", function () {
+		describe("FunctionExpression", function () {
+			it("creates a new child scope and assigns it to the function node", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				`);
 
-			// assert
-			const scope = ast.program.scope;
-			expect(scope.resolveSymbol("x")).to.have.property("name").that.equals("x");
+				// assert
+				expect(ast.program.body[0].scope).to.be.ok;
+				expect(ast.program.body[0].scope).not.to.equal(program.globalScope);
+			});
+
+			it("leaves the child scope after the function declaration", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				let x = 10;
+				`);
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+			});
+
+			it("creates a symbol for each parameter in the scope of the function", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(current, intend) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				const scope = ast.program.body[0].scope;
+
+				expect(scope).to.have.ownSymbol("current");
+				expect(scope).to.have.ownSymbol("intend");
+			});
+
+			it("sets the declaration for a parameter symbol to the identifier node of the parameter", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(current, intend) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				const scope = ast.program.body[0].scope;
+
+				expect(scope.getOwnSymbol("current")).to.have.property("declaration", ast.program.body[0].params[0]);
+			});
+
+			it("sets the flags for the parameter to Variable", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(current, intend) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				const scope = ast.program.body[0].scope;
+
+				expect(scope.getOwnSymbol("current")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("does not create a symbol for the parameters in the outer scope", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				expect(ast.program.scope).not.to.have.ownSymbol("count");
+			});
+
+			it("creates a symbol for the function in the outer scope", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("dump");
+			});
+
+			it("sets the declaration of the function symbol to the FunctionDeclaration node", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				expect(ast.program.scope.getOwnSymbol("dump")).to.have.property("declaration", ast.program.body[0]);
+			});
+
+			it("sets the Function flag for the FunctionDeclaration", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				expect(ast.program.scope.getOwnSymbol("dump")).to.have.property("flags", SymbolFlags.Function);
+			});
+
+			it("does not create a symbol for the function in the function scope", function () {
+				// act
+				const ast = extractSymbols(`
+				function dump(count) {
+					console.log(count);
+				}
+				`);
+
+				// assert
+				expect(ast.program.body[0].scope).not.to.have.ownSymbol("dump");
+			});
 		});
 
-		it("sets the declarator node as declaration of the symbol", function () {
-			// act
-			const ast = extractSymbols("let x = 10");
+		describe("VariableDeclarator", function () {
+			it("creates a variable symbol in the current scope", function () {
+				// act
+				const ast = extractSymbols("let x = 10");
 
-			// assert
-			const scope = ast.program.scope;
-			expect(scope.resolveSymbol("x")).to.have.property("declaration").that.equals(ast.program.body[0].declarations[0]);
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("sets the declarator node as declaration of the symbol", function () {
+				// act
+				const ast = extractSymbols("let x = 10");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope.getOwnSymbol("x")).to.have.property("declaration", ast.program.body[0].declarations[0]);
+			});
+
+			it("sets the valueDeclaration of the symbol the the valueDeclarator.init flag, if present", function () {
+				// act
+				const ast = extractSymbols("let x = 10");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope.getOwnSymbol("x")).to.have.property("valueDeclaration", ast.program.body[0].declarations[0].init);
+			});
+
+			it("uses the same symbol as identifiers used before with the same name", function () {
+				// act
+				const ast = extractSymbols("x = 5; let x = 10;");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0])).to.equal(program.symbolTable.getSymbol(ast.program.body[1]));
+			});
+
+			it("creates a symbol for identifiers used in the init expression", function () {
+				// act
+				const ast = extractSymbols("let x = y;");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("y");
+			});
+
+			it("associates the symbol with the identifier node used in the init expression", function () {
+				// act
+				const ast = extractSymbols("let x = y;");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].declarations[0].init)).to.have.property("flags", SymbolFlags.Variable);
+			});
 		});
 
-		it("sets the value declaration of the symbol if the value is initialized in the declarator", function () {
-			// act
-			const ast = extractSymbols("let x = 10");
+		describe("ObjectExpression", function () {
+			it("sets the symbol of the object expression node to the symbol of the variable declaration when the object is directly assigned in a variable declarator", function () {
+				// act
+				const ast = extractSymbols("let person = { name: 'Micha' };");
 
-			// assert
-			const scope = ast.program.scope;
-			expect(scope.resolveSymbol("x")).to.have.property("valueDeclaration").that.equals(ast.program.body[0].declarations[0].init);
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				const personSymbol = program.symbolTable.getSymbol(variableDeclarator.id);
+				const objectSymbol = program.symbolTable.getSymbol(variableDeclarator.init);
+
+				expect(objectSymbol).to.be.defined;
+				expect(objectSymbol).to.equal(personSymbol);
+			});
+
+			it("sets the symbol of the object expression node to the symbol of the assignee of an assignment expression when the object is assigned in an assignment expression", function () {
+				const ast = extractSymbols("person = { name: 'Micha' };");
+
+				// assert
+				const assignmentExpression= ast.program.body[0].expression;
+				const personSymbol = program.symbolTable.getSymbol(assignmentExpression.left);
+				const objectSymbol = program.symbolTable.getSymbol(assignmentExpression.right);
+
+				expect(objectSymbol).to.be.defined;
+				expect(objectSymbol).to.equal(personSymbol);
+			});
+
+			it("sets the symbol of the object expression to the member id to which it is assigned if the object expression is used in an object property", function () {
+				const ast = extractSymbols("let person = { address: { street: 'Wunderschoen 12' } };");
+
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				const address = variableDeclarator.init.properties[0];
+				const addressSymbol = program.symbolTable.getSymbol(address);
+				const addressObjectSymbol = program.symbolTable.getSymbol(address.value);
+
+				expect(addressObjectSymbol).to.be.defined;
+				expect(addressObjectSymbol).to.equal(addressSymbol);
+			});
+
+			it("creates a new symbol for an object that is directly passed to a function call", function () {
+				const ast = extractSymbols("printAddress({ street: 'Wunderschoen 12' });");
+
+				// assert
+				const callExpression = ast.program.body[0].expression;
+				const address = callExpression.arguments[0];
+				const addressSymbol = program.symbolTable.getSymbol(address);
+
+				expect(addressSymbol).to.be.defined;
+			});
 		});
-	});
 
-	describe("AssignmentExpression", function () {
-		it("adds a member to the symbol to which the member is assigned for a member assignment expression", function () {
-			// act
-			const ast = extractSymbols(`
-				let x = 12;
-				x.y = 12;
-			`);
+		describe("ObjectProperty", function () {
+			it("adds a symbol with flags Property and declaration equal to the property node as member to the symbol of the object expression", function () {
+				// act
+				const ast = extractSymbols("let person = { name: 'Micha' };");
 
-			// assert
-			const x = ast.program.scope.resolveSymbol("x");
-			const y = x.getMember("y");
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				const objectSymbol = program.symbolTable.getSymbol(variableDeclarator.init);
 
-			expect(y).to.have.property("name").that.equals("y");
+				expect(objectSymbol).to.have.symbolMember("name");
+				expect(objectSymbol.getMember("name")).to.have.property("flags", SymbolFlags.Property);
+				expect(objectSymbol.getMember("name")).to.have.property("declaration", variableDeclarator.init.properties[0]);
+			});
+
+			it("does not add the symbol of the member to the current scope", function () {
+				// act
+				const ast = extractSymbols("let person = { name: 'Micha' };");
+
+				// assert
+				expect(ast.program.scope).not.to.have.ownSymbol("name");
+			});
+
+			it("associates the symbol with the property node", function () {
+				// act
+				const ast = extractSymbols("let person = { name: 'Micha' };");
+
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				expect(program.symbolTable.getSymbol(variableDeclarator.init.properties[0])).to.be.defined;
+			});
 		});
 
-		it("adds a member to the symbol of the nearest parent symbol for an assignment expression", function () {
-			// act
-			const ast = extractSymbols(`
+		describe("ObjectMethod", function () {
+			it("adds a symbol with flags Property and declaration equal to the property node as member to the symbol of the object expression", function () {
+				// act
+				const ast = extractSymbols("let person = { name() {} };");
+
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				const objectSymbol = program.symbolTable.getSymbol(variableDeclarator.init);
+
+				expect(objectSymbol).to.have.symbolMember("name");
+				expect(objectSymbol.getMember("name")).to.have.property("flags", SymbolFlags.Property);
+				expect(objectSymbol.getMember("name")).to.have.property("declaration", variableDeclarator.init.properties[0]);
+			});
+
+			it("associates the symbol with the property node", function () {
+				// act
+				const ast = extractSymbols("let person = { name() {} };");
+
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				expect(program.symbolTable.getSymbol(variableDeclarator.init.properties[0])).to.be.defined;
+			});
+		});
+
+		describe("UnaryExpression", function () {
+			it("creates a symbol for the identifier used in the argument to the current scope", function () {
+				// act
+				const ast = extractSymbols("!x");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("associates the argument node with the symbol", function () {
+				// act
+				const ast = extractSymbols("!x");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.argument)).to.be.defined;
+			});
+		});
+
+		describe("BinaryExpression", function () {
+			it("creates a symbol in the current scope for the identifiers used in the left and right hand side", function () {
+				// act
+				const ast = extractSymbols("x + y;");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+
+				expect(ast.program.scope).to.have.ownSymbol("y");
+				expect(ast.program.scope.getOwnSymbol("y")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("assigns the symbol for the left and right hand side with the corresponding identifier nodes", function () {
+				// act
+				const ast = extractSymbols("x + y;");
+
+				// assert
+				const binaryExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(binaryExpression.left)).to.be.equal(ast.program.scope.getOwnSymbol("x"));
+				expect(program.symbolTable.getSymbol(binaryExpression.right)).to.be.equal(ast.program.scope.getOwnSymbol("y"));
+			});
+		});
+
+		describe("AssignmentExpression", function () {
+			it("creates a symbol for the assignee identifier node and associates it with the assignee", function () {
+				// act
+				const ast = extractSymbols("x = 10;");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.left)).to.equal(ast.program.scope.getOwnSymbol("x"));
+			});
+
+			it("creates a symbol for the member of the assignee  and associates it with the assignee if the assignee is a member expression", function () {
+				// act
+				const ast = extractSymbols("x.y = 10;");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.symbolMember("y");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.left.property)).to.equal(ast.program.scope.getOwnSymbol("x").getMember("y"));
+			});
+
+			it("extracts the identifiers used in the right hand side of the assignment expression", function () {
+				// act
+				const ast = extractSymbols("x.y = z");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("z");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.right)).to.equal(ast.program.scope.getOwnSymbol("z"));
+			});
+		});
+
+		describe("UpdateExpression", function () {
+			it("creates a symbol for the identifier used in the argument to the current scope", function () {
+				// act
+				const ast = extractSymbols("++x");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("associates the argument node with the symbol", function () {
+				// act
+				const ast = extractSymbols("!x");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.argument)).to.be.defined;
+			});
+		});
+
+		describe("LogicalExpression", function () {
+			it("creates a symbol for the identifiers used in the left and right hand side to the current scope", function () {
+				// act
+				const ast = extractSymbols("x && y");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+
+				expect(ast.program.scope).to.have.ownSymbol("y");
+				expect(ast.program.scope.getOwnSymbol("y")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("associates the left and right hand side with the corresponding symbols", function () {
+				// act
+				const ast = extractSymbols("x && y");
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.left)).to.be.equal(program.globalScope.getOwnSymbol("x"));
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.right)).to.be.equal(program.globalScope.getOwnSymbol("y"));
+			});
+		});
+
+		describe("CallExpression", function () {
+			it("creates a symbol for each identifier used in the arguments", function () {
+				// act
+				const ast = extractSymbols("console.log(x, y, z)");
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
+				expect(ast.program.scope.getOwnSymbol("x")).to.have.property("flags", SymbolFlags.Variable);
+
+				expect(ast.program.scope).to.have.ownSymbol("y");
+				expect(ast.program.scope.getOwnSymbol("y")).to.have.property("flags", SymbolFlags.Variable);
+
+				expect(ast.program.scope).to.have.ownSymbol("z");
+				expect(ast.program.scope.getOwnSymbol("z")).to.have.property("flags", SymbolFlags.Variable);
+			});
+
+			it("associates the argument nodes with the corresponding symbols", function () {
+				// act
+				const ast = extractSymbols("console.log(x, y)");
+
+				// assert
+				const args = ast.program.body[0].expression.arguments;
+				expect(program.symbolTable.getSymbol(args[0])).to.be.equal(program.globalScope.getOwnSymbol("x"));
+				expect(program.symbolTable.getSymbol(args[1])).to.be.equal(program.globalScope.getOwnSymbol("y"));
+			});
+		});
+
+		describe("MemberExpression", function () {
+			it("creates a symbol for the member on the object symbol", function () {
+				// act
+				const ast = extractSymbols(`
 				let x = {};
-				x.y = {};
-				x.y.z = 10;
-			`);
+				x.y;
+				`);
 
-			// assert
-			const x = ast.program.scope.resolveSymbol("x");
-			const y = x.getMember("y");
-			const z = y.getMember("z");
+				// assert
+				const x = ast.program.scope.getOwnSymbol("x");
+				expect(x).to.have.symbolMember("y");
+				expect(x.getMember("y")).to.have.property("flags", SymbolFlags.Property);
+			});
 
-			expect(z).to.have.property("name").that.equals("z");
-		});
+			it("creates symbols for nested members", function () {
+				const ast = extractSymbols("x.y.z = 10");
 
-		it("adds unknown intermediate members", function () {
-			// act
-			const ast = extractSymbols(`
-				let x = {};
-				x.y.z = 10;
-			`);
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("x");
 
-			// assert
-			const x = ast.program.scope.resolveSymbol("x");
-			const y = x.getMember("y");
-			const z = y.getMember("z");
+				const x = ast.program.scope.getOwnSymbol("x");
+				expect(x).to.have.symbolMember("y");
 
-			expect(z).to.have.property("name").that.equals("z");
-		});
+				const y = x.getMember("y");
+				expect(y).to.have.symbolMember("z");
+			});
 
-		it("can handle access to not yet declared identifiers", function () {
-			// act
-			const ast = extractSymbols(`
-				x.y = 10;
-				var x;
-			`);
+			it("associates the property node of the member expression with the symbol of the member", function () {
+				// act
+				const ast = extractSymbols("x.y");
 
-			// assert
-			const x = ast.program.scope.resolveSymbol("x");
-			const y = x.getMember("y");
+				// assert
+				const memberExpression = ast.program.body[0].expression;
+				const x = ast.program.scope.getOwnSymbol("x");
+				expect(program.symbolTable.getSymbol(memberExpression.property)).to.equal(x.getMember("y"));
+			});
 
-			expect(y).to.have.property("name").that.equals("y");
-		});
+			it("associates the object node of the member expression with the symbol of the object", function () {
+				// act
+				const ast = extractSymbols("x.y");
 
-		it("creates a symbol for assigned variables", function () {
-			// act
-			const ast = extractSymbols(`
-				x = 10;
-			`);
-
-			// assert
-			const x = ast.program.scope.resolveSymbol("x");
-
-			expect(x).to.have.property("name").that.equals("x");
-			expect(x).to.have.property("declaration").that.is.null;
+				// assert
+				const memberExpression = ast.program.body[0].expression;
+				const x = ast.program.scope.getOwnSymbol("x");
+				expect(program.symbolTable.getSymbol(memberExpression.object)).to.equal(x);
+			});
 		});
 	});
 
-	describe("FunctionExpression", function () {
-		it("creates a new scope", function () {
-			// act
-			const ast = extractSymbols(`
-			function dump(count) {
-				console.log(count);
-			}
-			`);
-
-			// assert
-			expect(ast.program.body[0].scope).to.be.ok;
+	describe("Miscellaneous", function () {
+		describe("StringLiteral", function () {
+			it("are supported", function () {
+				// act, assert
+				expect(() => extractSymbols("x = 'test'")).not.to.throw();
+			});
 		});
 
-		it("creates a symbol for each parameter", function () {
-			// act
-			const ast = extractSymbols(`
-			function dump(count) {
-				console.log(count);
-			}
-			`);
-
-			// assert
-			const x = ast.program.body[0].scope.resolveSymbol("count");
-
-			expect(ast.program.body[0].scope.hasOwnSymbol("count")).to.be.true;
-			expect(x).to.have.property("name").that.equals("count");
-			expect(x).to.have.property("declaration").that.is.equal(ast.program.body[0]);
+		describe("NumericLiteral", function () {
+			it("are supported", function () {
+				// act, assert
+				expect(() => extractSymbols("5")).not.to.throw();
+			});
 		});
 
-		it("does not create a symbol for the parameters in the outer scope", function () {
-			// act
-			const ast = extractSymbols(`
-			function dump(count) {
-				console.log(count);
-			}
-			`);
-
-			// assert
-			expect(ast.program.scope.hasOwnSymbol("count")).to.be.false;
+		describe("BooleanLiteral", function () {
+			it("are supported", function () {
+				// act, assert
+				expect(() => extractSymbols("true")).not.to.throw();
+			});
 		});
 
-		it("creates a symbol for the function", function () {
-			// act
-			const ast = extractSymbols(`
-			function dump(count) {
-				console.log(count);
-			}
-			`);
-
-			// assert
-			const dump = ast.program.scope.resolveSymbol("dump");
-			expect(ast.program.scope.hasOwnSymbol("dump")).to.be.true;
-			expect(dump).to.have.property("name").that.equals("dump");
-			expect(dump).to.have.property("declaration").that.equals(ast.program.body[0]);
-		});
-
-		it("does not create a symbol for the function in the function scope", function () {
-			// act
-			const ast = extractSymbols(`
-			function dump(count) {
-				console.log(count);
-			}
-			`);
-
-			// assert
-			expect(ast.program.body[0].scope.hasOwnSymbol("dump")).to.be.false;
+		describe("NullLiteral", function () {
+			it("is supported", function () {
+				// act, assert
+				expect(() => extractSymbols("null")).not.to.throw();
+			});
 		});
 	});
 
 	function extractSymbols(source) {
 		const ast = parse(source);
 
-		const symbolExtractor = new SymbolExtractor(program);
-		traverse(ast, symbolExtractor.visitor, null, symbolExtractor.state);
+		const symbolExtractor = createTraverseVisitorWrapper(new SymbolExtractor(program));
+		traverse(ast, symbolExtractor);
 		return ast;
 	}
+});
+
+/**
+ * Chai helper for testing if a scope contains a symbol with the given name
+ */
+Assertion.addMethod("ownSymbol", function (name) {
+	new Assertion(this._obj).to.be.instanceOf(Scope);
+
+
+	this.assert(
+		this._obj.hasOwnSymbol(name),
+		"expected #{this} to be have own symbol #{exp} but got #{act}",
+		"expected #{this} not to contain own symbol #{act}",
+		name, "[" + [...this._obj.symbols].join(", ") + "]"
+	);
+});
+
+Assertion.addMethod("symbolMember", function (name) {
+	new Assertion(this._obj).to.be.instanceOf(Symbol);
+
+
+	this.assert(
+		this._obj.hasMember(name),
+		"expected #{this} to have member #{exp} but got #{act}",
+		"expected #{this} not to contain member #{act}",
+		name, "[" + [...this._obj.members.values()].join(", ") + "]"
+	);
 });

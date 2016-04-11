@@ -7,6 +7,7 @@ import {cfgToDot} from "../../lib/cfg/dot";
 import {parse} from "babylon";
 import traverse from "babel-traverse";
 import CfgBuilder from "../../lib/cfg/cfg-builder";
+import {createTraverseVisitorWrapper} from "../../lib/util";
 
 describe("CfgBuilder integration tests", () => {
 	const testCasesDirectory = "./test/cfg/test-cases";
@@ -24,8 +25,7 @@ describe("CfgBuilder integration tests", () => {
 				const builder = new CfgBuilder(ast);
 
 				// act
-				builder.init();
-				traverse(ast, builder.visitor, null, builder.state);
+				traverse(ast, createTraverseVisitorWrapper(builder));
 
 				// assert
 				const dot = cfgToDot(ast.cfg, {stable: true});

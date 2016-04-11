@@ -91,10 +91,9 @@ describe("FunctionRefinementRule", function () {
 			const refined = rule.refine(functionDeclaration, context);
 
 			// assert
-			expect(refined.typeParameters.size).to.equal(4);
-			expect(refined.typeParameters.get(0)).to.be.instanceOf(NullType); // will be changed when the this parameter will be implemented
-			expect(refined.typeParameters.get(2)).to.be.instanceOf(TypeVariable);
-			expect(refined.typeParameters.get(3)).to.be.instanceOf(TypeVariable);
+			expect(refined.thisType).to.be.instanceOf(NullType); // will be changed when the this parameter will be implemented
+			expect(refined.params[0]).to.be.instanceOf(TypeVariable);
+			expect(refined.params[1]).to.be.instanceOf(TypeVariable);
 
 			sinon.assert.calledWithExactly(context.setType, x, sinon.match.instanceOf(TypeVariable));
 			sinon.assert.calledWithExactly(context.setType, y, sinon.match.instanceOf(TypeVariable));

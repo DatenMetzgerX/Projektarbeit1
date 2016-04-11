@@ -4,6 +4,7 @@ import {expect} from "chai";
 
 import {BRANCHES} from "../../lib/cfg/control-flow-graph";
 import CfgBuilder from "../../lib/cfg/cfg-builder";
+import {createTraverseVisitorWrapper} from "../../lib/util";
 
 describe("CfgBuilder", function () {
 	it("returns a cfg", function () {
@@ -856,8 +857,7 @@ function toCfg (code) {
 	const ast = parse(code);
 
 	const builder = new CfgBuilder(ast);
-	builder.init();
-	traverse(ast, builder.visitor, null, builder.state);
+	traverse(ast, createTraverseVisitorWrapper(builder));
 
 	return { cfg: ast.cfg, ast: ast};
 }

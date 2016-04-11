@@ -16,6 +16,7 @@ describe("ReturnStatementRefinementRule", function () {
 		sinon.stub(context, "unify");
 		sinon.stub(context, "getSymbol");
 		sinon.stub(context, "getType");
+		sinon.stub(context, "replaceType");
 		rule = new ReturnStatementRefinementRule();
 	});
 
@@ -67,6 +68,11 @@ describe("ReturnStatementRefinementRule", function () {
 
 			// assert
 			sinon.assert.calledWith(context.unify, functionType.returnType, sinon.match.instanceOf(NumberType), returnStatement);
+			sinon.assert.calledWith(context.replaceType, functionSymbol);
+
+			const replaceTypeArgs = context.replaceType.getCall(0).args;
+			const callback = replaceTypeArgs[1];
+			expect(callback(functionType)).to.have.property("returnType").that.is.an.instanceOf(NumberType);
 		});
 
 		it("sets the return type of the enclosing function to VoidType if the return statement has no argument (just return;)", function () {
@@ -87,6 +93,11 @@ describe("ReturnStatementRefinementRule", function () {
 
 			// assert
 			sinon.assert.calledWith(context.unify, functionType.returnType, sinon.match.instanceOf(VoidType), returnStatement);
+			sinon.assert.calledWith(context.replaceType, functionSymbol);
+
+			const replaceTypeArgs = context.replaceType.getCall(0).args;
+			const callback = replaceTypeArgs[1];
+			expect(callback(functionType)).to.have.property("returnType").that.is.an.instanceOf(VoidType);
 		});
 
 		it("the type of a return statement is void", function () {

@@ -2,6 +2,16 @@ import {expect} from "chai";
 import {TypeVariable} from "../../../lib/semantic-model/types/index";
 
 describe("TypeVariable", function () {
+	describe("fresh", function () {
+		it("returns the same instance", function () {
+			// arrange
+			const original = new TypeVariable();
+
+			// act, assert
+			expect(original.fresh()).to.equal(original);
+		});
+	});
+
 	describe("isTypeVariable", function () {
 		it("returns true", function () {
 			expect(new TypeVariable().isTypeVariable).to.be.true;
