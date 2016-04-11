@@ -3,15 +3,18 @@ import {expect} from "chai";
 import * as t from "babel-types";
 
 import {VariableDeclarationRefinementRule} from "../../../lib/type-inference/refinement-rules/variable-declaration-refinement-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import {StringType, VoidType, NumberType} from "../../../lib/semantic-model/types";
+import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
+import {Program} from "../../../lib/semantic-model/program";
 
 describe("VariableDeclarationRefinementRule", function () {
-	let rule, context;
+	let rule, context, program;
 
 	beforeEach(function () {
-		context = new RefinementContext();
+		program = new Program();
+		context = new RefinementContext(null, new TypeInferenceContext(program));
 		rule = new VariableDeclarationRefinementRule();
 	});
 
@@ -43,11 +46,11 @@ describe("VariableDeclarationRefinementRule", function () {
 				// arrange
 				const identifier = t.identifier("x");
 				const declarator = t.variableDeclarator(identifier, t.stringLiteral("abcd"));
-				const symbol = new Symbol("x", SymbolFlags.Variable);
 
-				sinon.stub(context, "getSymbol").withArgs(identifier).returns(symbol);
+				const symbol = new Symbol("x", SymbolFlags.Variable);
+				program.symbolTable.setSymbol(identifier, symbol);
+
 				sinon.stub(context, "infer").returns(new StringType());
-				sinon.stub(context, "setType");
 
 				// act
 				const refined = rule.refine(declarator, context);
@@ -61,33 +64,31 @@ describe("VariableDeclarationRefinementRule", function () {
 				const identifier = t.identifier("x");
 				const declarator = t.variableDeclarator(identifier, t.stringLiteral("abcd"));
 				const symbol = new Symbol("x", SymbolFlags.Variable);
+				program.symbolTable.setSymbol(identifier, symbol);
 
-				sinon.stub(context, "getSymbol").returns(symbol);
 				sinon.stub(context, "infer").returns(new StringType());
-				sinon.stub(context, "setType");
 
 				// act
 				rule.refine(declarator, context);
 
 				// assert
-				sinon.assert.calledWith(context.setType, symbol, sinon.match.instanceOf(StringType));
+				expect(context.getType(symbol)).to.be.instanceOf(StringType);
 			});
 
 			it("returns VoidType if the declarator has no init expression", function () {
 				// arrange
 				const identifier = t.identifier("x");
 				const declarator = t.variableDeclarator(identifier);
-				const symbol = new Symbol("x", SymbolFlags.Variable);
 
-				sinon.stub(context, "getSymbol").withArgs(identifier).returns(symbol);
-				sinon.stub(context, "setType");
+				const symbol = new Symbol("x", SymbolFlags.Variable);
+				program.symbolTable.setSymbol(identifier, symbol);
 
 				// act
 				const refined = rule.refine(declarator, context);
 
 				// assert
 				expect(refined).to.be.instanceOf(VoidType);
-				sinon.assert.calledWith(context.setType, symbol, sinon.match.instanceOf(VoidType));
+				expect(context.getType(symbol)).to.be.instanceOf(VoidType);
 			});
 		});
 

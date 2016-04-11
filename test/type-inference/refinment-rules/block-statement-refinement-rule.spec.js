@@ -24,7 +24,7 @@ describe("BlockStatementRefinementRule", function () {
 
 	describe("refine", function () {
 		it("returns VoidType", function () {
-			expect(rule.refine(blockStatement, context)).to.be.instanceOf(VoidType);
+			expect(rule.refine(blockStatement, null)).to.be.instanceOf(VoidType);
 		});
 	});
 });

@@ -5,14 +5,15 @@ import sinon from "sinon";
 import BINARY_OPERATORS from "../../../lib/type-inference/refinement-rules/binary-operators";
 import {BinaryExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/binary-expression-refinement-rule";
 import {NullType, NumberType} from "../../../lib/semantic-model/types";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
 describe("BinaryExpressionRefinementRule", function () {
-	let rule, context, sandbox;
+	let rule, context, sandbox, program;
 
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
-		context = new RefinementContext();
+		context = new RefinementContext(null, new TypeInferenceContext(program));
 		sandbox.stub(context, "infer");
 		rule = new BinaryExpressionRefinementRule();
 	});

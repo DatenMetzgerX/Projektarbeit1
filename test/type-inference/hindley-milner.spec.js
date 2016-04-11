@@ -6,20 +6,20 @@ import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 import {TypeUnificator} from "../../lib/type-inference/type-unificator";
 import {Program} from "../../lib/semantic-model/program";
 import {NumberType, TypeVariable, StringType, NullType, MaybeType} from "../../lib/semantic-model/types";
-import {RefinementContext} from "../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../lib/type-inference/refinement-context";
 import {UnificationError} from "../../lib/type-inference/type-unificator";
 import {SymbolFlags, Symbol} from "../../lib/semantic-model/symbol";
+import {TypeInferenceContext} from "../../lib/type-inference/type-inference-context";
 
 describe("HindleyMilner", function () {
-	let hindleyMilner, refineRule1, refineRule2, typeEnvironment, typeUnificator, program;
+	let hindleyMilner, refineRule1, refineRule2, typeUnificator, program;
 
 	beforeEach(function () {
+		program = new Program();
 		refineRule1 = { canRefine: sinon.stub(), refine: sinon.stub() };
 		refineRule2 = { canRefine: sinon.stub(), refine: sinon.stub() };
-		typeEnvironment = new TypeEnvironment();
 		typeUnificator = new TypeUnificator();
-		program = new Program();
-		hindleyMilner = new HindleyMilner(program, typeEnvironment, typeUnificator, [refineRule1, refineRule2]);
+		hindleyMilner = new HindleyMilner(typeUnificator, [refineRule1, refineRule2]);
 	});
 
 	describe("refinementRules", function () {
@@ -29,7 +29,7 @@ describe("HindleyMilner", function () {
 
 		it("loads the refinment rules from the refinment-rules directory by default", function () {
 			// act
-			hindleyMilner = new HindleyMilner(typeEnvironment, program, typeUnificator);
+			hindleyMilner = new HindleyMilner(typeUnificator);
 
 			// assert
 			expect(hindleyMilner.refinementRules.toArray()).not.to.be.empty;
@@ -45,7 +45,7 @@ describe("HindleyMilner", function () {
 			refineRule2.refine.returns(new NumberType());
 
 			// act
-			const inferred = hindleyMilner.infer(node);
+			const inferred = hindleyMilner.infer(node, new TypeInferenceContext(program));
 
 			// assert
 			expect(inferred).to.be.instanceOf(NumberType);
@@ -59,7 +59,7 @@ describe("HindleyMilner", function () {
 			refineRule2.canRefine.returns(false);
 
 			// act, assert
-			expect(() => hindleyMilner.infer(node)).to.throw("Type inference failure: There exists no refinement rule that can handle a node of type undefined");
+			expect(() => hindleyMilner.infer(node, new TypeInferenceContext(program))).to.throw("Type inference failure: There exists no refinement rule that can handle a node of type undefined");
 		});
 
 		it("throws an exception if more then one rule can handle the given node", function () {
@@ -69,7 +69,7 @@ describe("HindleyMilner", function () {
 			refineRule2.canRefine.returns(true);
 
 			// act, assert
-			expect(() => hindleyMilner.infer(node)).to.throw("Type inference failure: The refinement rule to use for a node of type undefined is ambiguous");
+			expect(() => hindleyMilner.infer(node, new TypeInferenceContext(program))).to.throw("Type inference failure: The refinement rule to use for a node of type undefined is ambiguous");
 		});
 	});
 
@@ -81,7 +81,7 @@ describe("HindleyMilner", function () {
 			sinon.stub(typeUnificator, "unify").returns(t1);
 
 			// act
-			const result = hindleyMilner.unify(t1, t2, {});
+			const result = hindleyMilner.unify(t1, t2, {}, new TypeInferenceContext(program));
 
 			// assert
 			sinon.assert.calledWith(typeUnificator.unify, t1, t2);
@@ -92,14 +92,16 @@ describe("HindleyMilner", function () {
 			// arrange
 			const t1 = new TypeVariable();
 			const t2 = new NumberType();
+
+			const context = new TypeInferenceContext(program);
+			sinon.spy(context, "substitute");
 			sinon.stub(typeUnificator, "unify").returns(t2);
-			sinon.spy(typeEnvironment, "substitute");
 
 			// act
-			hindleyMilner.unify(t1, t2, {});
+			hindleyMilner.unify(t1, t2, {}, context);
 
 			// assert
-			sinon.assert.calledWith(typeEnvironment.substitute, t1, t2);
+			sinon.assert.calledWith(context.substitute, t1, t2);
 		});
 
 		it("substitutes the type t2 with the returned type after unification if they are not equal", function () {
@@ -107,13 +109,14 @@ describe("HindleyMilner", function () {
 			const t2 = new TypeVariable();
 			const t1 = new NumberType();
 			sinon.stub(typeUnificator, "unify").returns(t1);
-			sinon.spy(typeEnvironment, "substitute");
+			const context = new TypeInferenceContext(program);
+			sinon.spy(context, "substitute");
 
 			// act
-			hindleyMilner.unify(t1, t2, {});
+			hindleyMilner.unify(t1, t2, {}, context);
 
 			// assert
-			sinon.assert.calledWith(typeEnvironment.substitute, t2, t1);
+			sinon.assert.calledWith(context.substitute, t2, t1);
 		});
 
 		it("substitutes the type variable t1 with the type variable t2 after unification", function () {
@@ -121,13 +124,14 @@ describe("HindleyMilner", function () {
 			const t1 = new TypeVariable();
 			const t2 = new TypeVariable();
 			sinon.stub(typeUnificator, "unify").returns(t2);
-			sinon.spy(typeEnvironment, "substitute");
+			const context = new TypeInferenceContext(program);
+			sinon.spy(context, "substitute");
 
 			// act
-			hindleyMilner.unify(t1, t2, {});
+			hindleyMilner.unify(t1, t2, {}, context);
 
 			// assert
-			sinon.assert.calledWith(typeEnvironment.substitute, t1, t2);
+			sinon.assert.calledWith(context.substitute, t1, t2);
 		});
 
 		it("catches the unification errors and propagates the error as type inference error", function () {
@@ -137,7 +141,7 @@ describe("HindleyMilner", function () {
 			sinon.stub(typeUnificator, "unify").throws(new UnificationError(t1, t2, "Ooops..."));
 
 			// act, assert
-			expect(() => hindleyMilner.unify(t1, t2, {})).to.throw("Type inference failure: Unification for type 'number' and 'number' failed because Ooops...");
+			expect(() => hindleyMilner.unify(t1, t2, {}, new TypeInferenceContext(program))).to.throw("Type inference failure: Unification for type 'number' and 'number' failed because Ooops...");
 		});
 	});
 
@@ -150,14 +154,14 @@ describe("HindleyMilner", function () {
 			const env1 = new TypeEnvironment().setType(name, new StringType());
 			const env2 = new TypeEnvironment().setType(age, new NumberType());
 
-			hindleyMilner.typeEnvironment = env1;
+			const context = new TypeInferenceContext(program, env1);
 
 			// act
-			const merged = hindleyMilner.mergeWithTypeEnvironments([env2], {});
+			hindleyMilner.mergeWithTypeEnvironments([env2], {}, context);
 
 			// assert
-			expect(merged.getType(name)).to.be.instanceOf(StringType);
-			expect(merged.getType(age)).to.be.instanceOf(NumberType);
+			expect(context.getType(name)).to.be.instanceOf(StringType);
+			expect(context.getType(age)).to.be.instanceOf(NumberType);
 		});
 
 		it("unifies the types of conflicting definitions for the same symbol", function () {
@@ -171,14 +175,14 @@ describe("HindleyMilner", function () {
 
 			sinon.stub(typeUnificator, "unify").withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(new MaybeType(new StringType()));
 
-			hindleyMilner.typeEnvironment = env1;
+			const context = new TypeInferenceContext(program, env1);
 
 			// act
-			const merged = hindleyMilner.mergeWithTypeEnvironments([env2], {});
+			hindleyMilner.mergeWithTypeEnvironments([env2], {}, context);
 
 			// assert
-			expect(merged.getType(name)).to.be.instanceOf(MaybeType);
-			expect(merged.getType(age)).to.be.instanceOf(NumberType);
+			expect(context.getType(name)).to.be.instanceOf(MaybeType);
+			expect(context.getType(age)).to.be.instanceOf(NumberType);
 		});
 	});
 });

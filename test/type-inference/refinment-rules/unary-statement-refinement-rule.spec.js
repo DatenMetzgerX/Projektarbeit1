@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 import {UnaryExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/unary-expression-refinement-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinment-context";
+import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {NumberType, VoidType, BooleanType, NullType, MaybeType} from "../../../lib/semantic-model/types";
 
 describe("UnaryExpressionRefinementRule", function () {
