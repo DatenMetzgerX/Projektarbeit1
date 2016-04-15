@@ -41,26 +41,7 @@ describe("TypeInferenceContext", function () {
 			expect(context.typeEnvironment.getType(x)).to.equal(xType);
 		});
 	});
-
-	describe("replaceType", function () {
-		it("replaces the type in the type environment", function () {
-			// arrange
-			const x = new Symbol("x", SymbolFlags.Identifier);
-			const typeEnvironment = new TypeEnvironment().setType(x, new StringType());
-			const context = new TypeInferenceContext(program, typeEnvironment);
-
-			const newType = new NumberType();
-			sinon.spy(typeEnvironment, "replaceType");
-
-			// act
-			context.replaceType(x, () => newType);
-
-			// assert
-			expect(context.getType(x)).to.equal(newType);
-			sinon.assert.calledWith(typeEnvironment.replaceType, x);
-		});
-	});
-
+	
 	describe("substitute", function () {
 		it("calls substitute on the type environment", function () {
 			// arrange

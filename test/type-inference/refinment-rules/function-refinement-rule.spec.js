@@ -5,7 +5,7 @@ import sinon from "sinon";
 import {FunctionRefinementRule} from "../../../lib/type-inference/refinement-rules/function-refinement-rule";
 import {FunctionType, TypeVariable, NullType, VoidType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ControlFlowGraph, BRANCHES} from "../../../lib/cfg/control-flow-graph";
 import {Edge} from "../../../lib/cfg/edge";
 import {Node} from "../../../lib/cfg/node";
@@ -21,7 +21,7 @@ describe("FunctionRefinementRule", function () {
 		sinon.stub(cfg, "getExitEdges");
 
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		sinon.stub(context, "getCfg").returns(cfg);
 	});
 

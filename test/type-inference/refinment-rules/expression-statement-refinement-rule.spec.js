@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ExpressionStatementRefinementRule} from "../../../lib/type-inference/refinement-rules/expression-statement-refinement-rule";
 import {VoidType} from "../../../lib/semantic-model/types";
 
@@ -10,7 +10,7 @@ describe("ExpressionStatementRefinementRule", function () {
 	let rule, context, expressionStatement;
 
 	beforeEach(function () {
-		context = new RefinementContext();
+		context = new HindleyMilnerContext();
 		sinon.stub(context, "infer");
 		rule = new ExpressionStatementRefinementRule();
 		expressionStatement = t.expressionStatement(t.assignmentExpression("=", t.identifier("x"), t.numericLiteral(5)));

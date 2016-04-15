@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import _ from "lodash";
-import ControlFlowGraph from "../../lib/cfg/control-flow-graph";
+import ControlFlowGraph, {BRANCHES} from "../../lib/cfg/control-flow-graph";
 import Node from "../../lib/cfg/node";
 import {Edge} from "../../lib/cfg/edge";
 
@@ -65,6 +65,69 @@ describe("ControlFlowGraph", () => {
 
 			// assert
 			expect(Array.from(nodes)).to.have.members([x1, x2]);
+		});
+	});
+
+	describe("getNodesToExit", function () {
+		it("returns all nodes from the passed in node to the exit node including the exit node", function () {
+			// arrange
+			const x = cfg.createNode("let x = 1;");
+			const y = cfg.createNode("let y = 2");
+			const result = cfg.createNode("let z = x + y");
+
+			cfg.connectIfNotFound(x, BRANCHES.UNCONDITIONAL, y);
+			cfg.connectIfNotFound(y, BRANCHES.UNCONDITIONAL, result);
+			cfg.connectIfNotFound(result, BRANCHES.UNCONDITIONAL, null);
+
+			// act
+			const nodes = Array.from(cfg.getNodesToExit(y.value));
+
+			// assert
+			expect(nodes).to.deep.equal([y, result, cfg.getNode(null)]);
+		});
+
+		it("includes the nodes from different branches", function () {
+			// arrange
+			const x = cfg.createNode("let x = 1;");
+			const ifNode = cfg.createNode("if (x > 0) {");
+			const consequence = cfg.createNode("x = -x;");
+			const alternative = cfg.createNode("x = x*x;");
+			const result = cfg.createNode("let y = x*2");
+
+
+			cfg.connectIfNotFound(x, BRANCHES.UNCONDITIONAL, ifNode);
+			cfg.connectIfNotFound(ifNode, BRANCHES.TRUE, consequence);
+			cfg.connectIfNotFound(ifNode, BRANCHES.FALSE, alternative);
+			cfg.connectIfNotFound(consequence, BRANCHES.UNCONDITIONAL, result);
+			cfg.connectIfNotFound(alternative, BRANCHES.UNCONDITIONAL, result);
+			cfg.connectIfNotFound(result, BRANCHES.UNCONDITIONAL, null);
+
+			// act
+			const nodes = Array.from(cfg.getNodesToExit(ifNode.value));
+
+			// assert
+			expect(nodes).to.deep.equal([ifNode, consequence, result, cfg.getNode(null), alternative]);
+		});
+
+		it("ignores back links to already processed nodes", function () {
+			// arrange
+			const x = cfg.createNode("let x = 1;");
+			const whileNode = cfg.createNode("while (x > 0) {");
+			const whileBody = cfg.createNode("--x;");
+			const result = cfg.createNode("let y = x*2");
+
+
+			cfg.connectIfNotFound(x, BRANCHES.UNCONDITIONAL, whileNode);
+			cfg.connectIfNotFound(whileNode, BRANCHES.TRUE, whileBody);
+			cfg.connectIfNotFound(whileNode, BRANCHES.FALSE, result);
+			cfg.connectIfNotFound(whileBody, BRANCHES.UNCONDITIONAL, whileNode);
+			cfg.connectIfNotFound(result, BRANCHES.UNCONDITIONAL, null);
+
+			// act
+			const nodes = Array.from(cfg.getNodesToExit(whileNode.value));
+
+			// assert
+			expect(nodes).to.deep.equal([whileNode, whileBody, result, cfg.getNode(null)]);
 		});
 	});
 

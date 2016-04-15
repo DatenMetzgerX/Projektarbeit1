@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ObjectExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/object-expression-refinement-rule";
 import {NumberType, StringType, RecordType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
@@ -15,7 +15,7 @@ describe("ObjectExpressRefinementRule", function () {
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		sandbox.stub(context, "infer");
 
 		rule = new ObjectExpressionRefinementRule();

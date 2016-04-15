@@ -1,9 +1,8 @@
 import {expect} from "chai";
-import sinon from "sinon";
 import Immutable from "immutable";
 
 import Symbol, {SymbolFlags} from "../../lib/semantic-model/symbol";
-import {Type, MaybeType, NumberType, StringType, FunctionType, TypeVariable, VoidType, NullType} from "../../lib/semantic-model/types/index";
+import {Type, MaybeType, NumberType, StringType, TypeVariable} from "../../lib/semantic-model/types/index";
 import TypeEnvironment from "../../lib/type-inference/type-environment";
 
 describe("TypeEnvironment", function () {
@@ -102,74 +101,6 @@ describe("TypeEnvironment", function () {
 
 			// act, assert
 			expect(typeEnvironment.hasType(age)).to.be.false;
-		});
-	});
-
-	describe("replaceType", function () {
-		it("calls the callback with the old type", function () {
-			// arrange
-			const name = new Symbol("name", SymbolFlags.Variable);
-			const nameType = new StringType();
-			const typeEnvironment = new TypeEnvironment().setType(name, nameType);
-
-			const callback = sinon.stub().returns(new StringType());
-
-			// act
-			typeEnvironment.replaceType(name, callback);
-
-			// assert
-			sinon.assert.calledWith(callback, nameType);
-		});
-
-		it("returns a new type environment where the old type is replaced with the returned type of the callback", function () {
-			// arrange
-			const name = new Symbol("name", SymbolFlags.Variable);
-			const nameType = new StringType();
-			let typeEnvironment = new TypeEnvironment().setType(name, nameType);
-
-			const callback = sinon.stub();
-			const newType = new NumberType();
-			callback.returns(newType);
-
-			// act
-			typeEnvironment = typeEnvironment.replaceType(name, callback);
-
-			// assert
-			expect(typeEnvironment.getType(name)).to.equal(newType);
-		});
-
-		it("returns a new type environment where all occurrences of the old type are repalced with the type returned by the callback", function () {
-			// arrange
-			const x = new Symbol("x", SymbolFlags.Variable);
-			const xType = new TypeVariable();
-
-			const fx = new Symbol("fx", SymbolFlags.Function);
-			const fxType = new FunctionType(new NullType(), [xType], new VoidType());
-
-			let typeEnvironment = new TypeEnvironment()
-				.setType(x, xType)
-				.setType(fx, fxType);
-
-			const callback = sinon.stub();
-			const newType = new NumberType();
-			callback.returns(newType);
-
-			// act
-			typeEnvironment = typeEnvironment.replaceType(x, callback);
-
-			// assert
-			expect(typeEnvironment.getType(fx).params[0]).to.equal(newType);
-		});
-
-		it("throws if the type environment does not contain a type for the given symbol", function () {
-			// arrange
-			const name = new Symbol("name", SymbolFlags.Variable);
-			const typeEnvironment = new TypeEnvironment();
-
-			const callback = sinon.spy();
-
-			// act, assert
-			expect(() => typeEnvironment.replaceType(name, callback)).to.throw("AssertionError: No existing mapping for name exists.");
 		});
 	});
 

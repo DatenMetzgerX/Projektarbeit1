@@ -4,7 +4,7 @@ import {Program} from "../../lib/semantic-model/program";
 import {infer} from "../../lib/infer";
 import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, RecordType, FunctionType} from "../../lib/semantic-model/types";
 
-describe("ForwardAnalysisTypeInference Integration Tests", function () {
+describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 
 	it("infers the types for declared variables correctly", function () {
 		// act
@@ -71,7 +71,7 @@ describe("ForwardAnalysisTypeInference Integration Tests", function () {
 		expect(p1Type.hasProperty(person.getMember("address"))).to.be.false;
 
 		const address = person.getMember("address");
-		const addressType = typeEnvironment.getType(address);
+		const addressType = personType.getType(address);
 		expect(addressType).to.be.instanceOf(RecordType);
 		expect(addressType.hasProperty(address.getMember("street")));
 	});
@@ -81,7 +81,7 @@ describe("ForwardAnalysisTypeInference Integration Tests", function () {
 		const {typeEnvironment, ast, scope} = inferTypes(`
 		function hy(x) {
 			let func = hy;
-			return z.name / 2 + x;
+			return 11 / 2 + x;
 		}
 		`);
 
@@ -161,6 +161,6 @@ describe("ForwardAnalysisTypeInference Integration Tests", function () {
 		infer(sourceFile, program);
 
 		const cfg = sourceFile.ast.cfg;
-		return { typeEnvironment: cfg.getNode(null).annotation.out, scope: sourceFile.scope, ast: sourceFile.ast };
+		return { typeEnvironment: cfg.getNode(null).annotation.in, scope: sourceFile.scope, ast: sourceFile.ast };
 	}
 });

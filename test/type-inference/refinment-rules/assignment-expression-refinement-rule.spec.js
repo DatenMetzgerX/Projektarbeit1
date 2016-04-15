@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as t from "babel-types";
 
 import BINARY_OPERATORS from "../../../lib/type-inference/refinement-rules/binary-operators";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {AssignmentExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/assignment-expression-refinement-rule";
 import {NumberType, NullType, StringType, RecordType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
@@ -14,9 +14,8 @@ describe("AssignmentExpressionRefinementRule", function () {
 	let rule, context, program, assignmentExpression, sandbox;
 
 	beforeEach(function () {
-
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 
 		sandbox = sinon.sandbox.create();
 		sandbox.stub(context, "unify");
@@ -128,6 +127,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 				const personSymbol = new Symbol("person", SymbolFlags.Variable);
 				const name = new Symbol("name", SymbolFlags.Property);
 				personSymbol.addMember(name);
+
 				const person = new RecordType();
 
 				program.symbolTable.setSymbol(memberExpression.object, personSymbol);
