@@ -217,6 +217,25 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		expect(typeEnv2.getType(x)).to.be.instanceOf(NumberType);
 	});
 
+	it("can infer the type of recursive functions", function () {
+		// act
+		const {scope, typeEnvironment} = inferTypes(`
+		function successor(x) {
+			if (x === 0) {
+				return 1;
+			}
+		
+			return successor(x - 1) + 1;
+		}
+		let eleven = successor(10000);
+		`);
+
+		// assert
+		const eleven = scope.resolveSymbol("eleven");
+
+		expect(typeEnvironment.getType(eleven)).to.be.instanceOf(NumberType);
+	});
+
     /**
      * Infers the types for the given code and returns the type environment, ast and the scope of the source file
      * @param code the source code for which the types should be inferred.
