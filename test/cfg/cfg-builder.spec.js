@@ -119,7 +119,7 @@ describe("CfgBuilder", function () {
 			expect(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
-		it("does not connect the block statment with a function declaration, if the function declaration is the first statement in the block", function () {
+		it("connects the block statement with a function declaration, if the function declaration is the first statement in the block", function () {
 			const {ast, cfg} = toCfg(`
 			{
 				function hy () {
@@ -132,9 +132,7 @@ describe("CfgBuilder", function () {
 			// assert
 			const blockStatement = ast.program.body[0];
 			const functionDeclaration = blockStatement.body[0];
-			const assignment = blockStatement.body[1];
-			expect(cfg.isConnected(blockStatement, functionDeclaration, BRANCHES.UNCONDITIONAL)).to.be.false;
-			expect(cfg.isConnected(blockStatement, assignment, BRANCHES.UNCONDITIONAL)).to.be.true;
+			expect(cfg.isConnected(blockStatement, functionDeclaration, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 
 		it("connects the next sibling of the block statement as successor if the block statement is empty", () => {
@@ -683,17 +681,31 @@ describe("CfgBuilder", function () {
 	});
 
 	describe("FunctionDeclaration", function () {
-		it("connects the function declaration with the body statement", function () {
+		it("connects the function declaration with the successor statement", function () {
 			const {ast, cfg} = toCfg(`
 			function x (z) {
 				console.log(z);
 			}
+			let y = 10;
 			`);
 
 			// assert
 			const functionStatement = ast.program.body[0];
 
-			expect(cfg.isConnected(functionStatement, functionStatement.body, BRANCHES.UNCONDITIONAL)).to.be.true;
+			expect(cfg.isConnected(functionStatement, ast.program.body[1], BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("connects the last statement in the function body with the EOF node", function () {
+			const {ast, cfg} = toCfg(`
+			function x (z) {
+				console.log(z);
+			}
+			let y = 10;
+			`);
+
+			// assert
+			const functionStatement = ast.program.body[0];
+			expect(cfg.isConnected(functionStatement.body.body[0], null, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
