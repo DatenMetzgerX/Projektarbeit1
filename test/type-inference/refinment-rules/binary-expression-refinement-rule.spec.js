@@ -64,7 +64,7 @@ describe("BinaryExpressionRefinementRule", function () {
 			const refined = rule.refine(addExpression, context);
 
 			// assert
-			sinon.assert.calledWithExactly(BINARY_OPERATORS["+"].refine, nullType, numberType, sinon.match.func);
+			sinon.assert.calledWithExactly(BINARY_OPERATORS["+"].refine, sinon.match.instanceOf(NullType), sinon.match.instanceOf(NumberType), sinon.match.func);
 			expect(refined).to.be.instanceOf(NumberType);
 		});
 	});
