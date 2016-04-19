@@ -79,6 +79,21 @@ describe("FunctionRefinementRule", function () {
 			expect(rule.refine(functionDeclaration, context)).to.be.instanceOf(FunctionType);
 		});
 
+		it("Sets the function type in the symbol table", function () {
+			// arrange
+			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
+			cfg.getExitEdges.returns([]);
+
+			const functionSymbol = new Symbol("abcd", SymbolFlags.Function);
+			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
+
+			// act
+			rule.refine(functionDeclaration, context);
+
+			// assert
+			expect(context.getType(functionSymbol)).to.be.instanceOf(FunctionType);
+		});
+
 		it("adds a type parameter for each parameter", function () {
 			// arrange
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([]));
@@ -98,9 +113,6 @@ describe("FunctionRefinementRule", function () {
 			expect(refined.thisType).to.be.instanceOf(NullType); // will be changed when the this parameter will be implemented
 			expect(refined.params[0]).to.be.instanceOf(TypeVariable);
 			expect(refined.params[1]).to.be.instanceOf(TypeVariable);
-
-			expect(context.getType(x)).to.be.instanceOf(TypeVariable);
-			expect(context.getType(y)).to.be.instanceOf(TypeVariable);
 		});
 
 		it("sets the return type to void if no exit edge is an explicit return statement", function () {

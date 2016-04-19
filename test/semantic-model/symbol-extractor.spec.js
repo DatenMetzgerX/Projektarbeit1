@@ -138,16 +138,6 @@ describe("SymbolExtractor", function () {
 				expect(scope).to.have.ownSymbol("y");
 			});
 
-			it("assigns the return symbol to the return statement node", function () {
-				// act
-				const ast = extractSymbols("function x() { return y; }");
-
-				// assert
-				const scope = ast.program.body[0].scope;
-				expect(scope).to.have.ownSymbol("return");
-				expect(program.symbolTable.getSymbol(ast.program.body[0].body.body[0])).to.equal(scope.resolveSymbol("return"));
-			});
-
 			it("assigns the symbol to the identifier used directly in the return statement", function () {
 				// act
 				const ast = extractSymbols("function x() { return y; }");
@@ -310,26 +300,6 @@ describe("SymbolExtractor", function () {
 
 				// assert
 				expect(ast.program.body[0].scope).not.to.have.ownSymbol("dump");
-			});
-
-			it("creates a return symbol in the function scope", function () {
-				const ast = extractSymbols(`
-				function dump(count) {
-					console.log(count);
-				}
-				`);
-
-				expect(ast.program.body[0].scope).to.have.ownSymbol("return");
-			});
-
-			it("creates a this symbol in the function scope", function () {
-				const ast = extractSymbols(`
-				function dump(count) {
-					console.log(count);
-				}
-				`);
-
-				expect(ast.program.body[0].scope).to.have.ownSymbol("this");
 			});
 		});
 

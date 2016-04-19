@@ -8,7 +8,7 @@ describe("FunctionType", function () {
 			// arrange
 			const thisType = new Type("this");
 			const returnType = new VoidType();
-			const functionType = new FunctionType(thisType, [], returnType);
+			const functionType = new FunctionType(thisType, [], returnType, {});
 
 			// act, assert
 			expect(functionType.typeParameters).to.deep.equal([thisType, returnType]);
@@ -20,7 +20,7 @@ describe("FunctionType", function () {
 			const param1 = new Type("number");
 			const param2 = new Type("string");
 			const returnType = new VoidType();
-			const functionType = new FunctionType(thisType, [param1, param2], returnType);
+			const functionType = new FunctionType(thisType, [param1, param2], returnType, {});
 
 			// act, assert
 			expect(functionType.typeParameters).to.deep.equal([thisType, returnType, param1, param2]);
@@ -30,7 +30,7 @@ describe("FunctionType", function () {
 	describe("withTypeParameters", function () {
 		it("returns a new instance with the specified id", function () {
 			// arrange
-			const functionType = new FunctionType(new Type("oldThis"), [new Type("number")], new Type("OldReturn"));
+			const functionType = new FunctionType(new Type("oldThis"), [new Type("number")], new Type("OldReturn"), {});
 
 			// act
 			const newFunction = functionType.withTypeParameters([new Type("this"), new VoidType(), new Type("number"), new Type("string")], functionType.id);
@@ -46,7 +46,7 @@ describe("FunctionType", function () {
 			const param1 = new Type("number");
 			const param2 = new Type("string");
 			const returnType = new VoidType();
-			const functionType = new FunctionType(new Type("oldThis"), [param1], new Type("OldReturn"));
+			const functionType = new FunctionType(new Type("oldThis"), [param1], new Type("OldReturn"), {});
 
 			// act
 			const newFunction = functionType.withTypeParameters([thisType, returnType, param1, param2]);
@@ -61,7 +61,7 @@ describe("FunctionType", function () {
 	describe("prettyName", function () {
 		it("returns a string representation of the form thisType.(parameterTypes) -> returnType", function () {
 			// arrange
-			const functionType = new FunctionType(new Type("this"), [new Type("number"), new Type("string")], new Type("number"));
+			const functionType = new FunctionType(new Type("this"), [new Type("number"), new Type("string")], new Type("number"), {});
 
 			// act, assert
 			expect(functionType.prettyName).to.equal("this.(number, string) -> number");

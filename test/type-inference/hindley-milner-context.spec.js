@@ -5,9 +5,8 @@ import * as t from "babel-types";
 import {Program} from "../../lib/semantic-model/program";
 import Symbol, {SymbolFlags} from "../../lib/semantic-model/symbol";
 import {HindleyMilnerContext} from "../../lib/type-inference/hindley-milner-context";
-import {NumberType, StringType} from "../../lib/semantic-model/types";
+import {NumberType, StringType, RecordType, NullType, MaybeType, VoidType} from "../../lib/semantic-model/types";
 import {TypeInferenceContext} from "../../lib/type-inference/type-inference-context";
-import {RecordType} from "../../lib/semantic-model/types/record-type";
 
 describe("HindleyMilnerContext", function () {
 	let typeInferenceAnalysis,
@@ -123,99 +122,130 @@ describe("HindleyMilnerContext", function () {
 		});
 	});
 
-	describe("getNodeType", function () {
-		it("returns the type of the passed in node from the type inference context", function () {
+	describe("getObjectType", function () {
+		it("returns the type of the identifier if the object is an identifier node", function () {
 			// arrange
-			const node = t.identifier("x");
-			const symbol = new Symbol("x", SymbolFlags.Variable);
-			program.symbolTable.setSymbol(node, symbol);
-			const type = new NumberType();
+			const objectNode = t.identifier("person");
+			const nameNode = t.memberExpression(objectNode, t.identifier("name"));
 
-			context.setType(symbol, type);
+			const person = new Symbol("person", SymbolFlags.Variable);
+			const name = new Symbol("name", SymbolFlags.Property);
+
+			program.symbolTable.setSymbol(objectNode, person);
+			program.symbolTable.setSymbol(nameNode, name);
+
+			const personType = RecordType.withProperties();
+			context.setType(person, personType);
 
 			// act
-			const nodeType = context.getNodeType(node);
+			const objectType = context.getObjectType(nameNode);
 
 			// assert
-			expect(nodeType).to.equal(type);
+			expect(objectType).to.equal(personType);
 		});
 
-		it("returns the type of the record property if the node is a member expression", function () {
+		it("returns the type of the parent property if it is a nested member access", function () {
 			// arrange
-			const name = new Symbol("name", SymbolFlags.Property);
-			const person = new Symbol("person", SymbolFlags.Variable);
-			person.addMember(name);
+			const personNode = t.identifier("person");
+			const addressNode = t.memberExpression(personNode, t.identifier("address"));
+			const streetNode = t.memberExpression(addressNode, t.identifier("street"));
 
-			const personType = RecordType.withProperties([[name, new StringType() ]]);
-			const node = t.memberExpression(t.identifier("person"), t.identifier("name"));
-			program.symbolTable.setSymbol(node.object, person);
-			program.symbolTable.setSymbol(node.property, name);
+			const person = new Symbol("person", SymbolFlags.Variable);
+			const address = new Symbol("address", SymbolFlags.Property);
+			const street = new Symbol("street", SymbolFlags.Property);
+			person.addMember(address);
+			address.addMember(street);
+
+			program.symbolTable.setSymbol(personNode, person);
+			program.symbolTable.setSymbol(addressNode, address);
+			program.symbolTable.setSymbol(streetNode, street);
+
+			const addressType = RecordType.withProperties();
+			const personType = RecordType.withProperties([[address, addressType]]);
 
 			context.setType(person, personType);
 
 			// act
-			const propertyType = context.getNodeType(node);
+			const objectType = context.getObjectType(streetNode);
 
 			// assert
-			expect(propertyType).to.be.instanceOf(StringType);
-		});
-	});
-
-	describe("setNodeType", function () {
-		it("sets the type of the node", function () {
-			// arrange
-			const node = t.identifier("x");
-			const symbol = new Symbol("x", SymbolFlags.Variable);
-			program.symbolTable.setSymbol(node, symbol);
-			const type = new NumberType();
-
-			// act
-			context.setNodeType(node, type);
-
-			// assert
-			expect(context.getType(symbol)).to.equal(type);
+			expect(objectType).to.equal(addressType);
 		});
 
-		it("creates a new member property if the node is a member expression", function () {
+		it("throws if the parent node type is not known", function () {
 			// arrange
+			const thisNode = t.thisExpression();
+			const nameNode = t.memberExpression(thisNode, t.identifier("node"));
+
 			const name = new Symbol("name", SymbolFlags.Property);
-			const person = new Symbol("person", SymbolFlags.Variable);
-			person.addMember(name);
+			program.symbolTable.setSymbol(thisNode, Symbol.THIS);
+			program.symbolTable.setSymbol(nameNode, name);
 
-			const personType = RecordType.withProperties([]);
-			const node = t.memberExpression(t.identifier("person"), t.identifier("name"));
-			program.symbolTable.setSymbol(node.object, person);
-			program.symbolTable.setSymbol(node.property, name);
+			const thisType = RecordType.withProperties();
+			context.setType(Symbol.THIS, thisType);
 
-			context.setType(person, personType);
-			typeInferenceAnalysis.unify.withArgs(RecordType.ANY, personType).returns(personType);
-
-			// act
-			context.setNodeType(node, new StringType());
-
-			// assert
-			expect(context.getNodeType(node)).to.be.instanceOf(StringType);
+			// act, assert
+			expect(() => context.getObjectType(nameNode)).to.throw("Node type MemberExpression for the object of a member expression not yet supported.");
 		});
 
-		it("changes the type of the existing property if the node is a member expression", function () {
+		it("fails if the object type cannot be unified with the record type", function () {
 			// arrange
-			const name = new Symbol("name", SymbolFlags.Property);
+			const personNode = t.identifier("person");
+			const nameNode = t.memberExpression(personNode, t.identifier("name"));
+
 			const person = new Symbol("person", SymbolFlags.Variable);
-			person.addMember(name);
+			const name = new Symbol("name", SymbolFlags.Property);
 
-			const personType = RecordType.withProperties([[name, new NumberType() ]]);
-			const node = t.memberExpression(t.identifier("person"), t.identifier("name"));
-			program.symbolTable.setSymbol(node.object, person);
-			program.symbolTable.setSymbol(node.property, name);
+			program.symbolTable.setSymbol(personNode, person);
+			program.symbolTable.setSymbol(nameNode, name);
 
+			const personType = new StringType();
 			context.setType(person, personType);
-			typeInferenceAnalysis.unify.withArgs(RecordType.ANY, personType).returns(personType);
+
+			typeInferenceAnalysis.unify.throws(new Error("Cannot unify string with record type"));
 
 			// act
-			context.setNodeType(node, new StringType());
+			expect(() => context.getObjectType(nameNode)).to.throw("Cannot unify string with record type");
+		});
 
-			// assert
-			expect(context.getNodeType(node)).to.be.instanceOf(StringType);
+		it("fails if the object type is null", function () {
+			// arrange
+			const personNode = t.identifier("person");
+			const nameNode = t.memberExpression(personNode, t.identifier("name"));
+
+			const person = new Symbol("person", SymbolFlags.Variable);
+			const name = new Symbol("name", SymbolFlags.Property);
+
+			program.symbolTable.setSymbol(personNode, person);
+			program.symbolTable.setSymbol(nameNode, name);
+
+			const personType = new NullType();
+			context.setType(person, personType);
+
+			typeInferenceAnalysis.unify.returns(new MaybeType(RecordType.withProperties()));
+
+			// act
+			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type null.");
+		});
+
+		it("fails if the object type is undefined", function () {
+			// arrange
+			const personNode = t.identifier("person");
+			const nameNode = t.memberExpression(personNode, t.identifier("name"));
+
+			const person = new Symbol("person", SymbolFlags.Variable);
+			const name = new Symbol("name", SymbolFlags.Property);
+
+			program.symbolTable.setSymbol(personNode, person);
+			program.symbolTable.setSymbol(nameNode, name);
+
+			const personType = new VoidType();
+			context.setType(person, personType);
+
+			typeInferenceAnalysis.unify.returns(RecordType.withProperties());
+
+			// act
+			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type undefined.");
 		});
 	});
 

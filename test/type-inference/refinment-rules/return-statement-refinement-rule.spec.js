@@ -5,7 +5,7 @@ import sinon from "sinon";
 import {ReturnStatementRefinementRule} from "../../../lib/type-inference/refinement-rules/return-statement-refinement-rule";
 import {NullType, NumberType, VoidType, MaybeType} from "../../../lib/semantic-model/types";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
-import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
+import {Symbol} from "../../../lib/semantic-model/symbol";
 import {Program} from "../../../lib/semantic-model/program";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
@@ -42,9 +42,7 @@ describe("ReturnStatementRefinementRule", function () {
 
 		it("sets the type of the `return` symbol to the evaluated type of the return expression", function () {
 			// arrange
-			const returnSymbol = new Symbol("return", SymbolFlags.Return);
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
-			program.symbolTable.setSymbol(returnStatement, returnSymbol);
 
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
 
@@ -52,16 +50,14 @@ describe("ReturnStatementRefinementRule", function () {
 			rule.refine(returnStatement, context);
 
 			// assert
-			expect(context.getType(returnSymbol)).to.be.an.instanceOf(NumberType);
+			expect(context.getType(Symbol.RETURN)).to.be.an.instanceOf(NumberType);
 		});
 
 		it("unifies the type of the `return` symbol with the type of the return `argument`", function () {
 			// arrange
-			const returnSymbol = new Symbol("return", SymbolFlags.Return);
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
-			program.symbolTable.setSymbol(returnStatement, returnSymbol);
 
-			context.setType(returnSymbol, new NullType());
+			context.setType(Symbol.RETURN, new NullType());
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
 			context.unify.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(NumberType)).returns(new MaybeType(new NumberType()));
 
@@ -69,28 +65,23 @@ describe("ReturnStatementRefinementRule", function () {
 			rule.refine(returnStatement, context);
 
 			// assert
-			expect(context.getType(returnSymbol)).to.be.an.instanceOf(MaybeType);
+			expect(context.getType(Symbol.RETURN)).to.be.an.instanceOf(MaybeType);
 		});
 
 		it("sets the type of the `return` symbol to VoidType if the return statement has no argument (just return;)", function () {
 			// arrange
-			const returnSymbol = new Symbol("return", SymbolFlags.Return);
 			const returnStatement = t.returnStatement();
-			program.symbolTable.setSymbol(returnStatement, returnSymbol);
 
 			// act
 			rule.refine(returnStatement, context);
 
 			// assert
-			expect(context.getType(returnSymbol)).to.be.an.instanceOf(VoidType);
+			expect(context.getType(Symbol.RETURN)).to.be.an.instanceOf(VoidType);
 		});
 
 		it("the type of a return statement is void", function () {
 			// arrange
-			const returnSymbol = new Symbol("return", SymbolFlags.Return);
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
-			program.symbolTable.setSymbol(returnStatement, returnSymbol);
-
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
 
 			// act, assert

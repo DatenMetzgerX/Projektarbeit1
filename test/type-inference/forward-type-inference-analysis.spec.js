@@ -40,9 +40,9 @@ describe("ForwardTypeInferenceAnalysis", function () {
 			const cfg = new ControlFlowGraph();
 			cfg.connectIfNotFound(programNode.body[0], BRANCHES.UNCONDITIONAL, programNode.body[1]);
 			cfg.connectIfNotFound(programNode.body[1], BRANCHES.UNCONDITIONAL, null);
+			sourceFile.ast.cfg = cfg;
 
 			sandbox.stub(hindleyMilner, "infer");
-			sandbox.stub(program, "getCfg").returns(cfg);
 
 			// act
 			analysis.analyseSourceFile(sourceFile);

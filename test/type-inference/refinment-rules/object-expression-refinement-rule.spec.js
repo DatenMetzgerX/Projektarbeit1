@@ -40,14 +40,18 @@ describe("ObjectExpressRefinementRule", function () {
 	});
 
 	describe("refine", function () {
+		const person = new Symbol("person", SymbolFlags.Variable);
 		const name = new Symbol("name", SymbolFlags.Property);
 		const age = new Symbol("age", SymbolFlags.Property);
+		person.addMember(name);
+		person.addMember(age);
 
 		beforeEach(function () {
 			context.infer.withArgs(objectExpression.properties[0].value).returns(new StringType());
 			context.infer.withArgs(objectExpression.properties[1].value).returns(new NumberType());
 			program.symbolTable.setSymbol(objectExpression.properties[0], name);
 			program.symbolTable.setSymbol(objectExpression.properties[1], age);
+			program.symbolTable.setSymbol(objectExpression, person);
 		});
 
 		it("returns a record type", function () {

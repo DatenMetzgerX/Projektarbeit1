@@ -7,6 +7,8 @@ import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 import {Program} from "../../lib/semantic-model/program";
 import {TypeInferenceContext} from "../../lib/type-inference/type-inference-context";
 import {HindleyMilnerContext} from "../../lib/type-inference/hindley-milner-context";
+import {SymbolFlags, Symbol} from "../../lib/semantic-model/symbol";
+import {Type} from "../../lib/semantic-model/types/type";
 
 describe("HindleyMilnerDataFlowAnalysis", function () {
 	let analysis, typeInferenceAnalysis, program;
@@ -63,10 +65,19 @@ describe("HindleyMilnerDataFlowAnalysis", function () {
 			expect(analysis.areStatesEqual(typeEnv, typeEnv)).to.be.true;
 		});
 
-		it("is false if the type environment are not the same instances", function () {
+		it("is true if the type environment are not the same instances but have the same mappings", function () {
 			// arrange
 			const typeEnv = new TypeEnvironment();
 			const typeEnv2 = new TypeEnvironment();
+
+			// act, assert
+			expect(analysis.areStatesEqual(typeEnv, typeEnv2)).to.be.true;
+		});
+
+		it("is false if the type environment are not the same instances but have the same mappings", function () {
+			// arrange
+			const typeEnv = new TypeEnvironment();
+			const typeEnv2 = new TypeEnvironment().setType(new Symbol("x", SymbolFlags.Variable), new Type("string"));
 
 			// act, assert
 			expect(analysis.areStatesEqual(typeEnv, typeEnv2)).to.be.false;

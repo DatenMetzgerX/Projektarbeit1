@@ -139,20 +139,19 @@ describe("TypeEnvironment", function () {
 			expect(substituted.getType(y).of).to.equal(newT);
 		});
 
-		it("returns this if the old and new type are the same", function () {
+		it("returns this if the old and new type are the same instance", function () {
 			// arrange
 			const t = new TypeVariable();
-			const t2 = new TypeVariable(t.id);
 
 			const x = new Symbol("x");
 			const y = new Symbol("y");
 
 			const typeEnvironment = new TypeEnvironment()
 				.setType(x, t)
-				.setType(y, t2);
+				.setType(y, t);
 
 			// act, assert
-			expect(typeEnvironment.substitute(t, t2)).to.equal(typeEnvironment);
+			expect(typeEnvironment.substitute(t, t)).to.equal(typeEnvironment);
 		});
 	});
 

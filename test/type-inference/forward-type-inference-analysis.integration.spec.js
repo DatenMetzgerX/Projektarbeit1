@@ -1,8 +1,9 @@
 import {expect} from "chai";
 
+import {Symbol} from "../../lib/semantic-model/symbol";
 import {Program} from "../../lib/semantic-model/program";
 import {infer} from "../../lib/infer";
-import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, RecordType, FunctionType} from "../../lib/semantic-model/types";
+import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, RecordType} from "../../lib/semantic-model/types";
 
 describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 
@@ -35,19 +36,21 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		expect(typeEnvironment.getType(scope.resolveSymbol("age"))).to.be.instanceOf(NumberType);
 	});
 
-	it("the type of a function parameter can be inferred if the parameter is used in a numeric calculation", function () {
+	it("infers the type from the result of a function call", function () {
 		// act
 		const { typeEnvironment, ast } = inferTypes(`
 		function test(x) {
 			return x * 2;
 		}
+		
+		const l = test(10);
 		`);
 
 		// assert
 		const functionNode = ast.program.body[0];
 		const functionScope = functionNode.scope;
 
-		expect(typeEnvironment.getType(functionScope.resolveSymbol("x"))).to.be.instanceOf(MaybeType).and.to.have.property("of").that.is.instanceOf(NumberType);
+		expect(typeEnvironment.getType(functionScope.resolveSymbol("l"))).to.be.instanceOf(NumberType);
 	});
 
 	it("changes to aliased variables are not reflected to their aliases", function () {
@@ -76,28 +79,94 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		expect(addressType.hasProperty(address.getMember("street")));
 	});
 
-	it("refinements about the return type of a function are reflected in all references to that function", function () {
+	it("adds added properties in a function call to the type in the callers context", function () {
 		// act
-		const {typeEnvironment, ast, scope} = inferTypes(`
-		function hy(x) {
-			let func = hy;
-			return 11 / 2 + x;
+		const {typeEnvironment, scope} = inferTypes(`
+		function setName(x, name) {
+			x.name = name;
 		}
+		
+		let p = {};
+		setName(p, "Test");
 		`);
 
-		const blockScope = ast.program.body[0].body.scope;
-		const hy = scope.resolveSymbol("hy");
-		const hyType = typeEnvironment.getType(hy);
-		const func = blockScope.resolveSymbol("func");
-		const funcType = typeEnvironment.getType(func);
+		const p = scope.resolveSymbol("p");
+		const pType = typeEnvironment.getType(p);
 
 		// assert
-		expect(hyType).to.be.instanceOf(FunctionType);
-		expect(hyType.thisType).to.be.instanceOf(NullType);
-		expect(hyType.params[0]).to.be.instanceOf(MaybeType).and.to.have.property("of").that.is.an.instanceOf(NumberType);
-		expect(funcType.thisType).to.equal(hyType.thisType);
-		expect(funcType.params).to.deep.equal(hyType.params);
-		expect(funcType.returnType).to.equal(hyType.returnType);
+		expect(pType).to.be.instanceOf(RecordType);
+		expect(pType.getType(new Symbol("name"))).to.be.instanceOf(StringType);
+	});
+
+	it("throws if a function access members of an object that is null or not defined", function () {
+		expect(() => inferTypes(`
+		function getStreet(x) {
+			return x.address.street;
+		}
+		
+		getStreet({});
+		`)).to.throw("Type inference failure: Potential null pointer when accessing property street on null or not initialized object of type undefined.");
+	});
+
+	it("a member is void if it is accessed before it's declaration", function () {
+		// act
+		const {typeEnvironment, scope} = inferTypes(`
+		function getName(x) {
+			return x.name;
+		}
+		
+		let name = getName({});
+		`);
+
+		const name = scope.resolveSymbol("name");
+
+		// assert
+		expect(typeEnvironment.getType(name)).to.be.instanceOf(VoidType);
+	});
+
+	it("supports functions as arguments", function () {
+		// act
+		const {typeEnvironment, scope} = inferTypes(`
+		function id(x) {
+			return x;
+		}
+		
+		const ten = id(id)(10);
+		`);
+
+		const ten = scope.resolveSymbol("ten");
+
+		// assert
+		expect(typeEnvironment.getType(ten)).to.be.instanceOf(NumberType);
+	});
+
+	it("does not change the type of the callers argument when the function assigns to the parameters of the function", function () {
+		// act
+		const {typeEnvironment, scope} = inferTypes(`
+		function toNumber(x) {
+			x = 10;
+			return x;
+		}
+		
+		let input = "10";
+		toNumber(input);
+		`);
+
+		const ten = scope.resolveSymbol("input");
+
+		// assert
+		expect(typeEnvironment.getType(ten)).to.be.instanceOf(StringType);
+	});
+
+	it("throws an error if a not declared identifier is passed to a function call", function () {
+		expect(() => inferTypes(`
+		function toNumber(x) {
+			x = 10;
+			return x;
+		}
+		
+		toNumber(x);
+		`)).to.throw("Type inference failure: The identifier x is not defined");
 	});
 
 	it("it does not refine the type for identifiers used in calculations to not reduce the accuracy of their inferred type (x=null is here the most accurate information)", function () {
