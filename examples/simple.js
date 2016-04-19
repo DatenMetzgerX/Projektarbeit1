@@ -47,17 +47,17 @@ function log(m) {
 const n = 10; // n should stay number
 log(n);
 
-// function successor(x) {
-//	if (x === 0) {
-//		return 1;
-//	}
-//
-//	return successor(x - 1) + 1;
-//}
+function successor(x) {
+	if (x === 0) {
+		return 1;
+	}
+
+	return successor(x - 1) + 1;
+}
 
 
 // let z = duplicate(x, y);
-// let eleven = successor(10);
+let eleven = successor(1000);
 
 // //const x = 10;
 // const y = {
