@@ -73,7 +73,7 @@ describe("CallExpressionRefinementRule", function () {
 				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(context.typeEnvironment);
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(context.typeEnvironment.setType(Symbol.RETURN, new VoidType()));
 
 				// assert
 				expect(rule.refine(callExpression, context)).to.be.instanceOf(VoidType);
@@ -178,7 +178,7 @@ describe("CallExpressionRefinementRule", function () {
 				const person = new Symbol("person", SymbolFlags.Variable);
 				const log = new Symbol("log", SymbolFlags.Function & SymbolFlags.Property);
 				person.addMember(log);
-				
+
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(personNode, person);
 				program.symbolTable.setSymbol(logMember, log);
@@ -349,6 +349,79 @@ describe("CallExpressionRefinementRule", function () {
 
 				// assert
 				expect(context.getType(input)).to.be.instanceOf(StringType);
+			});
+		});
+
+		describe("recursion", function () {
+			it("terminates recursive calls after 20 rounds", function () {
+				// arrange
+				const functionDeclaration = t.functionDeclaration(t.identifier("f"), [], t.blockStatement([]));
+				const f = new Symbol("f", SymbolFlags.Variable);
+
+
+				const c1 = t.callExpression(t.identifier("f"), []);
+				const calls = [];
+				let args = [];
+
+				// create an array with 1000 call expressions. It simulates a function where the body always adds one more
+				// argument and calls itself again.
+				for (let i = 0; i < 1000; ++i) {
+					args = args.concat(t.numericLiteral(i));
+					calls.push(t.callExpression(t.identifier("f"), args));
+				}
+
+				program.symbolTable.setSymbol(functionDeclaration, f);
+				context.setType(f, new FunctionType(new NullType(), [], new VoidType(), functionDeclaration));
+				for (const call of calls.concat(c1)) {
+					program.symbolTable.setSymbol(call.callee, f);
+				}
+
+				let nextCall = 0;
+				typeInferenceAnalysis.analyse = (node, typeEnvironment) => {
+					if (nextCall > 20) {
+						expect.fail("Recursive function is called more then twenty times, should terminate after 20 calls");
+					}
+
+					rule.refine(calls[nextCall++], context);
+
+					return typeEnvironment;
+				};
+
+				typeInferenceAnalysis.infer.returns(new NumberType());
+
+				// act
+				rule.refine(c1, context);
+			});
+
+			it("detects recursive calls with the same arguments and uses the return type of the previously called function", function () {
+				// arrange
+				const functionDeclaration = t.functionDeclaration(t.identifier("successor"), [t.identifier("x")], t.blockStatement([]));
+				const successor = new Symbol("successor", SymbolFlags.Variable);
+				const x = new Symbol("x", SymbolFlags.Variable);
+
+				program.symbolTable.setSymbol(functionDeclaration, successor);
+				program.symbolTable.setSymbol(functionDeclaration.id, x);
+				context.setType(successor, new FunctionType(new NullType(), [], new VoidType(), functionDeclaration));
+
+				const call = t.callExpression(t.identifier("successor"), [t.numericLiteral(4)]);
+				program.symbolTable.setSymbol(call.callee, successor);
+				let analyseCount = 0;
+
+				typeInferenceAnalysis.analyse = (node, typeEnvironment) => {
+					++analyseCount;
+					const recursiveCall = t.callExpression(t.identifier("successor"), [t.binaryExpression("-", t.identifier("x"), t.numericLiteral(-1))]);
+					program.symbolTable.setSymbol(recursiveCall.callee, successor);
+					program.symbolTable.setSymbol(recursiveCall.arguments[0].left, x);
+					rule.refine(recursiveCall, context);
+
+					return typeEnvironment.setType(Symbol.RETURN, new NumberType());
+				};
+
+				typeInferenceAnalysis.infer.returns(new NumberType());
+
+				// act
+				expect(rule.refine(call, context)).to.be.instanceOf(NumberType);
+				expect(analyseCount).to.equal(1);
 			});
 		});
 	});

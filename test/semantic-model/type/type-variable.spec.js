@@ -3,12 +3,12 @@ import {TypeVariable} from "../../../lib/semantic-model/types/index";
 
 describe("TypeVariable", function () {
 	describe("fresh", function () {
-		it("returns the same instance", function () {
+		it("returns a new instance", function () {
 			// arrange
 			const original = new TypeVariable();
 
 			// act, assert
-			expect(original.fresh()).to.equal(original);
+			expect(original.fresh()).not.to.equal(original);
 		});
 	});
 
