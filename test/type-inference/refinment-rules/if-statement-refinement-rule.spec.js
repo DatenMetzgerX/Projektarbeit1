@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {IfStatementRefinementRule} from "../../../lib/type-inference/refinement-rules/if-statement-refinement-rule";
 import {VoidType} from "../../../lib/semantic-model/types";
 
@@ -11,7 +11,7 @@ describe("IfStatementRefinementRule", function () {
 
 	beforeEach(function () {
 		rule = new IfStatementRefinementRule();
-		context = new RefinementContext();
+		context = new HindleyMilnerContext();
 
 		test = t.unaryExpression("!", t.identifier("x"));
 		ifStatement = t.ifStatement(test, t.expressionStatement(t.callExpression(t.identifier("log"), [t.stringLiteral("x is falsy")])));

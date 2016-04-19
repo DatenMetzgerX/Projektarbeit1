@@ -6,7 +6,7 @@ import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 import {TypeUnificator} from "../../lib/type-inference/type-unificator";
 import {Program} from "../../lib/semantic-model/program";
 import {NumberType, TypeVariable, StringType, NullType, MaybeType} from "../../lib/semantic-model/types";
-import {RefinementContext} from "../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../lib/type-inference/hindley-milner-context";
 import {UnificationError} from "../../lib/type-inference/type-unificator";
 import {SymbolFlags, Symbol} from "../../lib/semantic-model/symbol";
 import {TypeInferenceContext} from "../../lib/type-inference/type-inference-context";
@@ -45,11 +45,11 @@ describe("HindleyMilner", function () {
 			refineRule2.refine.returns(new NumberType());
 
 			// act
-			const inferred = hindleyMilner.infer(node, new TypeInferenceContext(program));
+			const inferred = hindleyMilner.infer(node, new HindleyMilnerContext({}, new TypeInferenceContext(program)));
 
 			// assert
 			expect(inferred).to.be.instanceOf(NumberType);
-			sinon.assert.calledWith(refineRule2.refine, node, sinon.match.instanceOf(RefinementContext));
+			sinon.assert.calledWith(refineRule2.refine, node, sinon.match.instanceOf(HindleyMilnerContext));
 		});
 
 		it("throws an exception if no rule can handle the given node", function () {

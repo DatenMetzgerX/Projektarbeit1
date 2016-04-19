@@ -2,17 +2,17 @@ import sinon from "sinon";
 import {expect} from "chai";
 
 import {RecordUnificationRule} from "../../../lib/type-inference/unification-rules/record-unification-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import {StringType, RecordType, NumberType, NullType, MaybeType} from "../../../lib/semantic-model/types";
+import {TypeUnificator} from "../../../lib/type-inference/type-unificator";
 
 describe("RecordUnificationRule", function () {
-	let context, rule, sandbox, name, age, lastName;
+	let unificator, rule, sandbox, name, age, lastName;
 
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
 
-		context = new RefinementContext();
+		unificator = new TypeUnificator([]);
 		rule = new RecordUnificationRule();
 		name = new Symbol("name", SymbolFlags.Property);
 		lastName = new Symbol("lastName", SymbolFlags.Property);
@@ -49,10 +49,10 @@ describe("RecordUnificationRule", function () {
 			const withAge = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
 			const withLastName = RecordType.withProperties([[name, new StringType()], [lastName, new StringType()]]);
 
-			sandbox.stub(context, "unify").returnsArg(0);
+			sandbox.stub(unificator, "unify").returnsArg(0);
 
 			// act
-			const unified = rule.unify(withAge, withLastName, context);
+			const unified = rule.unify(withAge, withLastName, unificator);
 
 			// assert
 			expect(unified.hasProperty(name)).to.be.true;
@@ -66,10 +66,10 @@ describe("RecordUnificationRule", function () {
 			const smaller = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
 			const larger = RecordType.withProperties([[name, new StringType()], [age, new NumberType()], [lastName, new StringType()]]);
 
-			sandbox.stub(context, "unify").returnsArg(0);
+			sandbox.stub(unificator, "unify").returnsArg(0);
 
 			// act
-			const unified = rule.unify(smaller, larger, context);
+			const unified = rule.unify(smaller, larger, unificator);
 
 			// assert
 			expect(unified).to.equal(smaller);
@@ -80,12 +80,12 @@ describe("RecordUnificationRule", function () {
 			const withNameAsNull = RecordType.withProperties([[name, new NullType()], [lastName, new StringType()]]);
 			const withNameAsString = RecordType.withProperties([[name, new StringType()], [lastName, new StringType(), [age, new NumberType()]]]);
 
-			sandbox.stub(context, "unify")
+			sandbox.stub(unificator, "unify")
 				.withArgs(sinon.match.instanceOf(StringType), sinon.match.instanceOf(StringType)).returnsArg(0)
 				.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(new MaybeType(new StringType()));
 
 			// act
-			const unified = rule.unify(withNameAsNull, withNameAsString, context);
+			const unified = rule.unify(withNameAsNull, withNameAsString, unificator);
 
 			// assert
 			expect(unified.getType(name)).to.be.instanceOf(MaybeType);
@@ -97,7 +97,7 @@ describe("RecordUnificationRule", function () {
 			const t1 = new RecordType();
 
 			// act, assert
-			expect(rule.unify(t1, RecordType.ANY, context)).to.equal(t1);
+			expect(rule.unify(t1, RecordType.ANY, unificator)).to.equal(t1);
 		});
 
 		it("returns t2 if t1 is RecordType.ANY", function () {
@@ -105,7 +105,7 @@ describe("RecordUnificationRule", function () {
 			const t2 = new RecordType();
 
 			// act, assert
-			expect(rule.unify(RecordType.ANY, t2, context)).to.equal(t2);
+			expect(rule.unify(RecordType.ANY, t2, unificator)).to.equal(t2);
 		});
 	});
 });

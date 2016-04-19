@@ -4,7 +4,7 @@ import * as t from "babel-types";
 
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
 import {StringType, RecordType, VoidType} from "../../../lib/semantic-model/types";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {MemberExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/member-expression-refinement-rule";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 import {Program} from "../../../lib/semantic-model/program";
@@ -15,7 +15,7 @@ describe("MemberExpressionRefinementRule", function () {
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 
 		sandbox.stub(context, "unify");
 
@@ -63,7 +63,7 @@ describe("MemberExpressionRefinementRule", function () {
 		 * The forward analysis infers what is known about a type and not what is required about a type.
 		 * Therefore if a member is accessed before it's explicit declaration (e.g. assignment, object literal...), then
 		 * we won't create a property for the record as it is not 100% sure if the record has this type. All that is known
-		 * is that the property therefor mgiht be of the type undefined, so lets return undefined.
+		 * is that the property therefor might be of the type undefined, so lets return undefined.
 		 */
 		it("returns void for unknown members", function () {
 			// arrange
@@ -78,28 +78,6 @@ describe("MemberExpressionRefinementRule", function () {
 			context.setType(personSymbol, personType);
 
 			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
-
-			// act
-			const refined = rule.refine(memberExpression, context);
-
-			// assert
-			expect(refined).to.be.instanceOf(VoidType);
-		});
-
-		/**
-		 * This can only be the case if a variable is accessed that has not been declared in this scope and therefore is invalid
-		 * anyway. In this case we return undefined as we assume that the member does not exist and therefor will not have a value
-		 */
-		it("returns void if the object type is not yet known", function () {
-			// arrange
-			const nameSymbol = new Symbol("name", SymbolFlags.Property);
-			const personSymbol = new Symbol("person", SymbolFlags.Variable);
-			personSymbol.addMember(nameSymbol);
-
-			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
-			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
-
-			context.unify.withArgs(RecordType.ANY).returns(new RecordType());
 
 			// act
 			const refined = rule.refine(memberExpression, context);

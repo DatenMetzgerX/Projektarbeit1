@@ -5,7 +5,7 @@ import sinon from "sinon";
 import BINARY_OPERATORS from "../../../lib/type-inference/refinement-rules/binary-operators";
 import {BinaryExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/binary-expression-refinement-rule";
 import {NullType, NumberType} from "../../../lib/semantic-model/types";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
 describe("BinaryExpressionRefinementRule", function () {
@@ -13,7 +13,7 @@ describe("BinaryExpressionRefinementRule", function () {
 
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		sandbox.stub(context, "infer");
 		rule = new BinaryExpressionRefinementRule();
 	});

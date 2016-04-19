@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ObjectExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/object-expression-refinement-rule";
 import {NumberType, StringType, RecordType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
@@ -15,7 +15,7 @@ describe("ObjectExpressRefinementRule", function () {
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		sandbox.stub(context, "infer");
 
 		rule = new ObjectExpressionRefinementRule();
@@ -40,14 +40,18 @@ describe("ObjectExpressRefinementRule", function () {
 	});
 
 	describe("refine", function () {
+		const person = new Symbol("person", SymbolFlags.Variable);
 		const name = new Symbol("name", SymbolFlags.Property);
 		const age = new Symbol("age", SymbolFlags.Property);
+		person.addMember(name);
+		person.addMember(age);
 
 		beforeEach(function () {
 			context.infer.withArgs(objectExpression.properties[0].value).returns(new StringType());
 			context.infer.withArgs(objectExpression.properties[1].value).returns(new NumberType());
 			program.symbolTable.setSymbol(objectExpression.properties[0], name);
 			program.symbolTable.setSymbol(objectExpression.properties[1], age);
+			program.symbolTable.setSymbol(objectExpression, person);
 		});
 
 		it("returns a record type", function () {

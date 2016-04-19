@@ -2,7 +2,7 @@ import {expect} from "chai";
 import sinon from "sinon";
 import * as t from "babel-types";
 import {UnaryExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/unary-expression-refinement-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {NumberType, VoidType, BooleanType, NullType, MaybeType} from "../../../lib/semantic-model/types";
 
 describe("UnaryExpressionRefinementRule", function () {
@@ -10,7 +10,7 @@ describe("UnaryExpressionRefinementRule", function () {
 
 	beforeEach(function() {
 		rule = new UnaryExpressionRefinementRule();
-		context = new RefinementContext();
+		context = new HindleyMilnerContext();
 	});
 
 	describe("canRefine", function() {

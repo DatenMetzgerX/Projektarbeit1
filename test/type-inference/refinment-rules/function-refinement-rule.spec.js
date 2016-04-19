@@ -5,7 +5,7 @@ import sinon from "sinon";
 import {FunctionRefinementRule} from "../../../lib/type-inference/refinement-rules/function-refinement-rule";
 import {FunctionType, TypeVariable, NullType, VoidType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ControlFlowGraph, BRANCHES} from "../../../lib/cfg/control-flow-graph";
 import {Edge} from "../../../lib/cfg/edge";
 import {Node} from "../../../lib/cfg/node";
@@ -21,7 +21,7 @@ describe("FunctionRefinementRule", function () {
 		sinon.stub(cfg, "getExitEdges");
 
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		sinon.stub(context, "getCfg").returns(cfg);
 	});
 
@@ -79,6 +79,21 @@ describe("FunctionRefinementRule", function () {
 			expect(rule.refine(functionDeclaration, context)).to.be.instanceOf(FunctionType);
 		});
 
+		it("Sets the function type in the symbol table", function () {
+			// arrange
+			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
+			cfg.getExitEdges.returns([]);
+
+			const functionSymbol = new Symbol("abcd", SymbolFlags.Function);
+			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
+
+			// act
+			rule.refine(functionDeclaration, context);
+
+			// assert
+			expect(context.getType(functionSymbol)).to.be.instanceOf(FunctionType);
+		});
+
 		it("adds a type parameter for each parameter", function () {
 			// arrange
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([]));
@@ -98,9 +113,6 @@ describe("FunctionRefinementRule", function () {
 			expect(refined.thisType).to.be.instanceOf(NullType); // will be changed when the this parameter will be implemented
 			expect(refined.params[0]).to.be.instanceOf(TypeVariable);
 			expect(refined.params[1]).to.be.instanceOf(TypeVariable);
-
-			expect(context.getType(x)).to.be.instanceOf(TypeVariable);
-			expect(context.getType(y)).to.be.instanceOf(TypeVariable);
 		});
 
 		it("sets the return type to void if no exit edge is an explicit return statement", function () {

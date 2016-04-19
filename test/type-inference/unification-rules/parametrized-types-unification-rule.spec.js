@@ -3,14 +3,14 @@ import sinon from "sinon";
 
 import ParametrizedTypesUnificationRule from "../../../lib/type-inference/unification-rules/parametrized-types-unification-rule";
 import {NumberType, ParametrizedType, StringType} from "../../../lib/semantic-model/types/index";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 
 describe("ParametrizedTypesUnificationRule", function () {
 	let rule, context;
 
 	beforeEach(function () {
 		rule = new ParametrizedTypesUnificationRule();
-		context = new RefinementContext();
+		context = new HindleyMilnerContext();
 		sinon.stub(context, "unify");
 	});
 

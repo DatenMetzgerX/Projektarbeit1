@@ -605,6 +605,19 @@ describe("SymbolExtractor", function () {
 				expect(program.symbolTable.getSymbol(args[0])).to.be.equal(program.globalScope.getOwnSymbol("x"));
 				expect(program.symbolTable.getSymbol(args[1])).to.be.equal(program.globalScope.getOwnSymbol("y"));
 			});
+
+			it("associates the callee with the symbol of the called function", function () {
+				// arrange
+				const log = new Symbol("log", SymbolFlags.Property);
+				program.globalScope.addSymbol(log);
+
+				// act
+				const ast = extractSymbols("log(x, y)");
+
+				// assert
+				const callExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(callExpression.callee)).to.be.equal(log);
+			});
 		});
 
 		describe("MemberExpression", function () {

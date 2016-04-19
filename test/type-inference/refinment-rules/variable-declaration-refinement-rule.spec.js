@@ -3,7 +3,7 @@ import {expect} from "chai";
 import * as t from "babel-types";
 
 import {VariableDeclarationRefinementRule} from "../../../lib/type-inference/refinement-rules/variable-declaration-refinement-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import {StringType, VoidType, NumberType} from "../../../lib/semantic-model/types";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
@@ -14,7 +14,7 @@ describe("VariableDeclarationRefinementRule", function () {
 
 	beforeEach(function () {
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		rule = new VariableDeclarationRefinementRule();
 	});
 

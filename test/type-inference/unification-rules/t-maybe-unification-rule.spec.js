@@ -1,10 +1,10 @@
 import {expect} from "chai";
 
 import TMaybeUnificationRule from "../../../lib/type-inference/unification-rules/t-maybe-unification-rule";
-import {NullType, MaybeType, Type} from "../../../lib/semantic-model/types/index";
+import {NullType, MaybeType, Type, StringType, NumberType} from "../../../lib/semantic-model/types/index";
 import {TypeUnificator} from "../../../lib/type-inference/type-unificator";
 
-describe("NullMaybeUnificationRule", function () {
+describe("TMaybeUnificationRule", function () {
 	let rule;
 	let unificator;
 
@@ -42,10 +42,10 @@ describe("NullMaybeUnificationRule", function () {
 
 		it("fails if MaybeType.of cannot be unified with the other type", function () {
 			// arrange
-			const maybe = new MaybeType(new Type("number"));
+			const maybe = new MaybeType(new NumberType("number"));
 
 			// act, assert
-			expect(() => rule.unify(new NullType(), maybe, unificator)).to.throw("Unification for type 'null' and 'number' failed because there exists no rule that can be used to unify the given types.");
+			expect(() => rule.unify(new StringType(), maybe, unificator)).to.throw("Unification for type 'string' and 'number' failed because there exists no rule that can be used to unify the given types.");
 		});
 	});
 });

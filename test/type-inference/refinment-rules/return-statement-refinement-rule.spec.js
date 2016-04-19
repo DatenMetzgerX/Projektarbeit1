@@ -3,9 +3,9 @@ import * as t from "babel-types";
 import sinon from "sinon";
 
 import {ReturnStatementRefinementRule} from "../../../lib/type-inference/refinement-rules/return-statement-refinement-rule";
-import {FunctionType, TypeVariable, NumberType, VoidType} from "../../../lib/semantic-model/types";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
-import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
+import {NullType, NumberType, VoidType, MaybeType} from "../../../lib/semantic-model/types";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
+import {Symbol} from "../../../lib/semantic-model/symbol";
 import {Program} from "../../../lib/semantic-model/program";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 
@@ -14,7 +14,7 @@ describe("ReturnStatementRefinementRule", function () {
 
 	beforeEach(function () {
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		sinon.stub(context, "infer");
 		sinon.stub(context, "unify");
 		rule = new ReturnStatementRefinementRule();
@@ -39,79 +39,50 @@ describe("ReturnStatementRefinementRule", function () {
 	});
 
 	describe("refine", function () {
-		it("throws if the enclosing function is anonymous", function () {
-			// arrange
-			const returnStatement = t.returnStatement(t.identifier("x"));
-			const arrowFunction = t.arrowFunctionExpression([], t.blockStatement([returnStatement]));
 
-			// act, assert
-			expect(() => rule.refine(arrowFunction)).to.throw("Type inference failure: return statements inside of anonymous functions are not yet supported");
-		});
-
-		it("sets the return type of the enclosing function to the evaluated type of the return expression", function () {
+		it("sets the type of the `return` symbol to the evaluated type of the return expression", function () {
 			// arrange
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
-			const functionDeclaration = t.functionDeclaration(t.identifier("duplicate"), [], t.blockStatement([returnStatement]));
-			returnStatement.parent = functionDeclaration;
 
-			const functionSymbol = new Symbol("duplicate", SymbolFlags.Function);
-			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
-
-			const functionType = new FunctionType(null, [], new TypeVariable());
-			context.setType(functionSymbol, functionType);
-
-			sinon.spy(context, "replaceType");
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
-			context.unify.returns(new NumberType());
 
 			// act
 			rule.refine(returnStatement, context);
 
 			// assert
-			sinon.assert.calledWith(context.unify, functionType.returnType, sinon.match.instanceOf(NumberType), returnStatement);
-			sinon.assert.calledWith(context.replaceType, functionSymbol);
-
-			expect(context.getType(functionSymbol)).to.have.property("returnType").that.is.an.instanceOf(NumberType);
+			expect(context.getType(Symbol.RETURN)).to.be.an.instanceOf(NumberType);
 		});
 
-		it("sets the return type of the enclosing function to VoidType if the return statement has no argument (just return;)", function () {
+		it("unifies the type of the `return` symbol with the type of the return `argument`", function () {
 			// arrange
-			const returnStatement = t.returnStatement();
-			const functionDeclaration = t.functionDeclaration(t.identifier("duplicate"), [], t.blockStatement([returnStatement]));
-			returnStatement.parent = functionDeclaration;
+			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
 
-			const functionSymbol = new Symbol("duplicate", SymbolFlags.Function);
-			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
-
-			const functionType = new FunctionType(null, [], new TypeVariable());
-			context.setType(functionSymbol, functionType);
-			context.unify.returns(new VoidType());
-
-			sinon.spy(context, "replaceType");
+			context.setType(Symbol.RETURN, new NullType());
+			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
+			context.unify.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(NumberType)).returns(new MaybeType(new NumberType()));
 
 			// act
 			rule.refine(returnStatement, context);
 
 			// assert
-			sinon.assert.calledWith(context.unify, functionType.returnType, sinon.match.instanceOf(VoidType), returnStatement);
-			sinon.assert.calledWith(context.replaceType, functionSymbol);
-			expect(context.getType(functionSymbol)).to.have.property("returnType").that.is.an.instanceOf(VoidType);
+			expect(context.getType(Symbol.RETURN)).to.be.an.instanceOf(MaybeType);
+		});
+
+		it("sets the type of the `return` symbol to VoidType if the return statement has no argument (just return;)", function () {
+			// arrange
+			const returnStatement = t.returnStatement();
+
+			// act
+			rule.refine(returnStatement, context);
+
+			// assert
+			expect(context.getType(Symbol.RETURN)).to.be.an.instanceOf(VoidType);
 		});
 
 		it("the type of a return statement is void", function () {
 			// arrange
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
-			const functionDeclaration = t.functionDeclaration(t.identifier("duplicate"), [], t.blockStatement([returnStatement]));
-			returnStatement.parent = functionDeclaration;
-
-			const functionSymbol = new Symbol("duplicate", SymbolFlags.Function);
-			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
-
-			const functionType = new FunctionType(null, [], new TypeVariable());
-			context.setType(functionSymbol, functionType);
-
 			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
-			context.unify.returns(new NumberType());
 
 			// act, assert
 			expect(rule.refine(returnStatement, context)).to.be.instanceOf(VoidType);

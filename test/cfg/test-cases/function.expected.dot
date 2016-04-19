@@ -13,10 +13,10 @@ digraph cfg {
   "11" [ label = "17 console.log(\"Complete\")" ];
   "12" [ label = "EOF" ];
   "0" -> "1" [ label = "Unconditional" ];
-  "1" -> "11" [ label = "Unconditional" ];
-  "2" -> "3" [ label = "Unconditional" ];
-  "3" -> "10" [ label = "Unconditional" ];
-  "4" -> "5" [ label = "Unconditional" ];
+  "1" -> "2" [ label = "Unconditional" ];
+  "2" -> "11" [ label = "Unconditional" ];
+  "3" -> "4" [ label = "Unconditional" ];
+  "4" -> "10" [ label = "Unconditional" ];
   "5" -> "6" [ label = "Unconditional" ];
   "6" -> "7" [ label = "True" ];
   "6" -> "9" [ label = "False" ];

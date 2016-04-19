@@ -89,4 +89,80 @@ function query(includeAge) {// any -> void
 const x = 19;				// number
 x.y = 12;					// x: { y: number }
 
-/// Wann entstehen eigentlich Unions??? 
+
+
+// -------------------------
+// Read of unknown property:
+// This should typecheck correctly
+// -------------------------
+const p = {};
+
+if (!p.name) {
+	p.name = "Test";
+}
+
+// -------------------------
+// Read from unknown object:
+// This should throw a null ptr
+// -------------------------
+const p = {};
+
+if (!p.address.street) { // throws
+	p.address.street = "Test";
+}
+
+// -------------------------
+// Function call that has side effects to a parameter
+// -------------------------
+function setName(x, name) {
+	x.name = name;
+}
+
+let a = {};
+setName(a, "test"); // a = {name: string}
+
+// -------------------------
+// Function call that assigns an argument and changes it's type
+// -------------------------
+function toNumber(x) {
+	if (x == null) {
+		x = 0
+	}
+	
+	return x;
+}
+
+let a = null;
+toNumber(a) // a still needs to be of type null. 
+
+// Can we say that the type of the parameters should only be substituted if they still have the same id? But thats not the case if a member is assigned (returns another type)
+// overall this only applies to record types. Changes to other types can safely be ignored. The question is, how to find out if the type has changed or not
+
+// -------------------------
+// Not invoked function wiht access to member
+// Needs to typecheck safely
+// -------------------------
+
+function getName(x) {
+	return x.name; // what's the return type?
+}
+
+// -------------------------
+// Not invoked function with access to mutilpe members
+// Needs to typecheck safely
+// -------------------------
+
+function area(x) {
+	return x.length * x.width; // whats the type of length and width? 
+}
+
+
+// -------------------------
+// Invocation of function result
+// -------------------------
+function id(x) {
+	return x;
+}
+
+id(id)(10); // T = number
+

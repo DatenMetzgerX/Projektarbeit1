@@ -52,7 +52,7 @@ describe("computeSuccessor", () => {
 			expect(successor).to.equalPath(path.get("body")[1]);
 		});
 
-		it("skips function declarations", () => {
+		it("includes function declarations", () => {
 			// arrange
 			const path = getPath(`
 			let x = 10;
@@ -66,10 +66,10 @@ describe("computeSuccessor", () => {
 			const successor = computeSuccessor(path.get("body")[0]);
 
 			// assert
-			expect(successor).to.equalPath(path.get("body")[2]);
+			expect(successor).to.equalPath(path.get("body")[1]);
 		});
 
-		it("returns null (EOF) when the node is a function declaration", () => {
+		it("returns the direct successor of the function declaration", () => {
 			// arrange
 			const path = getPath(`
 			let x = 10;
@@ -81,6 +81,23 @@ describe("computeSuccessor", () => {
 
 			// act
 			const successor = computeSuccessor(path.get("body")[1]);
+
+			// assert
+			expect(successor).to.equal(path.get("body")[2]);
+		});
+
+		it("returns null (EOF) when the node is the body of a function declaration", () => {
+			// arrange
+			const path = getPath(`
+			let x = 10;
+			function hy () {
+				console.log("Hello world");
+			}
+			++x;
+			`);
+
+			// act
+			const successor = computeSuccessor(path.get("body")[1].get("body"));
 
 			// assert
 			expect(successor).to.be.null;

@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import * as t from "babel-types";
 import {IdentifierRefinementRule} from "../../../lib/type-inference/refinement-rules/identifier-refinement-rule";
-import {RefinementContext} from "../../../lib/type-inference/refinement-context";
+import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {VoidType, NumberType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import {Program} from "../../../lib/semantic-model/program";
@@ -12,7 +12,7 @@ describe("IdentifierRefinementRule", function () {
 
 	beforeEach(function () {
 		program = new Program();
-		context = new RefinementContext(null, new TypeInferenceContext(program));
+		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 		rule = new IdentifierRefinementRule();
 	});
 
