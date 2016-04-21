@@ -134,7 +134,7 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(objectNode, person);
 			program.symbolTable.setSymbol(nameNode, name);
 
-			const personType = RecordType.withProperties();
+			const personType = new RecordType();
 			context.setType(person, personType);
 
 			// act
@@ -160,8 +160,8 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(addressNode, address);
 			program.symbolTable.setSymbol(streetNode, street);
 
-			const addressType = RecordType.withProperties();
-			const personType = RecordType.withProperties([[address, addressType]]);
+			const addressType = new RecordType();
+			const personType = RecordType.create(RecordType, [[address, addressType]]);
 
 			context.setType(person, personType);
 
@@ -181,7 +181,7 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(thisNode, Symbol.THIS);
 			program.symbolTable.setSymbol(nameNode, name);
 
-			const thisType = RecordType.withProperties();
+			const thisType = new RecordType();
 			context.setType(Symbol.THIS, thisType);
 
 			// act, assert
@@ -199,13 +199,11 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(personNode, person);
 			program.symbolTable.setSymbol(nameNode, name);
 
-			const personType = new StringType();
+			const personType = new NumberType();
 			context.setType(person, personType);
 
-			typeInferenceAnalysis.unify.throws(new Error("Cannot unify string with record type"));
-
 			// act
-			expect(() => context.getObjectType(nameNode)).to.throw("Cannot unify string with record type");
+			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Type number is no record type and no conversion to record type exists, cannot be used as object.");
 		});
 
 		it("fails if the object type is null", function () {
@@ -222,7 +220,7 @@ describe("HindleyMilnerContext", function () {
 			const personType = new NullType();
 			context.setType(person, personType);
 
-			typeInferenceAnalysis.unify.returns(new MaybeType(RecordType.withProperties()));
+			typeInferenceAnalysis.unify.returns(new MaybeType(new RecordType()));
 
 			// act
 			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type null.");
@@ -242,7 +240,7 @@ describe("HindleyMilnerContext", function () {
 			const personType = new VoidType();
 			context.setType(person, personType);
 
-			typeInferenceAnalysis.unify.returns(RecordType.withProperties());
+			typeInferenceAnalysis.unify.returns(new RecordType());
 
 			// act
 			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type undefined.");

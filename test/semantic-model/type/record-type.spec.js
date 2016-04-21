@@ -9,7 +9,7 @@ describe("RecordType", function () {
 	describe("fresh", function () {
 		it("returns a new instance that has the same properties", function () {
 			// arrange
-			const original = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
+			const original = createRecord([[name, new StringType()], [age, new NumberType()]]);
 
 			// act
 			const fresh = original.fresh();
@@ -21,7 +21,7 @@ describe("RecordType", function () {
 
 		it("returns a new instance that has not the same id as the original one", function () {
 			// arrange
-			const original = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
+			const original = createRecord([[name, new StringType()], [age, new NumberType()]]);
 
 			// act
 			const fresh = original.fresh();
@@ -47,7 +47,7 @@ describe("RecordType", function () {
 
 		it("throws if a property with the given name already exists", function () {
 			// arrange
-			const record = RecordType.withProperties([[name, new StringType()]]);
+			const record = createRecord([[name, new StringType()]]);
 
 			// act, assert
 			expect(() => record.addProperty(name, new StringType())).to.throw("AssertionError: A property with the given name already exists");
@@ -66,7 +66,7 @@ describe("RecordType", function () {
 		});
 
 		it("returns a new record type where the symbol is associated with the new type", function () {
-			const record = RecordType.withProperties([[name, new NullType()]]);
+			const record = createRecord([[name, new NullType()]]);
 
 			// act
 			const changedRecord = record.setType(name, new StringType());
@@ -88,7 +88,7 @@ describe("RecordType", function () {
 		});
 
 		it("returns an object literal where the key is the name of the property and the value is the type of the property", function () {
-			const record = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
+			const record = createRecord([[name, new StringType()], [age, new NumberType()]]);
 
 			// act, assert
 			expect(record.prettyName).to.equal("{name: string, age: number}");
@@ -108,7 +108,7 @@ describe("RecordType", function () {
 			// arrange
 			const otherType = new TypeVariable();
 
-			const thisType = RecordType.withProperties([[name, otherType]]);
+			const thisType = createRecord([[name, otherType]]);
 
 			// act
 			expect(thisType.containsType(otherType)).to.be.true;
@@ -118,7 +118,7 @@ describe("RecordType", function () {
 			// arrange
 			const otherType = new TypeVariable();
 
-			const thisType = RecordType.withProperties([[name, new StringType()]]);
+			const thisType = createRecord([[name, new StringType()]]);
 
 			// act
 			expect(thisType.containsType(otherType)).to.be.false;
@@ -139,8 +139,8 @@ describe("RecordType", function () {
 			// arrange
 			const lastName = new Symbol("lastName", SymbolFlags.Property);
 
-			const t1 = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
-			const t2 = RecordType.withProperties([[name, new StringType()], [age, new NumberType()], [lastName, new StringType()]]);
+			const t1 = createRecord([[name, new StringType()], [age, new NumberType()]]);
+			const t2 = createRecord([[name, new StringType()], [age, new NumberType()], [lastName, new StringType()]]);
 
 			// act, assert
 			expect(t1.equals(t2)).to.be.false;
@@ -148,8 +148,8 @@ describe("RecordType", function () {
 
 		it("returns false if both records have the same properties but with different types", function () {
 			// arrange
-			const t1 = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
-			const t2 = RecordType.withProperties([[name, new StringType()], [age, new MaybeType(new NumberType())]]);
+			const t1 = createRecord([[name, new StringType()], [age, new NumberType()]]);
+			const t2 = createRecord([[name, new StringType()], [age, new MaybeType(new NumberType())]]);
 
 			// act, assert
 			expect(t1.equals(t2)).to.be.false;
@@ -157,8 +157,8 @@ describe("RecordType", function () {
 
 		it("returns true if both records have the same properties with equal types", function () {
 			// arrange
-			const t1 = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
-			const t2 = RecordType.withProperties([[name, new StringType()], [age, new NumberType()]]);
+			const t1 = createRecord([[name, new StringType()], [age, new NumberType()]]);
+			const t2 = createRecord([[name, new StringType()], [age, new NumberType()]]);
 
 			// act, assert
 			expect(t1.equals(t2)).to.be.true;
@@ -171,7 +171,7 @@ describe("RecordType", function () {
 			const oldType = new TypeVariable();
 			const newType = new StringType();
 
-			const record = RecordType.withProperties([[name, oldType], [age, new NumberType()]]);
+			const record = createRecord([[name, oldType], [age, new NumberType()]]);
 
 			// act
 			const substituted = record.substitute(oldType, newType);
@@ -181,7 +181,7 @@ describe("RecordType", function () {
 		});
 
 		it("returns the same object if no type has been replaced", function () {
-			const record = RecordType.withProperties([[name, new StringType()], [age, new NumberType() ]]);
+			const record = createRecord([[name, new StringType()], [age, new NumberType() ]]);
 
 			// act
 			const substituted = record.substitute(new TypeVariable(), new StringType());
@@ -190,4 +190,8 @@ describe("RecordType", function () {
 			expect(substituted).to.equal(record);
 		});
 	});
+
+	function createRecord(properties) {
+		return RecordType.create(RecordType, properties);
+	}
 });

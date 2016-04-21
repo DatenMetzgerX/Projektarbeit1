@@ -6,10 +6,8 @@ import {CallExpressionRefinementRule} from "../../../lib/type-inference/refineme
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 import {Program} from "../../../lib/semantic-model/program";
-import {VoidType, FunctionType, NullType, StringType} from "../../../lib/semantic-model/types";
+import {ObjectType, NumberType, VoidType, FunctionType, NullType, StringType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
-import {RecordType} from "../../../lib/semantic-model/types/record-type";
-import {NumberType} from "../../../lib/semantic-model/types/number-type";
 
 describe("CallExpressionRefinementRule", function () {
 	let context, rule, program, typeInferenceAnalysis;
@@ -124,7 +122,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				const personType = RecordType.withProperties([[log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration)]]);
+				const personType = ObjectType.create([[log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration)]]);
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -185,7 +183,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				const personType = RecordType.withProperties([[log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration)]]);
+				const personType = ObjectType.create([[log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration)]]);
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -302,7 +300,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(setNameDeclaration.params[0], x);
 				program.symbolTable.setSymbol(setNameDeclaration.params[1], name);
 
-				const personType = RecordType.withProperties();
+				const personType = ObjectType.create();
 				context.setType(person, personType);
 				context.setType(setName, new FunctionType(new NullType(), [], new VoidType(), setNameDeclaration));
 
@@ -315,7 +313,7 @@ describe("CallExpressionRefinementRule", function () {
 				rule.refine(callExpression, context);
 
 				// assert
-				expect(context.getType(person)).to.be.instanceOf(RecordType);
+				expect(context.getType(person)).to.be.instanceOf(ObjectType);
 				expect(context.getType(person).getType(name)).to.be.instanceOf(StringType);
 			});
 

@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as t from "babel-types";
 
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {StringType, RecordType, VoidType} from "../../../lib/semantic-model/types";
+import {StringType, RecordType, ObjectType, VoidType} from "../../../lib/semantic-model/types";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {MemberExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/member-expression-refinement-rule";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
@@ -47,7 +47,7 @@ describe("MemberExpressionRefinementRule", function () {
 			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
 			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
-			const personType = RecordType.withProperties([[nameSymbol, new StringType()]]);
+			const personType = ObjectType.create([[nameSymbol, new StringType()]]);
 			context.setType(personSymbol, personType);
 
 			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
