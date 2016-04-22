@@ -666,6 +666,15 @@ describe("SymbolExtractor", function () {
 				const x = ast.program.scope.getOwnSymbol("x");
 				expect(program.symbolTable.getSymbol(memberExpression.object)).to.equal(x);
 			});
+
+			it("creates an anonymous symbol for a literal type e.g. 'test'.length", function () {
+				// act
+				const ast = extractSymbols("'test'.length");
+
+				// assert
+				const memberExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(memberExpression.object)).not.to.be.undefined;
+			});
 		});
 	});
 

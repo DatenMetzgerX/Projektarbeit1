@@ -3,7 +3,7 @@ import * as t from "babel-types";
 import sinon from "sinon";
 
 import {FunctionRefinementRule} from "../../../lib/type-inference/refinement-rules/function-refinement-rule";
-import {FunctionType, TypeVariable, NullType, VoidType} from "../../../lib/semantic-model/types";
+import {FunctionType, TypeVariable, VoidType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ControlFlowGraph, BRANCHES} from "../../../lib/cfg/control-flow-graph";
@@ -110,7 +110,7 @@ describe("FunctionRefinementRule", function () {
 			const refined = rule.refine(functionDeclaration, context);
 
 			// assert
-			expect(refined.thisType).to.be.instanceOf(NullType); // will be changed when the this parameter will be implemented
+			expect(refined.thisType).to.be.instanceOf(TypeVariable); // will be changed when the this parameter will be implemented
 			expect(refined.params[0]).to.be.instanceOf(TypeVariable);
 			expect(refined.params[1]).to.be.instanceOf(TypeVariable);
 		});

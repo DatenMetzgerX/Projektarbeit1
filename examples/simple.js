@@ -31,7 +31,7 @@ function id(x) {
 	return x;
 }
 
-const p = { address: {street: "test"} };
+const p = { address: {} };
 setStreet(p, "test");
 setName(p, "Test");
 const name = getName(p);
@@ -43,8 +43,7 @@ function log(m) {
 	m = "test";
 }
 
-
-const n = 10; // n should stay number
+const n = name.substring(3); // n should stay number
 log(n);
 
 function successor(x) {
@@ -56,7 +55,7 @@ function successor(x) {
 }
 
 
-// let z = duplicate(x, y);
+let z = duplicate(x, y);
 let eleven = successor(1000);
 
 // //const x = 10;
