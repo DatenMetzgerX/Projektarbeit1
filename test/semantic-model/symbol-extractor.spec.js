@@ -159,6 +159,18 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("WhileStatement", function () {
+			it("registers the identifiers in the test expression", function () {
+				// act
+				const ast = extractSymbols("while(x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].test)).not.to.be.undefined;
+			});
+		});
+
 		describe("ForStatement", function () {
 			it("adds identifiers used in the init, test or update expression to the current scope", function () {
 				// act
@@ -179,6 +191,28 @@ describe("SymbolExtractor", function () {
 				expect(program.symbolTable.getSymbol(forStatement.init)).to.be.defined;
 				expect(program.symbolTable.getSymbol(forStatement.test)).to.be.defined;
 				expect(program.symbolTable.getSymbol(forStatement.update)).to.be.defined;
+			});
+		});
+
+		describe("ForInStatement", function () {
+			it("registers the identifiers in the left hand side expression", function () {
+				// act
+				const ast = extractSymbols("for (x in y) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].left)).not.to.be.undefined;
+			});
+
+			it("registers the identifiers in the right hand side expression", function () {
+				// act
+				const ast = extractSymbols("for (x in y) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("y");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].right)).not.to.be.undefined;
 			});
 		});
 	});
