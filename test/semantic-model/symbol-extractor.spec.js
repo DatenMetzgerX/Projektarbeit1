@@ -313,6 +313,20 @@ describe("SymbolExtractor", function () {
 				// assert
 				expect(ast.program.body[0].scope).not.to.have.ownSymbol("dump");
 			});
+
+			it("handles the scopes correctly", function () {
+				// act
+				const ast = extractSymbols(`
+				const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+				const even = numbers.filter(function isEven(n) { return n % 2 == 0; });
+				const mapped = numbers.map(function toArray(n) { return [n]; });
+				`);
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("numbers");
+				expect(ast.program.scope).to.have.ownSymbol("even");
+				expect(ast.program.scope).to.have.ownSymbol("mapped");
+			});
 		});
 
 		describe("VariableDeclarator", function () {
