@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {Type, FunctionType, VoidType} from "../../../lib/semantic-model/types/index";
+import {Type, FunctionType, VoidType, StringType, BooleanType, TypeVariable} from "../../../lib/semantic-model/types/index";
 
 describe("FunctionType", function () {
 
@@ -65,6 +65,40 @@ describe("FunctionType", function () {
 
 			// act, assert
 			expect(functionType.prettyName).to.equal("this.(number, string) -> number");
+		});
+	});
+
+	describe("hasCompleteSignature", function () {
+		it("returns true if all types in the function signature are base types", function () {
+			// arrange
+			const func = new FunctionType(new StringType(), [new StringType()], new BooleanType());
+
+			// act, assert
+			expect(func.hasCompleteSignature).to.be.true;
+		});
+
+		it("returns false if the this type is a type variable", function () {
+			// arrange
+			const func = new FunctionType(new TypeVariable(), [new StringType()], new BooleanType());
+
+			// act, assert
+			expect(func.hasCompleteSignature).to.be.false;
+		});
+
+		it("returns false if a parameter is a type variable", function () {
+			// arrange
+			const func = new FunctionType(new StringType(), [new TypeVariable()], new BooleanType());
+
+			// act, assert
+			expect(func.hasCompleteSignature).to.be.false;
+		});
+
+		it("returns false if the return type is a type variable", function () {
+			// arrange
+			const func = new FunctionType(new StringType(), [new StringType()], new TypeVariable());
+
+			// act, assert
+			expect(func.hasCompleteSignature).to.be.false;
 		});
 	});
 });

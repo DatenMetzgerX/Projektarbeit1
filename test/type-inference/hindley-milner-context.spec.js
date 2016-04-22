@@ -172,6 +172,23 @@ describe("HindleyMilnerContext", function () {
 			expect(objectType).to.equal(addressType);
 		});
 
+		it("infers the type of a literal", function () {
+			// arrange
+			const objectNode = t.stringLiteral("Zürich");
+			const lengthNode = t.memberExpression(objectNode, t.identifier("length"));
+
+			const length = new Symbol("length", SymbolFlags.Property);
+
+			program.symbolTable.setSymbol(lengthNode, length);
+			typeInferenceAnalysis.infer.withArgs(objectNode).returns(new StringType());
+
+			// act
+			const objectType = context.getObjectType(lengthNode);
+
+			// assert
+			expect(objectType).to.be.instanceOf(StringType);
+		});
+
 		it("throws if the parent node type is not known", function () {
 			// arrange
 			const thisNode = t.thisExpression();
@@ -185,7 +202,7 @@ describe("HindleyMilnerContext", function () {
 			context.setType(Symbol.THIS, thisType);
 
 			// act, assert
-			expect(() => context.getObjectType(nameNode)).to.throw("Node type MemberExpression for the object of a member expression not yet supported.");
+			expect(() => context.getObjectType(nameNode)).to.throw("Node type ThisExpression for the object of a member expression not yet supported.");
 		});
 
 		it("fails if the object type cannot be unified with the record type", function () {
@@ -203,7 +220,7 @@ describe("HindleyMilnerContext", function () {
 			context.setType(person, personType);
 
 			// act
-			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Type number is no record type and no conversion to record type exists, cannot be used as object.");
+			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Type number is not a record type and cannot be converted to a record type, cannot be used as object.");
 		});
 
 		it("fails if the object type is null", function () {

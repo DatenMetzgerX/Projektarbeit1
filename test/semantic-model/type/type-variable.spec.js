@@ -42,4 +42,15 @@ describe("TypeVariable", function () {
 			expect(first.equals(second)).to.be.false;
 		});
 	});
+
+	describe("isSubType", function () {
+		it("returns true", function () {
+			// arrange
+			const first = new TypeVariable();
+			const second = new TypeVariable();
+
+			// act, assert
+			expect(first.isSubType(second)).to.be.true;
+		});
+	});
 });

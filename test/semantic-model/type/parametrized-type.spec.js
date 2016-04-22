@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {ParametrizedType, MaybeType, Type} from "../../../lib/semantic-model/types";
+import {ParametrizedType, MaybeType, Type, NumberType, NullType, StringType} from "../../../lib/semantic-model/types";
 
 describe("ParametrizedType", function () {
 
@@ -155,6 +155,35 @@ describe("ParametrizedType", function () {
 
 			// assert
 			expect(substituted.typeParameters[0]).to.equal(newType);
+		});
+	});
+
+	describe("isSubType", function () {
+		it("returns true if the type parameters of t are all subtypes of this type", function () {
+			// arrange
+			const t = new TestParametrizedType("array", [new MaybeType(new NumberType())]);
+			const tSub = new TestParametrizedType("array", [new NumberType()]);
+
+			// act, assert
+			expect(t.isSubType(tSub)).to.be.true;
+		});
+
+		it("returns false if any type parameter of t is not a subtype of this type", function () {
+			// arrange
+			const t = new TestParametrizedType("array", [new MaybeType(new NumberType()), new StringType()]);
+			const tNotSub = new TestParametrizedType("array", [new NullType(), new NumberType()]);
+
+			// act, assert
+			expect(t.isSubType(tNotSub)).to.be.false;
+		});
+
+		it("returns false if t is of a different type", function () {
+			// arrange
+			const t = new TestParametrizedType("array", [new NumberType()]);
+			const tDifferent = new MaybeType(new NumberType());
+
+			// act, assert
+			expect(t.isSubType(tDifferent)).to.be.false;
 		});
 	});
 });

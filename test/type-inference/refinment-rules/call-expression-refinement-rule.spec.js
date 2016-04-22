@@ -6,7 +6,7 @@ import {CallExpressionRefinementRule} from "../../../lib/type-inference/refineme
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 import {Program} from "../../../lib/semantic-model/program";
-import {ObjectType, NumberType, VoidType, FunctionType, NullType, StringType} from "../../../lib/semantic-model/types";
+import {ObjectType, NumberType, VoidType, FunctionType, MaybeType, StringType, TypeVariable} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 
 describe("CallExpressionRefinementRule", function () {
@@ -46,7 +46,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 
@@ -68,7 +68,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(context.typeEnvironment.setType(Symbol.RETURN, new VoidType()));
@@ -90,7 +90,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -122,7 +122,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				const personType = ObjectType.create([[log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration)]]);
+				const personType = ObjectType.create([[log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration)]]);
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -152,7 +152,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 
@@ -183,7 +183,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				const personType = ObjectType.create([[log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration)]]);
+				const personType = ObjectType.create([[log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration)]]);
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -223,7 +223,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -249,7 +249,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
 
@@ -272,7 +272,7 @@ describe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(callExpression.callee, log);
 				program.symbolTable.setSymbol(logDeclaration.id, log);
 
-				context.setType(log, new FunctionType(new NullType(), [], new VoidType(), logDeclaration));
+				context.setType(log, new FunctionType(new TypeVariable(), [], new VoidType(), logDeclaration));
 
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
 
@@ -302,7 +302,7 @@ describe("CallExpressionRefinementRule", function () {
 
 				const personType = ObjectType.create();
 				context.setType(person, personType);
-				context.setType(setName, new FunctionType(new NullType(), [], new VoidType(), setNameDeclaration));
+				context.setType(setName, new FunctionType(new TypeVariable(), [], new VoidType(), setNameDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(personType);
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[1]).returns(new StringType());
@@ -336,7 +336,7 @@ describe("CallExpressionRefinementRule", function () {
 
 				const inputType = new StringType();
 				context.setType(input, inputType);
-				context.setType(stringToNumber, new FunctionType(new NullType(), [], new NumberType(), stringToNumberDeclaration));
+				context.setType(stringToNumber, new FunctionType(new TypeVariable(), [], new NumberType(), stringToNumberDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(inputType);
 
@@ -369,7 +369,7 @@ describe("CallExpressionRefinementRule", function () {
 				}
 
 				program.symbolTable.setSymbol(functionDeclaration, f);
-				context.setType(f, new FunctionType(new NullType(), [], new VoidType(), functionDeclaration));
+				context.setType(f, new FunctionType(new TypeVariable(), [], new VoidType(), functionDeclaration));
 				for (const call of calls.concat(c1)) {
 					program.symbolTable.setSymbol(call.callee, f);
 				}
@@ -399,7 +399,7 @@ describe("CallExpressionRefinementRule", function () {
 
 				program.symbolTable.setSymbol(functionDeclaration, successor);
 				program.symbolTable.setSymbol(functionDeclaration.id, x);
-				context.setType(successor, new FunctionType(new NullType(), [], new VoidType(), functionDeclaration));
+				context.setType(successor, new FunctionType(new TypeVariable(), [], new VoidType(), functionDeclaration));
 
 				const call = t.callExpression(t.identifier("successor"), [t.numericLiteral(4)]);
 				program.symbolTable.setSymbol(call.callee, successor);
@@ -420,6 +420,93 @@ describe("CallExpressionRefinementRule", function () {
 				// act
 				expect(rule.refine(call, context)).to.be.instanceOf(NumberType);
 				expect(analyseCount).to.equal(1);
+			});
+		});
+
+		describe("function with complete signatures", function () {
+			it("infers the return type from the function signature", function () {
+				// arrange
+				const trim = new Symbol("trim", SymbolFlags.Property & SymbolFlags.Function);
+				const trimType = new FunctionType(new VoidType(), [], new StringType());
+				context.setType(trim, trimType);
+
+				const callExpression = t.callExpression(t.identifier("trim"), []);
+				program.symbolTable.setSymbol(callExpression.callee, trim);
+
+				// act, assert
+				expect(rule.refine(callExpression, context)).to.be.instanceOf(StringType);
+			});
+
+			it("throws if the this type of the called function is not a subtype of the this expected by the function", function () {
+				// arrange
+				const trim = new Symbol("trim", SymbolFlags.Property & SymbolFlags.Function);
+				const trimType = new FunctionType(new StringType(), [], new StringType());
+				context.setType(trim, trimType);
+
+				const callExpression = t.callExpression(t.identifier("trim"), []);
+				program.symbolTable.setSymbol(callExpression.callee, trim);
+
+				// act, assert
+				expect(() => rule.refine(callExpression, context)).to.throw("Type inference failure: The function cannot be called with this of type 'undefined' whereas 'string' is required.");
+			});
+
+			it("throws if the call misses some required arguments", function () {
+				// arrange
+				const includes = new Symbol("includes", SymbolFlags.Property & SymbolFlags.Function);
+				const includesType = new FunctionType(new VoidType(), [new StringType()], new StringType());
+				context.setType(includes, includesType);
+
+				const callExpression = t.callExpression(t.identifier("includes"), []);
+				program.symbolTable.setSymbol(callExpression.callee, includes);
+
+				// act, assert
+				expect(() => rule.refine(callExpression, context)).to.throw("Type inference failure: The argument 1 with type 'undefined' is not a subtype of the required parameter type 'string'.");
+			});
+
+			it("throws if a call parameter is not a subtype of the parameter type", function () {
+				// arrange
+				const includes = new Symbol("includes", SymbolFlags.Property & SymbolFlags.Function);
+				const includesType = new FunctionType(new VoidType(), [new StringType()], new StringType());
+				context.setType(includes, includesType);
+
+				const callExpression = t.callExpression(t.identifier("includes"), [t.numericLiteral(4)]);
+				program.symbolTable.setSymbol(callExpression.callee, includes);
+
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new NumberType());
+
+				// act, assert
+				expect(() => rule.refine(callExpression, context)).to.throw("Type inference failure: The argument 1 with type 'number' is not a subtype of the required parameter type 'string'.");
+			});
+
+			it("can call a function with missing optional arguments", function () {
+				// arrange
+				const substring = new Symbol("substring", SymbolFlags.Property & SymbolFlags.Function);
+				const substringType = new FunctionType(new VoidType(), [new NumberType(), new MaybeType(new NumberType())], new StringType());
+				context.setType(substring, substringType);
+
+				const callExpression = t.callExpression(t.identifier("substring"), [t.numericLiteral(5)]);
+				program.symbolTable.setSymbol(callExpression.callee, substring);
+
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new NumberType());
+
+				// act, assert
+				expect(rule.refine(callExpression, context)).to.be.instanceOf(StringType);
+			});
+
+			it("can call a function with matching arguments", function () {
+				// arrange
+				const substring = new Symbol("substring", SymbolFlags.Property & SymbolFlags.Function);
+				const substringType = new FunctionType(new VoidType(), [new NumberType(), new MaybeType(new NumberType())], new StringType());
+				context.setType(substring, substringType);
+
+				const callExpression = t.callExpression(t.identifier("substring"), [t.numericLiteral(5), t.numericLiteral(8)]);
+				program.symbolTable.setSymbol(callExpression.callee, substring);
+
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new NumberType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[1]).returns(new NumberType());
+
+				// act, assert
+				expect(rule.refine(callExpression, context)).to.be.instanceOf(StringType);
 			});
 		});
 	});

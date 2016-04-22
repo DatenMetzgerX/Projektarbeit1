@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {RecordType, StringType, NumberType, MaybeType, TypeVariable, NullType} from "../../../lib/semantic-model/types";
+import {RecordType, StringType, NumberType, MaybeType, TypeVariable, NullType, ObjectType} from "../../../lib/semantic-model/types";
 
 describe("RecordType", function () {
 	const name = new Symbol("name", SymbolFlags.Property);
@@ -188,6 +188,53 @@ describe("RecordType", function () {
 
 			// assert
 			expect(substituted).to.equal(record);
+		});
+	});
+
+	describe("isSubType", function () {
+		it("returns true if the type has the same or more properties", function () {
+			// arrange
+			const t1 = createRecord([[name, new StringType()]]);
+			const t2 = createRecord([[name, new StringType()], [ age, new NumberType() ]]);
+
+			// act, assert
+			expect(t1.isSubType(t2)).to.be.true;
+		});
+
+		it("returns true if the type has the same or more properties and the properties are subtypes", function () {
+			// arrange
+			const t1 = createRecord([[name, new MaybeType(new StringType())]]);
+			const t2 = createRecord([[name, new NullType()], [ age, new NumberType() ]]);
+
+			// act, assert
+			expect(t1.isSubType(t2)).to.be.true;
+		});
+
+		it("returns false if the types are not from the same kind (type)", function () {
+			// arrange
+			const t1 = createRecord([[name, new StringType()]]);
+			const t2 = ObjectType.create([[name, new StringType()], [ age, new NumberType() ]]);
+
+			// act, assert
+			expect(t1.isSubType(t2)).to.be.false;
+		});
+
+		it("returns false if a property type is not a sub type", function () {
+			// arrange
+			const t1 = createRecord([[name, new NullType()]]);
+			const t2 = createRecord([[name, new MaybeType(new StringType())], [ age, new NumberType() ]]);
+
+			// act, assert
+			expect(t1.isSubType(t2)).to.be.false;
+		});
+
+		it("returns false if the ssubtype does not have the same properties", function () {
+			// arrange
+			const t1 = createRecord([[name, new StringType()], [ age, new NumberType() ]]);
+			const t2 = createRecord([[name, new StringType()]]);
+
+			// act, assert
+			expect(t1.isSubType(t2)).to.be.false;
 		});
 	});
 

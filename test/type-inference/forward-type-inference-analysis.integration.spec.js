@@ -236,6 +236,39 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		expect(typeEnvironment.getType(eleven)).to.be.instanceOf(NumberType);
 	});
 
+	it("can invoke built in function types", function() {
+		// act
+		const {scope, typeEnvironment} = inferTypes("const uppercase = 'Micha Reiser'.toUpperCase();");
+
+		// assert
+		const uppercase = scope.resolveSymbol("uppercase");
+		expect(typeEnvironment.getType(uppercase)).to.be.instanceOf(StringType);
+	});
+
+	it("throws if a required argument is missing when calling a built in function", function () {
+		expect(() => inferTypes("'Micha Reiser'.substring();")).to.throw("Type inference failure: The argument 1 with type \'undefined\' is not a subtype of the required parameter type \'number\'.");
+	});
+
+	it("throws if an argument of a built in function is not a subtype of the parameter type", function () {
+		expect(() => inferTypes("'Micha Reiser'.substring('3');")).to.throw("Type inference failure: The argument 1 with type \'string\' is not a subtype of the required parameter type \'number\'.");
+	});
+
+	it("a built in function with optional parameters can be invoked", function () {
+		// act
+		const {scope, typeEnvironment} = inferTypes("const substr = 'Micha Reiser'.substring(4);");
+
+		// assert
+		const substring = scope.resolveSymbol("substr");
+		expect(typeEnvironment.getType(substring)).to.be.instanceOf(StringType);
+	});
+
+	it("throws if a built in function is called where the this type is not a subtype of the required this type", function () {
+		expect(() => inferTypes(`
+			const substr = "".substr;
+			substr(3);
+		`)).to.throw("Type inference failure: The function cannot be called with this of type 'undefined' whereas 'string' is required.");
+	});
+
     /**
      * Infers the types for the given code and returns the type environment, ast and the scope of the source file
      * @param code the source code for which the types should be inferred.

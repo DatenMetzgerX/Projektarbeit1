@@ -209,4 +209,25 @@ describe("Type", function () {
 			expect(second.equals(first)).to.be.false;
 		});
 	});
+
+	describe("isSubType", function () {
+		it("returns true if the two types are equal", function () {
+			// arrange
+			const first = new Type("number");
+			const second = new Type("number");
+
+			// act, assert
+			expect(first.isSubType(second)).to.be.true;
+			expect(second.isSubType(first)).to.be.true;
+		});
+
+		it("returns false if the two types are not equal", function () {
+			// arrange
+			const first = new Type("number");
+			const second = new MaybeType(new Type("number"));
+
+			// act, assert
+			expect(first.isSubType(second)).to.be.false;
+		});
+	});
 });
