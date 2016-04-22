@@ -438,6 +438,15 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("ArrayExpression", function () {
+			it("sets the symbols for identifiers used in the array expression", function () {
+				const ast = extractSymbols("let persons = [ p1, p2 ];");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+			});
+		});
+
 		describe("ObjectExpression", function () {
 			it("sets the symbol of the object expression node to the symbol of the variable declaration when the object is directly assigned in a variable declarator", function () {
 				// act
