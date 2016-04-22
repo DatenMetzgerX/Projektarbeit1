@@ -676,6 +676,21 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("ConditionalExpression", function () {
+			it("sets the symbols for identifiers used in the test, consequent and alternate expression", function () {
+				const ast = extractSymbols("p1 ? p2 : p3");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+				expect(ast.program.scope).to.have.ownSymbol("p3");
+
+				const conditionExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(conditionExpression.test)).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(conditionExpression.consequent)).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(conditionExpression.alternate)).not.to.be.undefined;
+			});
+		});
+
 		describe("CallExpression", function () {
 			it("creates a symbol for each identifier used in the arguments", function () {
 				// act
