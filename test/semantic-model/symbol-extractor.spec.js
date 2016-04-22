@@ -159,6 +159,27 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("ThrowStatement", function () {
+			it("registers the identifiers in the argument expression", function () {
+				// act
+				const ast = extractSymbols("throw x");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].argument)).not.to.be.undefined;
+			});
+		});
+
+		describe("TryStatement", function () {
+			it("is supported", function () {
+				// act, assert
+				expect(() => extractSymbols(`
+				try {} finally {}
+				`)).not.to.throw();
+			});
+		});
+
 		describe("WhileStatement", function () {
 			it("registers the identifiers in the test expression", function () {
 				// act
@@ -778,6 +799,18 @@ describe("SymbolExtractor", function () {
 				const scope = ast.program.scope;
 				expect(scope).to.have.ownSymbol("x");
 				expect(program.symbolTable.getSymbol(ast.program.body[0].cases[0].test)).not.to.be.undefined;
+			});
+		});
+
+		describe("CatchCLause", function () {
+			it("registers the identifiers in the catch param expression", function () {
+				// act
+				const ast = extractSymbols("try { } catch (x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].handler.param)).not.to.be.undefined;
 			});
 		});
 	});
