@@ -128,6 +128,18 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("SwitchStatement", function () {
+			it("registers the identifiers in the discriminant expression", function () {
+				// act
+				const ast = extractSymbols("switch (x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].discriminant)).not.to.be.undefined;
+			});
+		});
+
 		describe("ReturnStatement", function () {
 			it("adds an identifier used in the return statement to the current scope", function () {
 				// act
@@ -704,6 +716,20 @@ describe("SymbolExtractor", function () {
 			it("is supported", function () {
 				// act, assert
 				expect(() => extractSymbols("null")).not.to.throw();
+			});
+		});
+	});
+
+	describe("Clauses", function () {
+		describe("SwitchCase", function () {
+			it("registers the identifiers in the test expression", function () {
+				// act
+				const ast = extractSymbols("switch ('test') { case x: }");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].cases[0].test)).not.to.be.undefined;
 			});
 		});
 	});
