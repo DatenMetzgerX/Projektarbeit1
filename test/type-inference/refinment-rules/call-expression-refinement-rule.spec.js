@@ -352,6 +352,8 @@ describe("CallExpressionRefinementRule", function () {
 
 		describe("recursion", function () {
 			it("terminates recursive calls after 20 rounds", function () {
+				this.timeout(5000);
+				
 				// arrange
 				const functionDeclaration = t.functionDeclaration(t.identifier("f"), [], t.blockStatement([]));
 				const f = new Symbol("f", SymbolFlags.Variable);
