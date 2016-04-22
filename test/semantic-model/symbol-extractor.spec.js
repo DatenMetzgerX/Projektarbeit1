@@ -545,6 +545,21 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("SequenceExpression", function () {
+			it("sets the symbols for identifiers used in the expressions", function () {
+				const ast = extractSymbols("p1, p2, p3;");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+				expect(ast.program.scope).to.have.ownSymbol("p3");
+
+				const sequenceExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(sequenceExpression.expressions[0])).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(sequenceExpression.expressions[1])).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(sequenceExpression.expressions[2])).not.to.be.undefined;
+			});
+		});
+
 		describe("UnaryExpression", function () {
 			it("creates a symbol for the identifier used in the argument to the current scope", function () {
 				// act
