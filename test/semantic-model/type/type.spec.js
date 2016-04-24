@@ -25,7 +25,7 @@ describe("Type", function () {
 	});
 
 	describe("fresh", function () {
-		it("returns a new instance with the same name as the original one", function () {
+		it("returns the same instance", function () {
 			// arrange
 			const string = new Type("string");
 
@@ -33,19 +33,7 @@ describe("Type", function () {
 			const fresh = string.fresh();
 
 			// assert
-			expect(fresh).not.to.equal(string);
-			expect(fresh.name).to.equal(string.name);
-		});
-
-		it("returns a instance that has not the same id as the original one", function () {
-			// arrange
-			const string = new Type("string", 10);
-
-			// act
-			const fresh = string.fresh();
-
-			// assert
-			expect(fresh.id).not.to.equal(string.id);
+			expect(fresh).to.equal(string);
 		});
 	});
 

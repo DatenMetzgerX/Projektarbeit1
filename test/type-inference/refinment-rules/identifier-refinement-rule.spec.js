@@ -2,7 +2,7 @@ import {expect} from "chai";
 import * as t from "babel-types";
 import {IdentifierRefinementRule} from "../../../lib/type-inference/refinement-rules/identifier-refinement-rule";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
-import {VoidType, NumberType} from "../../../lib/semantic-model/types";
+import {VoidType, NumberType, TypeVariable} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import {Program} from "../../../lib/semantic-model/program";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
@@ -58,11 +58,11 @@ describe("IdentifierRefinementRule", function () {
 			expect(refinedType).to.be.instanceOf(NumberType);
 		});
 
-		it("returns a fresh copy of the variable to support cases like `z = null; person.age = z; z = 10;` In this case, z has type number, " +
+		it("returns a fresh copy of the variable to support cases like `person.age = z; z = 10;` In this case, z has type number, " +
 			"but this should not be reflected to person.age, whose type still needs to be null as this is the most accurate information known about person.age.", function () {
 			// arrange
 			const identifier = t.identifier("x");
-			const type = NumberType.create();
+			const type = TypeVariable.create();
 
 			const symbol = new Symbol("x", SymbolFlags.Variable);
 			program.symbolTable.setSymbol(identifier, symbol);
