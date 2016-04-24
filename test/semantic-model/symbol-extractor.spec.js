@@ -537,6 +537,19 @@ describe("SymbolExtractor", function () {
 				expect(objectSymbol.getMember("name")).to.have.property("declaration", variableDeclarator.init.properties[0]);
 			});
 
+			it("creates a symbol if the property key is a literal", function () {
+				// act
+				const ast = extractSymbols("let person = { 'name': 'Micha' };");
+
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				const objectSymbol = program.symbolTable.getSymbol(variableDeclarator.init);
+
+				expect(objectSymbol).to.have.symbolMember("name");
+				expect(objectSymbol.getMember("name")).to.have.property("flags", SymbolFlags.Property);
+				expect(objectSymbol.getMember("name")).to.have.property("declaration", variableDeclarator.init.properties[0]);
+			});
+
 			it("does not add the symbol of the member to the current scope", function () {
 				// act
 				const ast = extractSymbols("let person = { name: 'Micha' };");
