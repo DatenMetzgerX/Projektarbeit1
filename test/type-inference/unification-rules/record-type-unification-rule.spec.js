@@ -26,7 +26,7 @@ describe("RecordTypeUnificationRule", function () {
 	describe("canUnify", function () {
 		it("returns true for two record types with equal constructors", function () {
 			// arrange
-			const record = ObjectType.create([[name, new StringType()], [age, new NumberType()]]);
+			const record = ObjectType.create([[name, new StringType()], [age, NumberType.create()]]);
 			const otherRecord = record.addProperty(lastName, new StringType());
 
 			// act, assert
@@ -35,7 +35,7 @@ describe("RecordTypeUnificationRule", function () {
 
 		it("returns false if the two record types are not from the same type", function () {
 			// arrange
-			const record = ObjectType.create([[name, new StringType()], [age, new NumberType()]]);
+			const record = ObjectType.create([[name, new StringType()], [age, NumberType.create()]]);
 			const otherRecord = RecordType.create(RecordType, []);
 
 			// act, assert
@@ -44,7 +44,7 @@ describe("RecordTypeUnificationRule", function () {
 
 		it("returns false if only one of both types is an object type", function () {
 			// arrange
-			const record = ObjectType.create([[name, new StringType()], [age, new NumberType()]]);
+			const record = ObjectType.create([[name, new StringType()], [age, NumberType.create()]]);
 
 			// act, assert
 			expect(rule.canUnify(record, new StringType())).to.be.false;
@@ -55,7 +55,7 @@ describe("RecordTypeUnificationRule", function () {
 	describe("unify", function () {
 		it ("returns the subset with the common properties of the two records", function () {
 			// arrange
-			const withAge = ObjectType.create([[name, new StringType()], [age, new NumberType()]]);
+			const withAge = ObjectType.create([[name, new StringType()], [age, NumberType.create()]]);
 			const withLastName = ObjectType.create([[name, new StringType()], [lastName, new StringType()]]);
 
 			sandbox.stub(unificator, "unify").returnsArg(0);
@@ -72,8 +72,8 @@ describe("RecordTypeUnificationRule", function () {
 
 		it("returns the same record instance if one record is exactly the subset of the other record", function () {
 			// arrange
-			const smaller = ObjectType.create([[name, new StringType()], [age, new NumberType()]]);
-			const larger = ObjectType.create([[name, new StringType()], [age, new NumberType()], [lastName, new StringType()]]);
+			const smaller = ObjectType.create([[name, new StringType()], [age, NumberType.create()]]);
+			const larger = ObjectType.create([[name, new StringType()], [age, NumberType.create()], [lastName, new StringType()]]);
 
 			sandbox.stub(unificator, "unify").returnsArg(0);
 
@@ -86,12 +86,12 @@ describe("RecordTypeUnificationRule", function () {
 
 		it("unifies the types of the properties", function () {
 			// arrange
-			const withNameAsNull = ObjectType.create([[name, new NullType()], [lastName, new StringType()]]);
-			const withNameAsString = ObjectType.create([[name, new StringType()], [lastName, new StringType(), [age, new NumberType()]]]);
+			const withNameAsNull = ObjectType.create([[name, NullType.create()], [lastName, new StringType()]]);
+			const withNameAsString = ObjectType.create([[name, new StringType()], [lastName, new StringType(), [age, NumberType.create()]]]);
 
 			sandbox.stub(unificator, "unify")
 				.withArgs(sinon.match.instanceOf(StringType), sinon.match.instanceOf(StringType)).returnsArg(0)
-				.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(new MaybeType(new StringType()));
+				.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(MaybeType.of(new StringType()));
 
 			// act
 			const unified = rule.unify(withNameAsNull, withNameAsString, unificator);

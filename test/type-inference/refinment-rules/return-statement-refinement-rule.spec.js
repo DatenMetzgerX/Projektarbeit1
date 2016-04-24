@@ -44,7 +44,7 @@ describe("ReturnStatementRefinementRule", function () {
 			// arrange
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
 
-			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
+			context.infer.withArgs(returnStatement.argument).returns(NumberType.create());
 
 			// act
 			rule.refine(returnStatement, context);
@@ -57,9 +57,9 @@ describe("ReturnStatementRefinementRule", function () {
 			// arrange
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
 
-			context.setType(Symbol.RETURN, new NullType());
-			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
-			context.unify.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(NumberType)).returns(new MaybeType(new NumberType()));
+			context.setType(Symbol.RETURN, NullType.create());
+			context.infer.withArgs(returnStatement.argument).returns(NumberType.create());
+			context.unify.withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(NumberType)).returns(MaybeType.of(NumberType.create()));
 
 			// act
 			rule.refine(returnStatement, context);
@@ -82,7 +82,7 @@ describe("ReturnStatementRefinementRule", function () {
 		it("the type of a return statement is void", function () {
 			// arrange
 			const returnStatement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.numericLiteral(2)));
-			context.infer.withArgs(returnStatement.argument).returns(new NumberType());
+			context.infer.withArgs(returnStatement.argument).returns(NumberType.create());
 
 			// act, assert
 			expect(rule.refine(returnStatement, context)).to.be.instanceOf(VoidType);

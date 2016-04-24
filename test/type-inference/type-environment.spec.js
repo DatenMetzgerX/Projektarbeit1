@@ -124,8 +124,8 @@ describe("TypeEnvironment", function () {
 		it("returns a new type environment where the given type and all types that have used the given type as type parameter are replaced", function () {
 			// arrange
 			const t = new StringType();
-			const newT = new NumberType();
-			const maybe = new MaybeType(t);
+			const newT = NumberType.create();
+			const maybe = MaybeType.of(t);
 
 			const x = new Symbol("x");
 			const y = new Symbol("y");
@@ -162,7 +162,7 @@ describe("TypeEnvironment", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const before = new TypeEnvironment().setType(name, new StringType());
-			const after = before.setType(age, new NumberType());
+			const after = before.setType(age, NumberType.create());
 
 			// act
 			const difference = after.difference(before);
@@ -179,8 +179,8 @@ describe("TypeEnvironment", function () {
 
 			const before = new TypeEnvironment()
 				.setType(name, new StringType())
-				.setType(age, new NumberType());
-			const after = before.setType(age, new MaybeType(new NumberType()));
+				.setType(age, NumberType.create());
+			const after = before.setType(age, MaybeType.of(NumberType.create()));
 
 			// act
 			const difference = after.difference(before);
@@ -197,7 +197,7 @@ describe("TypeEnvironment", function () {
 
 			const before = new TypeEnvironment()
 				.setType(name, new StringType())
-				.setType(age, new NumberType());
+				.setType(age, NumberType.create());
 
 			// act
 			const difference = before.difference(before);
@@ -214,7 +214,7 @@ describe("TypeEnvironment", function () {
 			const before = new TypeEnvironment();
 			const after = before
 				.setType(name, new StringType())
-				.setType(age, new NumberType());
+				.setType(age, NumberType.create());
 
 			// act
 			const difference = after.difference(before);

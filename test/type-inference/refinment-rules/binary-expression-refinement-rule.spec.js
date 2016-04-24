@@ -27,7 +27,7 @@ describe("BinaryExpressionRefinementRule", function () {
 			// arrange
 			const binaryExpression = t.binaryExpression("+", t.identifier("x"), t.identifier("y"));
 
-			// act, assert
+			// act, asserts
 			expect(rule.canRefine(binaryExpression)).to.be.true;
 		});
 
@@ -52,10 +52,10 @@ describe("BinaryExpressionRefinementRule", function () {
 		it("uses the binary operator with the given name to refine the type", function () {
 			// arrange
 			const addExpression = t.binaryExpression("+", t.nullLiteral(), t.numericLiteral(4));
-			const nullType = new NullType();
-			const numberType = new NumberType();
+			const nullType = NullType.create();
+			const numberType = NumberType.create();
 
-			sandbox.stub(BINARY_OPERATORS["+"], "refine").returns(new NumberType());
+			sandbox.stub(BINARY_OPERATORS["+"], "refine").returns(NumberType.create());
 
 			context.infer.withArgs(addExpression.left).returns(nullType);
 			context.infer.withArgs(addExpression.right).returns(numberType);

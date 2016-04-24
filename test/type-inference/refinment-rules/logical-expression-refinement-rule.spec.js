@@ -36,7 +36,7 @@ describe("LogicalExpressionRefinementRule", function () {
 			// arrange
 			const logicalExpression = t.logicalExpression("&&", t.identifier("x"), t.identifier("x"));
 
-			sinon.stub(context, "infer").returns(new NumberType());
+			sinon.stub(context, "infer").returns(NumberType.create());
 
 			// act, assert
 			expect(rule.refine(logicalExpression, context)).to.be.instanceOf(BooleanType);
@@ -46,7 +46,7 @@ describe("LogicalExpressionRefinementRule", function () {
 			// arrange
 			const logicalExpression = t.logicalExpression("&&", t.identifier("x"), t.identifier("x"));
 
-			sinon.stub(context, "infer").returns(new NumberType());
+			sinon.stub(context, "infer").returns(NumberType.create());
 
 			// act
 			rule.refine(logicalExpression, context);

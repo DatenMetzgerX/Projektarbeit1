@@ -36,8 +36,8 @@ describe("UpdateExpressionRefinementRule", function () {
 			// arrange
 			const updateExpression = t.updateExpression("++", t.identifier("x"));
 
-			sinon.stub(context, "infer").returns(new NumberType());
-			sinon.stub(context, "unify").returns(new NumberType());
+			sinon.stub(context, "infer").returns(NumberType.create());
+			sinon.stub(context, "unify").returns(NumberType.create());
 
 			// act, assert
 			expect(rule.refine(updateExpression, context)).to.be.instanceOf(NumberType);
@@ -47,8 +47,8 @@ describe("UpdateExpressionRefinementRule", function () {
 			// arrange
 			const updateExpression = t.updateExpression("++", t.identifier("x"));
 
-			sinon.stub(context, "infer").returns(new NumberType());
-			sinon.stub(context, "unify").returns(new NumberType());
+			sinon.stub(context, "infer").returns(NumberType.create());
+			sinon.stub(context, "unify").returns(NumberType.create());
 
 			// act
 			rule.refine(updateExpression, context);

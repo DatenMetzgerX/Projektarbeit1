@@ -153,7 +153,7 @@ describe("Type", function () {
 		it("returns false if the types have not the same constructors", function () {
 			// arrange
 			const first = new Type("number");
-			const second = new MaybeType(new Type("number"));
+			const second = MaybeType.of(new Type("number"));
 
 			// act, assert
 			expect(first.isSameType(second)).to.be.false;
@@ -202,7 +202,7 @@ describe("Type", function () {
 		it("returns false if the types are not from the same kind", function () {
 			// arrange
 			const first = new Type("number");
-			const second = new MaybeType(new Type("number"));
+			const second = MaybeType.of(new Type("number"));
 
 			// act, assert
 			expect(first.equals(second)).to.be.false;
@@ -224,7 +224,7 @@ describe("Type", function () {
 		it("returns false if the two types are not equal", function () {
 			// arrange
 			const first = new Type("number");
-			const second = new MaybeType(new Type("number"));
+			const second = MaybeType.of(new Type("number"));
 
 			// act, assert
 			expect(first.isSubType(second)).to.be.false;

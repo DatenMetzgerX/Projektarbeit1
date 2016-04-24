@@ -36,7 +36,7 @@ describe("WhileStatementRefinementRule", function () {
 			// arrange
 			const whileStatement = t.whileStatement(t.booleanLiteral(true), t.blockStatement([]));
 
-			sinon.stub(context, "infer").returns(new BooleanType());
+			sinon.stub(context, "infer").returns(BooleanType.create());
 
 			// act, assert
 			expect(rule.refine(whileStatement, context)).to.be.instanceOf(VoidType);
@@ -46,7 +46,7 @@ describe("WhileStatementRefinementRule", function () {
 			// arrange
 			const whileStatement = t.whileStatement(t.booleanLiteral(true), t.blockStatement([]));
 
-			sinon.stub(context, "infer").returns(new BooleanType());
+			sinon.stub(context, "infer").returns(BooleanType.create());
 
 			// assert
 			rule.refine(whileStatement, context);

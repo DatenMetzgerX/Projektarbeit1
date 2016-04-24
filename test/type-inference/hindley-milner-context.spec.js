@@ -31,7 +31,7 @@ describe("HindleyMilnerContext", function () {
 		it("calls the infer function of the type inference analysis", function () {
 			// arrange
 			const node = {};
-			const type = new NumberType();
+			const type = NumberType.create();
 
 			typeInferenceAnalysis.infer.returns(type);
 
@@ -48,8 +48,8 @@ describe("HindleyMilnerContext", function () {
 		it("calls the unify function of the type inference analysis", function () {
 			// arrange
 			const node = {};
-			const type1 = new NumberType();
-			const type2 = new NumberType();
+			const type1 = NumberType.create();
+			const type2 = NumberType.create();
 
 			typeInferenceAnalysis.unify.returns(type1);
 
@@ -81,7 +81,7 @@ describe("HindleyMilnerContext", function () {
 		it("returns the type from the type inference context", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-			const type = new NumberType();
+			const type = NumberType.create();
 			typeInferenceContext.setType(symbol, type);
 
 			// act, assert
@@ -93,7 +93,7 @@ describe("HindleyMilnerContext", function () {
 		it("sets the type in the type inference context", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-			const type = new NumberType();
+			const type = NumberType.create();
 
 			// act
 			context.setType(symbol, type);
@@ -107,7 +107,7 @@ describe("HindleyMilnerContext", function () {
 		it("calls the substitute function on the type inference context", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-			const type = new NumberType();
+			const type = NumberType.create();
 			const newType = new StringType();
 
 			context.setType(symbol, type);
@@ -216,7 +216,7 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(personNode, person);
 			program.symbolTable.setSymbol(nameNode, name);
 
-			const personType = new NumberType();
+			const personType = NumberType.create();
 			context.setType(person, personType);
 
 			// act
@@ -234,10 +234,10 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(personNode, person);
 			program.symbolTable.setSymbol(nameNode, name);
 
-			const personType = new NullType();
+			const personType = NullType.create();
 			context.setType(person, personType);
 
-			typeInferenceAnalysis.unify.returns(new MaybeType(new RecordType()));
+			typeInferenceAnalysis.unify.returns(MaybeType.of(new RecordType()));
 
 			// act
 			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type null.");
@@ -254,7 +254,7 @@ describe("HindleyMilnerContext", function () {
 			program.symbolTable.setSymbol(personNode, person);
 			program.symbolTable.setSymbol(nameNode, name);
 
-			const personType = new VoidType();
+			const personType = VoidType.create();
 			context.setType(person, personType);
 
 			typeInferenceAnalysis.unify.returns(new RecordType());

@@ -12,22 +12,22 @@ describe("AnyUnificationRule", function () {
 
 	describe("canUnify", function () {
 		it("returns true if t1 is an any type", function () {
-			expect(rule.canUnify(new AnyType(), new NumberType())).to.be.true;
+			expect(rule.canUnify(AnyType.create(), NumberType.create())).to.be.true;
 		});
 
 		it("returns true if t2 is an any type", function () {
-			expect(rule.canUnify(new NumberType(), new AnyType())).to.be.true;
+			expect(rule.canUnify(NumberType.create(), AnyType.create())).to.be.true;
 		});
 
 		it("returns false if neither t1 nor t2 is an any type", function () {
-			expect(rule.canUnify(new NumberType(), new NumberType())).to.be.false;
+			expect(rule.canUnify(NumberType.create(), NumberType.create())).to.be.false;
 		});
 	});
 
 	describe("unify", function () {
 		it("returns any", function () {
 			// act, assert
-			expect(rule.unify(new NumberType(), new AnyType())).to.be.instanceOf(AnyType);
+			expect(rule.unify(NumberType.create(), AnyType.create())).to.be.instanceOf(AnyType);
 		});
 	});
 });

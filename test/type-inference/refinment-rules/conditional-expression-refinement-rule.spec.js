@@ -37,10 +37,10 @@ describe("ConditionalExpressionRefinementRule", function () {
 			const conditionalExpr = t.conditionalExpression(t.identifier("x"), t.identifier("x"), t.numericLiteral(0));
 
 			sinon.stub(context, "infer")
-				.withArgs(conditionalExpr.consequent).returns(MaybeType.of(new NumberType()))
-				.withArgs(conditionalExpr.alternate).returns(new NumberType());
+				.withArgs(conditionalExpr.consequent).returns(MaybeType.of(NumberType.create()))
+				.withArgs(conditionalExpr.alternate).returns(NumberType.create());
 
-			sinon.stub(context, "unify").returns(MaybeType.of(new NumberType()));
+			sinon.stub(context, "unify").returns(MaybeType.of(NumberType.create()));
 
 			// act, assert
 			expect(rule.refine(conditionalExpr, context)).to.be.instanceOf(MaybeType);
@@ -51,8 +51,8 @@ describe("ConditionalExpressionRefinementRule", function () {
 			// arrange
 			const conditionalExpr = t.conditionalExpression(t.identifier("x"), t.identifier("x"), t.numericLiteral(0));
 
-			sinon.stub(context, "infer").returns(new NumberType());
-			sinon.stub(context, "unify").returns(new NumberType());
+			sinon.stub(context, "infer").returns(NumberType.create());
+			sinon.stub(context, "unify").returns(NumberType.create());
 
 			// act
 			rule.refine(conditionalExpr, context);

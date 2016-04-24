@@ -46,7 +46,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 				const xSymbol = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(assignmentExpression.left, xSymbol);
 				context.unify.returnsArg(0);
-				context.infer.returns(new NumberType());
+				context.infer.returns(NumberType.create());
 
 				// act, assert
 				expect(rule.refine(assignmentExpression, context)).to.be.instanceOf(NumberType);
@@ -57,7 +57,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 				const xSymbol = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(assignmentExpression.left, xSymbol);
 				context.unify.returnsArg(0);
-				context.infer.returns(new NumberType());
+				context.infer.returns(NumberType.create());
 
 				// act
 				rule.refine(assignmentExpression, context);
@@ -79,11 +79,11 @@ describe("AssignmentExpressionRefinementRule", function () {
 			it("uses the binary operator with the given name to refine the type", function () {
 				// arrange
 				const plusAssignment = t.assignmentExpression("+=", t.identifier("x"), t.numericLiteral(4));
-				const xType = new NullType();
-				const numberType = new NumberType();
+				const xType = NullType.create();
+				const numberType = NumberType.create();
 				program.symbolTable.setSymbol(plusAssignment.left, new Symbol("x", SymbolFlags.Variable));
 
-				sandbox.stub(BINARY_OPERATORS["+"], "refine").returns(new NumberType());
+				sandbox.stub(BINARY_OPERATORS["+"], "refine").returns(NumberType.create());
 
 				context.infer.withArgs(plusAssignment.left).returns(xType);
 				context.infer.withArgs(plusAssignment.right).returns(numberType);
@@ -103,8 +103,8 @@ describe("AssignmentExpressionRefinementRule", function () {
 
 				program.symbolTable.setSymbol(plusAssignment.left, x);
 
-				const xType = new NullType();
-				const numberType = new NumberType();
+				const xType = NullType.create();
+				const numberType = NumberType.create();
 
 				context.infer.withArgs(plusAssignment.left).returns(xType);
 				context.infer.withArgs(plusAssignment.right).returns(numberType);
@@ -149,7 +149,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 				const name = new Symbol("name", SymbolFlags.Property);
 				personSymbol.addMember(name);
 				const person = new RecordType();
-				person.addProperty(name, new NullType());
+				person.addProperty(name, NullType.create());
 
 				program.symbolTable.setSymbol(memberExpression.object, personSymbol);
 				program.symbolTable.setSymbol(memberExpression.property, name);

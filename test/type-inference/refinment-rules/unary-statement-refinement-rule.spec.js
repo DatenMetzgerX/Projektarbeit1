@@ -53,7 +53,7 @@ describe("UnaryExpressionRefinementRule", function () {
 			it("returns type void", function () {
 				// arrange
 				const expression = t.unaryExpression("void", t.identifier("x"));
-				sinon.stub(context, "infer").returns(new NumberType());
+				sinon.stub(context, "infer").returns(NumberType.create());
 
 				// act, assert
 				expect(rule.refine(expression, context)).to.be.instanceOf(VoidType);
@@ -64,7 +64,7 @@ describe("UnaryExpressionRefinementRule", function () {
 			it("returns boolean type", function () {
 				// arrange
 				const expression = t.unaryExpression("!", t.identifier("x"));
-				sinon.stub(context, "infer").returns(new NumberType());
+				sinon.stub(context, "infer").returns(NumberType.create());
 
 				// act, assert
 				expect(rule.refine(expression, context)).to.be.instanceOf(BooleanType);
@@ -75,7 +75,7 @@ describe("UnaryExpressionRefinementRule", function () {
 			it("returns string type", function () {
 				// arrange
 				const expression = t.unaryExpression("typeof", t.identifier("x"));
-				sinon.stub(context, "infer").returns(new NumberType());
+				sinon.stub(context, "infer").returns(NumberType.create());
 
 				// act, assert
 				expect(rule.refine(expression, context)).to.be.instanceOf(StringType);
@@ -87,8 +87,8 @@ describe("UnaryExpressionRefinementRule", function () {
 				it("returns number type", function () {
 					// arrange
 					const expression = t.unaryExpression(operator, t.identifier("x"));
-					sinon.stub(context, "infer").returns(new NullType());
-					sinon.stub(context, "unify").returns(new MaybeType(new NumberType()));
+					sinon.stub(context, "infer").returns(NullType.create());
+					sinon.stub(context, "unify").returns(MaybeType.of(NumberType.create()));
 
 					// act, assert
 					expect(rule.refine(expression, context)).to.be.instanceOf(NumberType);
@@ -98,7 +98,7 @@ describe("UnaryExpressionRefinementRule", function () {
 					// arrange
 					const expression = t.unaryExpression(operator, t.identifier("x"));
 					sinon.stub(context, "unify");
-					sinon.stub(context, "infer").returns(new NullType());
+					sinon.stub(context, "infer").returns(NullType.create());
 
 					// act
 					rule.refine(expression, context);

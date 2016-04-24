@@ -36,7 +36,7 @@ describe("TypeUnificator", function () {
 			// arrange
 			const typeUnificator = new TypeUnificator();
 			const typeVariable = new TypeVariable();
-			const numberType = new NumberType();
+			const numberType = NumberType.create();
 
 			// act
 			const unified = typeUnificator.unify(numberType, typeVariable);
@@ -49,7 +49,7 @@ describe("TypeUnificator", function () {
 			// arrange
 			const typeUnificator = new TypeUnificator();
 			const typeVariable = new TypeVariable();
-			const numberType = new NumberType();
+			const numberType = NumberType.create();
 
 			// act
 			const unified = typeUnificator.unify(typeVariable, numberType);
@@ -62,7 +62,7 @@ describe("TypeUnificator", function () {
 			// arrange
 			const typeUnificator = new TypeUnificator();
 			const typeVariable = new TypeVariable(1);
-			const maybeType = new MaybeType(typeVariable);
+			const maybeType = MaybeType.of(typeVariable);
 
 			// act, assert
 			expect(() => typeUnificator.unify(maybeType, typeVariable)).to.throw("Unification for type '@ (1)' and 'Maybe<@ (1)>' failed because The type variable of t1 is contained inside of the type t2 and therefore cannot be replaced by t2.");
@@ -95,8 +95,8 @@ describe("TypeUnificator", function () {
 
 		it("uses the base unification rule that can unify the given two base types", function () {
 			// arrange
-			const numberType = new NumberType();
-			const maybeType = new MaybeType(numberType);
+			const numberType = NumberType.create();
+			const maybeType = MaybeType.of(numberType);
 
 			rule1.canUnify.returns(true);
 			rule1.unify.returns(maybeType);
@@ -113,8 +113,8 @@ describe("TypeUnificator", function () {
 
 		it("throws if no rule can be used for unifying the two base types", function () {
 			// arrange
-			const numberType = new NumberType();
-			const maybeType = new MaybeType(numberType);
+			const numberType = NumberType.create();
+			const maybeType = MaybeType.of(numberType);
 
 			rule1.canUnify.returns(false);
 			rule2.canUnify.returns(false);
@@ -125,8 +125,8 @@ describe("TypeUnificator", function () {
 
 		it("throws if when more then one rule can be used for unifying the two base types", function () {
 			// arrange
-			const numberType = new NumberType();
-			const maybeType = new MaybeType(numberType);
+			const numberType = NumberType.create();
+			const maybeType = MaybeType.of(numberType);
 
 			rule1.canUnify.returns(true);
 			rule2.canUnify.returns(true);

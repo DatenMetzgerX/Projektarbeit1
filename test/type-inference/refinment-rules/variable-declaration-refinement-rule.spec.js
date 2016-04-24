@@ -118,7 +118,7 @@ describe("VariableDeclarationRefinementRule", function () {
 				const y = t.variableDeclarator(t.identifier("y"), t.numericLiteral(5));
 				const ySymbol = new Symbol("y", SymbolFlags.Variable);
 				context.getSymbol.withArgs(y.id).returns(ySymbol);
-				context.infer.withArgs(y.init).returns(new NumberType());
+				context.infer.withArgs(y.init).returns(NumberType.create());
 
 				const declaration = t.variableDeclaration("let", [x, y]);
 

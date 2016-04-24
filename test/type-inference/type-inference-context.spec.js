@@ -46,7 +46,7 @@ describe("TypeInferenceContext", function () {
 		it("calls substitute on the type environment", function () {
 			// arrange
 			const t1 = new StringType();
-			const t2 = new NumberType();
+			const t2 = NumberType.create();
 			const typeEnvironment = new TypeEnvironment();
 			context = new TypeInferenceContext(program, typeEnvironment);
 

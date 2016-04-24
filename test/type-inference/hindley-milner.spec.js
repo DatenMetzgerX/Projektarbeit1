@@ -42,7 +42,7 @@ describe("HindleyMilner", function () {
 			const node = {};
 			refineRule1.canRefine.returns(false);
 			refineRule2.canRefine.returns(true);
-			refineRule2.refine.returns(new NumberType());
+			refineRule2.refine.returns(NumberType.create());
 
 			// act
 			const inferred = hindleyMilner.infer(node, new HindleyMilnerContext({}, new TypeInferenceContext(program)));
@@ -76,8 +76,8 @@ describe("HindleyMilner", function () {
 	describe("unify", function () {
 		it("uses the passed in unificator to unify two types", function () {
 			// arrange
-			const t1 = new NumberType();
-			const t2 = new NumberType();
+			const t1 = NumberType.create();
+			const t2 = NumberType.create();
 			sinon.stub(typeUnificator, "unify").returns(t1);
 
 			// act
@@ -91,7 +91,7 @@ describe("HindleyMilner", function () {
 		it("substitutes the type t1 with the returned type if they are not equal", function () {
 			// arrange
 			const t1 = new TypeVariable();
-			const t2 = new NumberType();
+			const t2 = NumberType.create();
 
 			const context = new TypeInferenceContext(program);
 			sinon.spy(context, "substitute");
@@ -107,7 +107,7 @@ describe("HindleyMilner", function () {
 		it("substitutes the type t2 with the returned type after unification if they are not equal", function () {
 			// arrange
 			const t2 = new TypeVariable();
-			const t1 = new NumberType();
+			const t1 = NumberType.create();
 			sinon.stub(typeUnificator, "unify").returns(t1);
 			const context = new TypeInferenceContext(program);
 			sinon.spy(context, "substitute");
@@ -136,8 +136,8 @@ describe("HindleyMilner", function () {
 
 		it("catches the unification errors and propagates the error as type inference error", function () {
 			// arrange
-			const t1 = new NumberType();
-			const t2 = new NumberType();
+			const t1 = NumberType.create();
+			const t2 = NumberType.create();
 			sinon.stub(typeUnificator, "unify").throws(new UnificationError(t1, t2, "Ooops..."));
 
 			// act, assert
@@ -152,7 +152,7 @@ describe("HindleyMilner", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const env1 = new TypeEnvironment().setType(name, new StringType());
-			const env2 = new TypeEnvironment().setType(age, new NumberType());
+			const env2 = new TypeEnvironment().setType(age, NumberType.create());
 
 			const context = new TypeInferenceContext(program, env1);
 
@@ -170,10 +170,10 @@ describe("HindleyMilner", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const env1 = new TypeEnvironment().setType(name, new StringType());
-			const env2 = new TypeEnvironment().setType(age, new NumberType())
-				.setType(name, new NullType());
+			const env2 = new TypeEnvironment().setType(age, NumberType.create())
+				.setType(name, NullType.create());
 
-			sinon.stub(typeUnificator, "unify").withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(new MaybeType(new StringType()));
+			sinon.stub(typeUnificator, "unify").withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(MaybeType.of(new StringType()));
 
 			const context = new TypeInferenceContext(program, env1);
 

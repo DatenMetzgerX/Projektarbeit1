@@ -7,7 +7,7 @@ describe("FunctionType", function () {
 		it("returns an array containing the this and return type for a function without parameters", function () {
 			// arrange
 			const thisType = new Type("this");
-			const returnType = new VoidType();
+			const returnType = VoidType.create();
 			const functionType = new FunctionType(thisType, [], returnType, {});
 
 			// act, assert
@@ -19,7 +19,7 @@ describe("FunctionType", function () {
 			const thisType = new Type("this");
 			const param1 = new Type("number");
 			const param2 = new Type("string");
-			const returnType = new VoidType();
+			const returnType = VoidType.create();
 			const functionType = new FunctionType(thisType, [param1, param2], returnType, {});
 
 			// act, assert
@@ -33,7 +33,7 @@ describe("FunctionType", function () {
 			const functionType = new FunctionType(new Type("oldThis"), [new Type("number")], new Type("OldReturn"), {});
 
 			// act
-			const newFunction = functionType.withTypeParameters([new Type("this"), new VoidType(), new Type("number"), new Type("string")], functionType.id);
+			const newFunction = functionType.withTypeParameters([new Type("this"), VoidType.create(), new Type("number"), new Type("string")], functionType.id);
 
 			// assert
 			expect(newFunction).not.to.equal(functionType);
@@ -45,7 +45,7 @@ describe("FunctionType", function () {
 			const thisType = new Type("this");
 			const param1 = new Type("number");
 			const param2 = new Type("string");
-			const returnType = new VoidType();
+			const returnType = VoidType.create();
 			const functionType = new FunctionType(new Type("oldThis"), [param1], new Type("OldReturn"), {});
 
 			// act
