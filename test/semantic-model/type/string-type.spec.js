@@ -47,12 +47,12 @@ describe("StringType", function () {
 	});
 
 	describe("setType", function () {
-		it("throws if the type of a built in function should be changed", function () {
+		it("throws if a property of the build in type should be changed", function () {
 			// arrange
 			const sType = StringType.create();
 
 			// act, assert
-			expect(() => sType.setType(new Symbol("trim"), StringType.create())).to.throw("Cannot modify the type of the built in operation string.trim");
+			expect(() => sType.setType(new Symbol("trim"), StringType.create())).to.throw("Cannot modify properties of the built in type string");
 		});
 	});
 });
