@@ -45,7 +45,7 @@ describe("TMaybeUnificationRule", function () {
 			const maybe = MaybeType.of(NumberType.create("number"));
 
 			// act, assert
-			expect(() => rule.unify(new StringType(), maybe, unificator)).to.throw("Unification for type 'string' and 'number' failed because there exists no rule that can be used to unify the given types.");
+			expect(() => rule.unify(StringType.create(), maybe, unificator)).to.throw("Unification for type 'string' and 'number' failed because there exists no rule that can be used to unify the given types.");
 		});
 	});
 });

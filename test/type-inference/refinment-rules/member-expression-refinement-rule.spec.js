@@ -47,7 +47,7 @@ describe("MemberExpressionRefinementRule", function () {
 			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
 			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
-			const personType = ObjectType.create([[nameSymbol, new StringType()]]);
+			const personType = ObjectType.create([[nameSymbol, StringType.create()]]);
 			context.setType(personSymbol, personType);
 
 			context.unify.withArgs(RecordType.ANY, personType).returns(personType);

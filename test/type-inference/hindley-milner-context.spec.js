@@ -108,7 +108,7 @@ describe("HindleyMilnerContext", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
 			const type = NumberType.create();
-			const newType = new StringType();
+			const newType = StringType.create();
 
 			context.setType(symbol, type);
 			sinon.spy(typeInferenceContext, "substitute");
@@ -180,7 +180,7 @@ describe("HindleyMilnerContext", function () {
 			const length = new Symbol("length", SymbolFlags.Property);
 
 			program.symbolTable.setSymbol(lengthNode, length);
-			typeInferenceAnalysis.infer.withArgs(objectNode).returns(new StringType());
+			typeInferenceAnalysis.infer.withArgs(objectNode).returns(StringType.create());
 
 			// act
 			const objectType = context.getObjectType(lengthNode);

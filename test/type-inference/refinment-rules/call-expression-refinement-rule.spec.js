@@ -48,7 +48,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				context.setType(log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration));
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 
 				const logTypeEnvironment = context.typeEnvironment.setType(Symbol.RETURN, VoidType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(logTypeEnvironment);
@@ -70,7 +70,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				context.setType(log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration));
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(context.typeEnvironment.setType(Symbol.RETURN, VoidType.create()));
 
 				// assert
@@ -92,7 +92,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				context.setType(log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration));
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
 
 				// act
@@ -124,7 +124,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				const personType = ObjectType.create([[log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration)]]);
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
 
 				sinon.stub(context, "getObjectType").withArgs(logMember).returns(personType);
@@ -154,7 +154,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				context.setType(log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration));
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 
 				const logTypeEnvironment = context.typeEnvironment.setType(Symbol.RETURN, VoidType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(logTypeEnvironment);
@@ -185,7 +185,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				const personType = ObjectType.create([[log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration)]]);
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
 
 				sinon.stub(context, "getObjectType").withArgs(logMember).returns(personType);
@@ -204,7 +204,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 				const log = new Symbol("log", SymbolFlags.Property);
 
 				program.symbolTable.setSymbol(callExpression.callee, log);
-				context.setType(log, new StringType());
+				context.setType(log, StringType.create());
 
 				// act, assert
 				expect(() => rule.refine(callExpression, context)).to.throw("Type inference failure: Cannot invoke the non function type string.");
@@ -225,7 +225,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 
 				context.setType(log, new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration));
 
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
 
 				// act
@@ -305,9 +305,9 @@ xdescribe("CallExpressionRefinementRule", function () {
 				context.setType(setName, new FunctionType(new TypeVariable(), [], VoidType.create(), setNameDeclaration));
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(personType);
-				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[1]).returns(new StringType());
+				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[1]).returns(StringType.create());
 
-				typeInferenceAnalysis.analyse = (node, typeEnv) => typeEnv.setType(x, personType.addProperty(name, new StringType()));
+				typeInferenceAnalysis.analyse = (node, typeEnv) => typeEnv.setType(x, personType.addProperty(name, StringType.create()));
 
 				// act
 				rule.refine(callExpression, context);
@@ -334,7 +334,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(stringToNumberDeclaration.id, stringToNumber);
 				program.symbolTable.setSymbol(stringToNumberDeclaration.params[0], s);
 
-				const inputType = new StringType();
+				const inputType = StringType.create();
 				context.setType(input, inputType);
 				context.setType(stringToNumber, new FunctionType(new TypeVariable(), [], NumberType.create(), stringToNumberDeclaration));
 
@@ -429,7 +429,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 			it("infers the return type from the function signature", function () {
 				// arrange
 				const trim = new Symbol("trim", SymbolFlags.Property & SymbolFlags.Function);
-				const trimType = new FunctionType(VoidType.create(), [], new StringType());
+				const trimType = new FunctionType(VoidType.create(), [], StringType.create());
 				context.setType(trim, trimType);
 
 				const callExpression = t.callExpression(t.identifier("trim"), []);
@@ -442,7 +442,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 			it("throws if the this type of the called function is not a subtype of the this expected by the function", function () {
 				// arrange
 				const trim = new Symbol("trim", SymbolFlags.Property & SymbolFlags.Function);
-				const trimType = new FunctionType(new StringType(), [], new StringType());
+				const trimType = new FunctionType(StringType.create(), [], StringType.create());
 				context.setType(trim, trimType);
 
 				const callExpression = t.callExpression(t.identifier("trim"), []);
@@ -455,7 +455,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 			it("throws if the call misses some required arguments", function () {
 				// arrange
 				const includes = new Symbol("includes", SymbolFlags.Property & SymbolFlags.Function);
-				const includesType = new FunctionType(VoidType.create(), [new StringType()], new StringType());
+				const includesType = new FunctionType(VoidType.create(), [StringType.create()], StringType.create());
 				context.setType(includes, includesType);
 
 				const callExpression = t.callExpression(t.identifier("includes"), []);
@@ -468,7 +468,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 			it("throws if a call parameter is not a subtype of the parameter type", function () {
 				// arrange
 				const includes = new Symbol("includes", SymbolFlags.Property & SymbolFlags.Function);
-				const includesType = new FunctionType(VoidType.create(), [new StringType()], new StringType());
+				const includesType = new FunctionType(VoidType.create(), [StringType.create()], StringType.create());
 				context.setType(includes, includesType);
 
 				const callExpression = t.callExpression(t.identifier("includes"), [t.numericLiteral(4)]);
@@ -483,7 +483,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 			it("can call a function with missing optional arguments", function () {
 				// arrange
 				const substring = new Symbol("substring", SymbolFlags.Property & SymbolFlags.Function);
-				const substringType = new FunctionType(VoidType.create(), [NumberType.create(), MaybeType.of(NumberType.create())], new StringType());
+				const substringType = new FunctionType(VoidType.create(), [NumberType.create(), MaybeType.of(NumberType.create())], StringType.create());
 				context.setType(substring, substringType);
 
 				const callExpression = t.callExpression(t.identifier("substring"), [t.numericLiteral(5)]);
@@ -498,7 +498,7 @@ xdescribe("CallExpressionRefinementRule", function () {
 			it("can call a function with matching arguments", function () {
 				// arrange
 				const substring = new Symbol("substring", SymbolFlags.Property & SymbolFlags.Function);
-				const substringType = new FunctionType(VoidType.create(), [NumberType.create(), MaybeType.of(NumberType.create())], new StringType());
+				const substringType = new FunctionType(VoidType.create(), [NumberType.create(), MaybeType.of(NumberType.create())], StringType.create());
 				context.setType(substring, substringType);
 
 				const callExpression = t.callExpression(t.identifier("substring"), [t.numericLiteral(5), t.numericLiteral(8)]);

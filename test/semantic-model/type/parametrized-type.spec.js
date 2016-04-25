@@ -170,7 +170,7 @@ describe("ParametrizedType", function () {
 
 		it("returns false if any type parameter of t is not a subtype of this type", function () {
 			// arrange
-			const t = new TestParametrizedType("array", [MaybeType.of(NumberType.create()), new StringType()]);
+			const t = new TestParametrizedType("array", [MaybeType.of(NumberType.create()), StringType.create()]);
 			const tNotSub = new TestParametrizedType("array", [NullType.create(), NumberType.create()]);
 
 			// act, assert

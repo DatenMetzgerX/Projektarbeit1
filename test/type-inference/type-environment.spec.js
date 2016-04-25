@@ -87,7 +87,7 @@ describe("TypeEnvironment", function () {
 		it("returns true if the type environment contains a definition for the given symbol", function () {
 			// arrange
 			const name = new Symbol("name", SymbolFlags.Variable);
-			const typeEnvironment = new TypeEnvironment().setType(name, new StringType());
+			const typeEnvironment = new TypeEnvironment().setType(name, StringType.create());
 
 			// act, assert
 			expect(typeEnvironment.hasType(name)).to.be.true;
@@ -97,7 +97,7 @@ describe("TypeEnvironment", function () {
 			// arrange
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
-			const typeEnvironment = new TypeEnvironment().setType(name, new StringType());
+			const typeEnvironment = new TypeEnvironment().setType(name, StringType.create());
 
 			// act, assert
 			expect(typeEnvironment.hasType(age)).to.be.false;
@@ -123,7 +123,7 @@ describe("TypeEnvironment", function () {
 
 		it("returns a new type environment where the given type and all types that have used the given type as type parameter are replaced", function () {
 			// arrange
-			const t = new StringType();
+			const t = StringType.create();
 			const newT = NumberType.create();
 			const maybe = MaybeType.of(t);
 
@@ -161,7 +161,7 @@ describe("TypeEnvironment", function () {
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
 
-			const before = new TypeEnvironment().setType(name, new StringType());
+			const before = new TypeEnvironment().setType(name, StringType.create());
 			const after = before.setType(age, NumberType.create());
 
 			// act
@@ -178,7 +178,7 @@ describe("TypeEnvironment", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const before = new TypeEnvironment()
-				.setType(name, new StringType())
+				.setType(name, StringType.create())
 				.setType(age, NumberType.create());
 			const after = before.setType(age, MaybeType.of(NumberType.create()));
 
@@ -196,7 +196,7 @@ describe("TypeEnvironment", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const before = new TypeEnvironment()
-				.setType(name, new StringType())
+				.setType(name, StringType.create())
 				.setType(age, NumberType.create());
 
 			// act
@@ -213,7 +213,7 @@ describe("TypeEnvironment", function () {
 
 			const before = new TypeEnvironment();
 			const after = before
-				.setType(name, new StringType())
+				.setType(name, StringType.create())
 				.setType(age, NumberType.create());
 
 			// act

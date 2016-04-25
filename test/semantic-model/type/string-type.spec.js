@@ -7,7 +7,7 @@ describe("StringType", function () {
 	describe("getType", function () {
 		it ("returns the type for built in functions", function () {
 			// arrange
-			const sType = new StringType();
+			const sType = StringType.create();
 
 			// act
 			const trim = sType.getType(new Symbol("trim"));
@@ -21,7 +21,7 @@ describe("StringType", function () {
 
 		it("returns undefined for not existing properties", function () {
 			// arrange
-			const sType = new StringType();
+			const sType = StringType.create();
 
 			// act, assert
 			expect(sType.getType(new Symbol("trim2"))).to.be.undefined;
@@ -31,7 +31,7 @@ describe("StringType", function () {
 	describe("hasProperty", function () {
 		it("returns true for built in types", function () {
 			// arrange
-			const sType = new StringType();
+			const sType = StringType.create();
 
 			// act, assert
 			expect(sType.hasProperty(new Symbol("trim"))).to.be.true;
@@ -39,7 +39,7 @@ describe("StringType", function () {
 
 		it("returns false for not existing properties", function () {
 			// arrange
-			const sType = new StringType();
+			const sType = StringType.create();
 
 			// act, assert
 			expect(sType.hasProperty(new Symbol("trim2"))).to.be.false;
@@ -49,10 +49,10 @@ describe("StringType", function () {
 	describe("setType", function () {
 		it("throws if the type of a built in function should be changed", function () {
 			// arrange
-			const sType = new StringType();
+			const sType = StringType.create();
 
 			// act, assert
-			expect(() => sType.setType(new Symbol("trim"), new StringType())).to.throw("Cannot modify the type of the built in operation string.trim");
+			expect(() => sType.setType(new Symbol("trim"), StringType.create())).to.throw("Cannot modify the type of the built in operation string.trim");
 		});
 	});
 });

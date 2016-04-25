@@ -135,7 +135,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 
 				context.setType(personSymbol, person);
 
-				context.infer.withArgs(assignmentToMember.right).returns(new StringType());
+				context.infer.withArgs(assignmentToMember.right).returns(StringType.create());
 				context.unify.withArgs(sinon.match.instanceOf(RecordType), person).returns(person);
 
 				// act, assert
@@ -155,7 +155,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 				program.symbolTable.setSymbol(memberExpression.property, name);
 				context.setType(personSymbol, person);
 
-				context.infer.withArgs(assignmentToMember.right).returns(new StringType());
+				context.infer.withArgs(assignmentToMember.right).returns(StringType.create());
 				context.unify.withArgs(sinon.match.instanceOf(RecordType), person).returns(person);
 
 				// act, assert

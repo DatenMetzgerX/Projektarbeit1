@@ -151,7 +151,7 @@ describe("HindleyMilner", function () {
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
 
-			const env1 = new TypeEnvironment().setType(name, new StringType());
+			const env1 = new TypeEnvironment().setType(name, StringType.create());
 			const env2 = new TypeEnvironment().setType(age, NumberType.create());
 
 			const context = new TypeInferenceContext(program, env1);
@@ -169,11 +169,11 @@ describe("HindleyMilner", function () {
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
 
-			const env1 = new TypeEnvironment().setType(name, new StringType());
+			const env1 = new TypeEnvironment().setType(name, StringType.create());
 			const env2 = new TypeEnvironment().setType(age, NumberType.create())
 				.setType(name, NullType.create());
 
-			sinon.stub(typeUnificator, "unify").withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(MaybeType.of(new StringType()));
+			sinon.stub(typeUnificator, "unify").withArgs(sinon.match.instanceOf(NullType), sinon.match.instanceOf(StringType)).returns(MaybeType.of(StringType.create()));
 
 			const context = new TypeInferenceContext(program, env1);
 

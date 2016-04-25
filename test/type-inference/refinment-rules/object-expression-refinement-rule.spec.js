@@ -47,7 +47,7 @@ describe("ObjectExpressRefinementRule", function () {
 		person.addMember(age);
 
 		beforeEach(function () {
-			context.infer.withArgs(objectExpression.properties[0].value).returns(new StringType());
+			context.infer.withArgs(objectExpression.properties[0].value).returns(StringType.create());
 			context.infer.withArgs(objectExpression.properties[1].value).returns(NumberType.create());
 			program.symbolTable.setSymbol(objectExpression.properties[0], name);
 			program.symbolTable.setSymbol(objectExpression.properties[1], age);

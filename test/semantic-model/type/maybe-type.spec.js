@@ -68,8 +68,8 @@ describe("MaybeType", function () {
 			// arrange
 			const name = new Symbol("name", SymbolFlags.Property);
 			const age = new Symbol("age", SymbolFlags.Property);
-			const maybe1 = MaybeType.of(ObjectType.create([[name, new StringType()]]));
-			const maybe2 = MaybeType.of(ObjectType.create([[name, new StringType()], [age, NumberType.create() ]]));
+			const maybe1 = MaybeType.of(ObjectType.create([[name, StringType.create()]]));
+			const maybe2 = MaybeType.of(ObjectType.create([[name, StringType.create()], [age, NumberType.create() ]]));
 
 			// act, assert
 			expect(maybe1.isSubType(maybe2)).to.be.true;
@@ -79,7 +79,7 @@ describe("MaybeType", function () {
 			// arrange
 			const name = new Symbol("name", SymbolFlags.Property);
 			const age = new Symbol("age", SymbolFlags.Property);
-			const maybe1 = MaybeType.of(ObjectType.create([[name, new StringType()]]));
+			const maybe1 = MaybeType.of(ObjectType.create([[name, StringType.create()]]));
 			const maybe2 = MaybeType.of(ObjectType.create([[age, NumberType.create() ]]));
 
 			// act, assert
@@ -87,11 +87,11 @@ describe("MaybeType", function () {
 		});
 
 		it("returns true for null", function () {
-			expect(MaybeType.of(new StringType()).isSubType(NullType.create())).to.be.true;
+			expect(MaybeType.of(StringType.create()).isSubType(NullType.create())).to.be.true;
 		});
 
 		it("returns true for void", function () {
-			expect(MaybeType.of(new StringType()).isSubType(VoidType.create())).to.be.true;
+			expect(MaybeType.of(StringType.create()).isSubType(VoidType.create())).to.be.true;
 		});
 
 		it("returns true for Maybe<T>.isSubType(T)", function () {
@@ -107,7 +107,7 @@ describe("MaybeType", function () {
 			const maybe1 = MaybeType.of(NumberType.create());
 
 			// act, assert
-			expect(maybe1.isSubType(new StringType())).to.be.false;
+			expect(maybe1.isSubType(StringType.create())).to.be.false;
 		});
 	});
 });

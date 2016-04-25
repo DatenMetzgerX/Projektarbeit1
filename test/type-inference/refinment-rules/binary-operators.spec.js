@@ -75,7 +75,7 @@ describe("BinaryOperators", function () {
 			it("fails if the right and left parameter type cannot be unified", function () {
 				// arrange
 				const leftType = NumberType.create();
-				const rightType = new StringType();
+				const rightType = StringType.create();
 
 				unify.throws(new Error("Unification of string and number not possible"));
 
