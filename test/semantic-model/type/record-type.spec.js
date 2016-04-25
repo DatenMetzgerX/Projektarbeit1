@@ -50,7 +50,7 @@ describe("RecordType", function () {
 			const record = createRecord([[name, StringType.create()]]);
 
 			// act, assert
-			expect(() => record.addProperty(name, StringType.create())).to.throw("AssertionError: A property with the given name already exists");
+			expect(() => record.addProperty(name, StringType.create())).to.throw("AssertionError: A property with the name 'name' already exists");
 		});
 	});
 
