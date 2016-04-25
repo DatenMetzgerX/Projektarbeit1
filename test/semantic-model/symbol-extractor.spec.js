@@ -239,6 +239,19 @@ describe("SymbolExtractor", function () {
 	});
 
 	describe("Expressions", function () {
+		describe("ArrayExpression", function () {
+			it("sets the symbols for identifiers used in the array", function () {
+				const ast = extractSymbols("[p1, p2, 10]");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+
+				const arrayExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(arrayExpression.elements[0])).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(arrayExpression.elements[1])).not.to.be.undefined;
+			});
+		});
+
 		describe("FunctionExpression", function () {
 			it("creates a new child scope and assigns it to the function node", function () {
 				// act
@@ -381,6 +394,18 @@ describe("SymbolExtractor", function () {
 				expect(ast.program.scope).to.have.ownSymbol("numbers");
 				expect(ast.program.scope).to.have.ownSymbol("even");
 				expect(ast.program.scope).to.have.ownSymbol("mapped");
+			});
+
+			it("sets the symbol for anonmous function", function () {
+				// act
+				const ast = extractSymbols(`
+				(function (count) {
+					console.log(count);
+				})
+				`);
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression)).not.to.be.undefined;
 			});
 		});
 
@@ -841,7 +866,7 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
-		describe("CatchCLause", function () {
+		describe("CatchClause", function () {
 			it("registers the identifiers in the catch param expression", function () {
 				// act
 				const ast = extractSymbols("try { } catch (x) {}");
