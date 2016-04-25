@@ -833,6 +833,18 @@ describe("SymbolExtractor", function () {
 				const memberExpression = ast.program.body[0].expression;
 				expect(program.symbolTable.getSymbol(memberExpression.object)).not.to.be.undefined;
 			});
+
+			it("associates the property with the computed symbol for computed members", function () {
+				// act
+				const ast = extractSymbols(`
+					const numbers = [1, 2, 3, 4, 5];
+					numbers[i];
+				`);
+
+				// assert
+				const indexedAccess = ast.program.body[1].expression;
+				expect(program.symbolTable.getSymbol(indexedAccess.property)).to.equal(Symbol.COMPUTED);
+			});
 		});
 	});
 
