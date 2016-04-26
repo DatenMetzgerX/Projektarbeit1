@@ -236,6 +236,28 @@ describe("SymbolExtractor", function () {
 				expect(program.symbolTable.getSymbol(ast.program.body[0].right)).not.to.be.undefined;
 			});
 		});
+
+		describe("ForOfStatement", function () {
+			it("registers the identifiers in the left hand side expression", function () {
+				// act
+				const ast = extractSymbols("for (x of y) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].left)).not.to.be.undefined;
+			});
+
+			it("registers the identifiers in the right hand side expression", function () {
+				// act
+				const ast = extractSymbols("for (const x of y) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("y");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].right)).not.to.be.undefined;
+			});
+		});
 	});
 
 	describe("Expressions", function () {
@@ -396,7 +418,7 @@ describe("SymbolExtractor", function () {
 				expect(ast.program.scope).to.have.ownSymbol("mapped");
 			});
 
-			it("sets the symbol for anonmous function", function () {
+			it("sets the symbol for anonymous function", function () {
 				// act
 				const ast = extractSymbols(`
 				(function (count) {
@@ -406,6 +428,16 @@ describe("SymbolExtractor", function () {
 
 				// assert
 				expect(program.symbolTable.getSymbol(ast.program.body[0].expression)).not.to.be.undefined;
+			});
+
+			it("sets the symbolf or arrow functions", function () {
+				// act
+				const ast = extractSymbols(`
+				x = n => n;
+				`);
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.right)).not.to.be.undefined;
 			});
 		});
 
