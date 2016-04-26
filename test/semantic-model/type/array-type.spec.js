@@ -6,7 +6,7 @@ import {ArrayType, StringType, MaybeType, NumberType, TypeVariable} from "../../
 describe("ArrayType", function () {
 	describe("prettyName", function () {
 		it("returns T[] where T is the type of the array", function () {
-			expect(ArrayType.of(StringType.create()).prettyName).to.equal("string[]");
+			expect(ArrayType.of(StringType.create()).prettyName).to.equals("string[]");
 		});
 	});
 
@@ -47,7 +47,7 @@ describe("ArrayType", function () {
 			const tNew = ArrayType.of(StringType.create());
 
 			// act, assert
-			expect(tOld.substitute(tOld, tNew)).to.equal(tNew);
+			expect(tOld.substitute(tOld, tNew)).to.equals(tNew);
 		});
 
 		it("substitutes the type in the of type parameter", function () {
@@ -64,7 +64,7 @@ describe("ArrayType", function () {
 			const array = ArrayType.of(StringType.create());
 
 			// act, assert
-			expect(array.substitute(new TypeVariable(), NumberType.create())).to.equal(array);
+			expect(array.substitute(new TypeVariable(), NumberType.create())).to.equals(array);
 		});
 
 		it("substitutes the type in the properties of the type", function () {
@@ -76,7 +76,7 @@ describe("ArrayType", function () {
 
 			// act, assert
 			const substituted = array.substitute(array.getType(description), newPropertyType);
-			expect(substituted.getType(description)).to.equal(newPropertyType);
+			expect(substituted.getType(description)).to.equals(newPropertyType);
 		});
 	});
 
@@ -236,7 +236,7 @@ describe("ArrayType", function () {
 			const updated = array.setType(Symbol.COMPUTED, NumberType.create());
 
 			// assert
-			expect(updated).to.have.property("of").that.is.an.instanceOf(NumberType).and.not.to.equal(array);
+			expect(updated).to.have.property("of").that.is.an.instanceOf(NumberType).and.not.to.equals(array);
 		});
 
 		it("returns a new array with the updated property", function () {
@@ -249,7 +249,7 @@ describe("ArrayType", function () {
 
 			// assert
 			expect(updated.getType(new Symbol("bla"))).to.be.an.instanceOf(NumberType);
-			expect(updated).not.to.equal(array);
+			expect(updated).not.to.equals(array);
 		});
 
 		it("throws if the type of a built in operation should be changed", function () {

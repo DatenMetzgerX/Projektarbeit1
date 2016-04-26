@@ -5,7 +5,7 @@ import * as t from "babel-types";
 import BINARY_OPERATORS from "../../../lib/type-inference/refinement-rules/binary-operators";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {AssignmentExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/assignment-expression-refinement-rule";
-import {NumberType, NullType, StringType, RecordType} from "../../../lib/semantic-model/types";
+import {NumberType, NullType, StringType, RecordType, TypeVariable, AnyType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 import Program from "../../../lib/semantic-model/program";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
@@ -56,7 +56,6 @@ describe("AssignmentExpressionRefinementRule", function () {
 				// arrange
 				const xSymbol = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(assignmentExpression.left, xSymbol);
-				context.unify.returnsArg(0);
 				context.infer.returns(NumberType.create());
 
 				// act
@@ -64,6 +63,21 @@ describe("AssignmentExpressionRefinementRule", function () {
 
 				// assert
 				expect(context.getType(xSymbol)).to.be.instanceOf(NumberType);
+			});
+
+			it("sets a fresh type of the assignee in the type environment", function () {
+				// arrange
+				const xSymbol = new Symbol("x", SymbolFlags.Variable);
+				program.symbolTable.setSymbol(assignmentExpression.left, xSymbol);
+
+				const xType = TypeVariable.create();
+				context.infer.returns(xType);
+
+				// act
+				rule.refine(assignmentExpression, context);
+
+				// assert
+				expect(context.getType(xSymbol)).to.be.instanceOf(TypeVariable).and.not.to.equal(xType);
 			});
 		});
 
@@ -136,7 +150,7 @@ describe("AssignmentExpressionRefinementRule", function () {
 				context.setType(personSymbol, person);
 
 				context.infer.withArgs(assignmentToMember.right).returns(StringType.create());
-				context.unify.withArgs(sinon.match.instanceOf(RecordType), person).returns(person);
+				context.infer.withArgs(memberExpression.object).returns(person);
 
 				// act, assert
 				expect(rule.refine(assignmentToMember, context)).to.be.instanceOf(StringType);
@@ -156,11 +170,31 @@ describe("AssignmentExpressionRefinementRule", function () {
 				context.setType(personSymbol, person);
 
 				context.infer.withArgs(assignmentToMember.right).returns(StringType.create());
-				context.unify.withArgs(sinon.match.instanceOf(RecordType), person).returns(person);
+				context.infer.withArgs(memberExpression.object).returns(person);
 
 				// act, assert
 				expect(rule.refine(assignmentToMember, context)).to.be.instanceOf(StringType);
 				expect(context.getType(personSymbol).getType(name)).to.be.instanceOf(StringType);
+			});
+
+			it("does  not add a member if the object type is any", function () {
+				// arrange
+				const personSymbol = new Symbol("person", SymbolFlags.Variable);
+				const name = new Symbol("name", SymbolFlags.Property);
+				personSymbol.addMember(name);
+
+				const person = AnyType.create();
+
+				program.symbolTable.setSymbol(memberExpression.object, personSymbol);
+				program.symbolTable.setSymbol(memberExpression.property, name);
+
+				context.setType(personSymbol, person);
+
+				context.infer.withArgs(assignmentToMember.right).returns(StringType.create());
+				context.infer.withArgs(memberExpression.object).returns(person);
+
+				// act, assert
+				expect(rule.refine(assignmentToMember, context)).to.be.instanceOf(StringType);
 			});
 		});
 	});

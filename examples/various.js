@@ -166,3 +166,38 @@ function id(x) {
 
 id(id)(10); // T = number
 
+
+
+// -------------------------
+// Computed property
+// -------------------------
+for (let i = 0; i<a.length; ++i) {
+	console.log(i, a[i]);
+}
+
+while (i < a.length) {
+	console.log(a[i++]);
+}
+
+function iterate(array, callback) {
+	for (let i = 0; i < array.length; ++i) {
+		callback(array[i]);
+	}
+}
+
+
+function filter(array, predicate) {
+	let result = [];
+	iterate(array, function (element) {
+		if (predicate(element) === true) {
+			result.push(element);
+		}
+	});
+	
+	return result;
+}
+
+
+filter([1, 2, 3,4, 5,6,7, 8, 9], function (i) {
+	return i % 2 === 0;
+});

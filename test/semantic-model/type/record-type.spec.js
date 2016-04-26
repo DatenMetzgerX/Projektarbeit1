@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {RecordType, StringType, NumberType, MaybeType, TypeVariable, NullType, ObjectType} from "../../../lib/semantic-model/types";
+import {RecordType, StringType, NumberType, MaybeType, TypeVariable, NullType, ObjectType, AnyType} from "../../../lib/semantic-model/types";
 
 describe("RecordType", function () {
 	const name = new Symbol("name", SymbolFlags.Property);
@@ -58,6 +58,11 @@ describe("RecordType", function () {
 		it ("returns false if the record has no property with the given name", function () {
 			expect(new RecordType().hasProperty(name)).to.be.false;
 		});
+
+		// There's no way that it can now if it has the property or not, therefor just return true to not trigger errors
+		it("returns true for a computed property", function () {
+			expect(new RecordType().hasProperty(Symbol.COMPUTED)).to.be.true;
+		});
 	});
 
 	describe("setType", function () {
@@ -74,11 +79,23 @@ describe("RecordType", function () {
 			// assert
 			expect(changedRecord.getType(name)).to.be.instanceOf(StringType);
 		});
+
+		it("returns this if a computed property is set", function () {
+			// arrange
+			const record = createRecord();
+
+			// act, assert
+			expect(record.setType(Symbol.COMPUTED, StringType.create())).to.equal(record);
+		});
 	});
 
 	describe("getType", function () {
 		it("returns undefined if the record has no property with the given name", function () {
 			expect(new RecordType().getType(name)).to.be.undefined;
+		});
+
+		it("returns type any for computed properties", function () {
+			expect(createRecord().getType(Symbol.COMPUTED, StringType.create())).to.be.instanceOf(AnyType);
 		});
 	});
 

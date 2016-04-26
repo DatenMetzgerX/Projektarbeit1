@@ -845,6 +845,19 @@ describe("SymbolExtractor", function () {
 				const indexedAccess = ast.program.body[1].expression;
 				expect(program.symbolTable.getSymbol(indexedAccess.property)).to.equal(Symbol.COMPUTED);
 			});
+
+			it("associates the property with a symbol for computed literal members", function () {
+				// act
+				const ast = extractSymbols(`
+					const person = { name: "Test" };
+					person["name"];
+				`);
+
+				// assert
+				const indexedAccess = ast.program.body[1].expression;
+				expect(program.symbolTable.getSymbol(indexedAccess.property)).not.to.equal(Symbol.COMPUTED);
+				expect(program.symbolTable.getSymbol(indexedAccess.property).name).equal("name");
+			});
 		});
 	});
 

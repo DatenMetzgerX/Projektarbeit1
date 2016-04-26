@@ -45,7 +45,7 @@ describe("ArrayUnificationRule", function () {
 			const unified = rule.unify(array1, array2, unificator);
 
 			// assert
-			expect(unified).to.equal(array1);
+			expect(unified).to.equals(array1);
 		});
 
 		it("returns t1 if the unified type is equal to t1", function () {
@@ -59,7 +59,7 @@ describe("ArrayUnificationRule", function () {
 			const unified = rule.unify(array1, array2, unificator);
 
 			// assert
-			expect(unified).to.equal(array1);
+			expect(unified).to.equals(array1);
 		});
 
 		it("returns t2 if the unified type is equal to t2", function () {
@@ -73,7 +73,7 @@ describe("ArrayUnificationRule", function () {
 			const unified = rule.unify(array1, array2, unificator);
 
 			// assert
-			expect(unified).to.equal(array2);
+			expect(unified).to.equals(array2);
 		});
 
 		it("returns a new array of the unified array type", function () {
@@ -87,7 +87,7 @@ describe("ArrayUnificationRule", function () {
 			const unified = rule.unify(array1, array2, unificator);
 
 			// assert
-			expect(unified).not.to.equal(array1).and.not.to.equal(array2);
+			expect(unified).not.to.equals(array1).and.not.to.equals(array2);
 			expect(unified.of).to.be.an.instanceOf(MaybeType).and.to.have.property("of").that.is.an.instanceOf(StringType);
 		});
 	});
