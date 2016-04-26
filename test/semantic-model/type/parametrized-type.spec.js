@@ -97,7 +97,7 @@ describe("ParametrizedType", function () {
 		it("returns false if the types are not from the same kind", function () {
 			// arrange
 			const first = new Type("number");
-			const second = new MaybeType(new Type("number"));
+			const second = MaybeType.of(new Type("number"));
 
 			// act, assert
 			expect(first.equals(second)).to.be.false;
@@ -116,7 +116,7 @@ describe("ParametrizedType", function () {
 
 		it("returns false if the parameter types are not equal", function () {
 			// arrange
-			const first = new TestParametrizedType("array", [new MaybeType(new Type("number"))]);
+			const first = new TestParametrizedType("array", [MaybeType.of(new Type("number"))]);
 			const second = new TestParametrizedType("array", [new Type("number")]);
 
 			// act, assert
@@ -148,7 +148,7 @@ describe("ParametrizedType", function () {
 			const oldType = new Type("number");
 			const t = new TestParametrizedType("array", [oldType]);
 
-			const newType = new MaybeType(new Type("number"));
+			const newType = MaybeType.of(new Type("number"));
 
 			// act
 			const substituted = t.substitute(oldType, newType);
@@ -161,8 +161,8 @@ describe("ParametrizedType", function () {
 	describe("isSubType", function () {
 		it("returns true if the type parameters of t are all subtypes of this type", function () {
 			// arrange
-			const t = new TestParametrizedType("array", [new MaybeType(new NumberType())]);
-			const tSub = new TestParametrizedType("array", [new NumberType()]);
+			const t = new TestParametrizedType("array", [MaybeType.of(NumberType.create())]);
+			const tSub = new TestParametrizedType("array", [NumberType.create()]);
 
 			// act, assert
 			expect(t.isSubType(tSub)).to.be.true;
@@ -170,8 +170,8 @@ describe("ParametrizedType", function () {
 
 		it("returns false if any type parameter of t is not a subtype of this type", function () {
 			// arrange
-			const t = new TestParametrizedType("array", [new MaybeType(new NumberType()), new StringType()]);
-			const tNotSub = new TestParametrizedType("array", [new NullType(), new NumberType()]);
+			const t = new TestParametrizedType("array", [MaybeType.of(NumberType.create()), StringType.create()]);
+			const tNotSub = new TestParametrizedType("array", [NullType.create(), NumberType.create()]);
 
 			// act, assert
 			expect(t.isSubType(tNotSub)).to.be.false;
@@ -179,8 +179,8 @@ describe("ParametrizedType", function () {
 
 		it("returns false if t is of a different type", function () {
 			// arrange
-			const t = new TestParametrizedType("array", [new NumberType()]);
-			const tDifferent = new MaybeType(new NumberType());
+			const t = new TestParametrizedType("array", [NumberType.create()]);
+			const tDifferent = MaybeType.of(NumberType.create());
 
 			// act, assert
 			expect(t.isSubType(tDifferent)).to.be.false;

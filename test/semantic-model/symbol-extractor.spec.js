@@ -128,6 +128,18 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("SwitchStatement", function () {
+			it("registers the identifiers in the discriminant expression", function () {
+				// act
+				const ast = extractSymbols("switch (x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].discriminant)).not.to.be.undefined;
+			});
+		});
+
 		describe("ReturnStatement", function () {
 			it("adds an identifier used in the return statement to the current scope", function () {
 				// act
@@ -144,6 +156,39 @@ describe("SymbolExtractor", function () {
 
 				// assert
 				expect(program.symbolTable.getSymbol(ast.program.body[0].body.body[0].argument)).not.to.be.undefined;
+			});
+		});
+
+		describe("ThrowStatement", function () {
+			it("registers the identifiers in the argument expression", function () {
+				// act
+				const ast = extractSymbols("throw x");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].argument)).not.to.be.undefined;
+			});
+		});
+
+		describe("TryStatement", function () {
+			it("is supported", function () {
+				// act, assert
+				expect(() => extractSymbols(`
+				try {} finally {}
+				`)).not.to.throw();
+			});
+		});
+
+		describe("WhileStatement", function () {
+			it("registers the identifiers in the test expression", function () {
+				// act
+				const ast = extractSymbols("while(x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].test)).not.to.be.undefined;
 			});
 		});
 
@@ -169,9 +214,44 @@ describe("SymbolExtractor", function () {
 				expect(program.symbolTable.getSymbol(forStatement.update)).to.be.defined;
 			});
 		});
+
+		describe("ForInStatement", function () {
+			it("registers the identifiers in the left hand side expression", function () {
+				// act
+				const ast = extractSymbols("for (x in y) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].left)).not.to.be.undefined;
+			});
+
+			it("registers the identifiers in the right hand side expression", function () {
+				// act
+				const ast = extractSymbols("for (x in y) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("y");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].right)).not.to.be.undefined;
+			});
+		});
 	});
 
 	describe("Expressions", function () {
+		describe("ArrayExpression", function () {
+			it("sets the symbols for identifiers used in the array", function () {
+				const ast = extractSymbols("[p1, p2, 10]");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+
+				const arrayExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(arrayExpression.elements[0])).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(arrayExpression.elements[1])).not.to.be.undefined;
+			});
+		});
+
 		describe("FunctionExpression", function () {
 			it("creates a new child scope and assigns it to the function node", function () {
 				// act
@@ -301,6 +381,32 @@ describe("SymbolExtractor", function () {
 				// assert
 				expect(ast.program.body[0].scope).not.to.have.ownSymbol("dump");
 			});
+
+			it("handles the scopes correctly", function () {
+				// act
+				const ast = extractSymbols(`
+				const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+				const even = numbers.filter(function isEven(n) { return n % 2 == 0; });
+				const mapped = numbers.map(function toArray(n) { return [n]; });
+				`);
+
+				// assert
+				expect(ast.program.scope).to.have.ownSymbol("numbers");
+				expect(ast.program.scope).to.have.ownSymbol("even");
+				expect(ast.program.scope).to.have.ownSymbol("mapped");
+			});
+
+			it("sets the symbol for anonmous function", function () {
+				// act
+				const ast = extractSymbols(`
+				(function (count) {
+					console.log(count);
+				})
+				`);
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression)).not.to.be.undefined;
+			});
 		});
 
 		describe("VariableDeclarator", function () {
@@ -354,6 +460,15 @@ describe("SymbolExtractor", function () {
 
 				// assert
 				expect(program.symbolTable.getSymbol(ast.program.body[0].declarations[0].init)).to.have.property("flags", SymbolFlags.Variable);
+			});
+		});
+
+		describe("ArrayExpression", function () {
+			it("sets the symbols for identifiers used in the array expression", function () {
+				const ast = extractSymbols("let persons = [ p1, p2 ];");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
 			});
 		});
 
@@ -422,6 +537,19 @@ describe("SymbolExtractor", function () {
 				expect(objectSymbol.getMember("name")).to.have.property("declaration", variableDeclarator.init.properties[0]);
 			});
 
+			it("creates a symbol if the property key is a literal", function () {
+				// act
+				const ast = extractSymbols("let person = { 'name': 'Micha' };");
+
+				// assert
+				const variableDeclarator = ast.program.body[0].declarations[0];
+				const objectSymbol = program.symbolTable.getSymbol(variableDeclarator.init);
+
+				expect(objectSymbol).to.have.symbolMember("name");
+				expect(objectSymbol.getMember("name")).to.have.property("flags", SymbolFlags.Property);
+				expect(objectSymbol.getMember("name")).to.have.property("declaration", variableDeclarator.init.properties[0]);
+			});
+
 			it("does not add the symbol of the member to the current scope", function () {
 				// act
 				const ast = extractSymbols("let person = { name: 'Micha' };");
@@ -461,6 +589,21 @@ describe("SymbolExtractor", function () {
 				// assert
 				const variableDeclarator = ast.program.body[0].declarations[0];
 				expect(program.symbolTable.getSymbol(variableDeclarator.init.properties[0])).to.be.defined;
+			});
+		});
+
+		describe("SequenceExpression", function () {
+			it("sets the symbols for identifiers used in the expressions", function () {
+				const ast = extractSymbols("p1, p2, p3;");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+				expect(ast.program.scope).to.have.ownSymbol("p3");
+
+				const sequenceExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(sequenceExpression.expressions[0])).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(sequenceExpression.expressions[1])).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(sequenceExpression.expressions[2])).not.to.be.undefined;
 			});
 		});
 
@@ -580,6 +723,21 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("ConditionalExpression", function () {
+			it("sets the symbols for identifiers used in the test, consequent and alternate expression", function () {
+				const ast = extractSymbols("p1 ? p2 : p3");
+
+				expect(ast.program.scope).to.have.ownSymbol("p1");
+				expect(ast.program.scope).to.have.ownSymbol("p2");
+				expect(ast.program.scope).to.have.ownSymbol("p3");
+
+				const conditionExpression = ast.program.body[0].expression;
+				expect(program.symbolTable.getSymbol(conditionExpression.test)).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(conditionExpression.consequent)).not.to.be.undefined;
+				expect(program.symbolTable.getSymbol(conditionExpression.alternate)).not.to.be.undefined;
+			});
+		});
+
 		describe("CallExpression", function () {
 			it("creates a symbol for each identifier used in the arguments", function () {
 				// act
@@ -675,6 +833,31 @@ describe("SymbolExtractor", function () {
 				const memberExpression = ast.program.body[0].expression;
 				expect(program.symbolTable.getSymbol(memberExpression.object)).not.to.be.undefined;
 			});
+
+			it("associates the property with the computed symbol for computed members", function () {
+				// act
+				const ast = extractSymbols(`
+					const numbers = [1, 2, 3, 4, 5];
+					numbers[i];
+				`);
+
+				// assert
+				const indexedAccess = ast.program.body[1].expression;
+				expect(program.symbolTable.getSymbol(indexedAccess.property)).to.equal(Symbol.COMPUTED);
+			});
+
+			it("associates the property with a symbol for computed literal members", function () {
+				// act
+				const ast = extractSymbols(`
+					const person = { name: "Test" };
+					person["name"];
+				`);
+
+				// assert
+				const indexedAccess = ast.program.body[1].expression;
+				expect(program.symbolTable.getSymbol(indexedAccess.property)).not.to.equal(Symbol.COMPUTED);
+				expect(program.symbolTable.getSymbol(indexedAccess.property).name).equal("name");
+			});
 		});
 	});
 
@@ -704,6 +887,32 @@ describe("SymbolExtractor", function () {
 			it("is supported", function () {
 				// act, assert
 				expect(() => extractSymbols("null")).not.to.throw();
+			});
+		});
+	});
+
+	describe("Clauses", function () {
+		describe("SwitchCase", function () {
+			it("registers the identifiers in the test expression", function () {
+				// act
+				const ast = extractSymbols("switch ('test') { case x: }");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].cases[0].test)).not.to.be.undefined;
+			});
+		});
+
+		describe("CatchClause", function () {
+			it("registers the identifiers in the catch param expression", function () {
+				// act
+				const ast = extractSymbols("try { } catch (x) {}");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].handler.param)).not.to.be.undefined;
 			});
 		});
 	});

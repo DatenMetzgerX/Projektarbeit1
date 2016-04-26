@@ -12,20 +12,20 @@ describe("TUndefinedUnificationRule", function () {
 
 	describe("canUnify", function () {
 		it("returns true if one of the types is undefined", function () {
-			expect(rule.canUnify(new StringType(), new VoidType())).to.be.true;
-			expect(rule.canUnify(new VoidType(), new StringType())).to.be.true;
+			expect(rule.canUnify(StringType.create(), VoidType.create())).to.be.true;
+			expect(rule.canUnify(VoidType.create(), StringType.create())).to.be.true;
 		});
 
 		it("returns false if neither of the types is VoidType", function () {
-			expect(rule.canUnify(new StringType(), new StringType())).to.be.false;
+			expect(rule.canUnify(StringType.create(), StringType.create())).to.be.false;
 		});
 	});
 
 	describe("unify", function () {
 		it ("returns t1 if t2 is VoidType", function () {
 			// arrange
-			const t1 = new StringType();
-			const t2 = new VoidType();
+			const t1 = StringType.create();
+			const t2 = VoidType.create();
 
 			// assert
 			expect(rule.unify(t1, t2)).to.equal(t1);
@@ -33,8 +33,8 @@ describe("TUndefinedUnificationRule", function () {
 
 		it ("returns t2 if t1 is VoidType", function () {
 			// arrange
-			const t1 = new VoidType();
-			const t2 = new StringType();
+			const t1 = VoidType.create();
+			const t2 = StringType.create();
 
 			// assert
 			expect(rule.unify(t1, t2)).to.equal(t2);

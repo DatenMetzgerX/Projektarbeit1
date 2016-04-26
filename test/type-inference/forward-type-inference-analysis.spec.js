@@ -81,8 +81,8 @@ describe("ForwardTypeInferenceAnalysis", function () {
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
 
-			const env1 = new TypeEnvironment().setType(name, new VoidType());
-			const env2 = new TypeEnvironment().setType(age, new NullType());
+			const env1 = new TypeEnvironment().setType(name, VoidType.create());
+			const env2 = new TypeEnvironment().setType(age, NullType.create());
 
 			sandbox.stub(hindleyMilner, "mergeWithTypeEnvironments");
 

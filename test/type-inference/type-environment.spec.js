@@ -2,7 +2,7 @@ import {expect} from "chai";
 import Immutable from "immutable";
 
 import Symbol, {SymbolFlags} from "../../lib/semantic-model/symbol";
-import {Type, MaybeType, NumberType, StringType, TypeVariable} from "../../lib/semantic-model/types/index";
+import {Type, MaybeType, NumberType, StringType, TypeVariable, NullType} from "../../lib/semantic-model/types/index";
 import TypeEnvironment from "../../lib/type-inference/type-environment";
 
 describe("TypeEnvironment", function () {
@@ -87,7 +87,7 @@ describe("TypeEnvironment", function () {
 		it("returns true if the type environment contains a definition for the given symbol", function () {
 			// arrange
 			const name = new Symbol("name", SymbolFlags.Variable);
-			const typeEnvironment = new TypeEnvironment().setType(name, new StringType());
+			const typeEnvironment = new TypeEnvironment().setType(name, StringType.create());
 
 			// act, assert
 			expect(typeEnvironment.hasType(name)).to.be.true;
@@ -97,7 +97,7 @@ describe("TypeEnvironment", function () {
 			// arrange
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
-			const typeEnvironment = new TypeEnvironment().setType(name, new StringType());
+			const typeEnvironment = new TypeEnvironment().setType(name, StringType.create());
 
 			// act, assert
 			expect(typeEnvironment.hasType(age)).to.be.false;
@@ -107,8 +107,8 @@ describe("TypeEnvironment", function () {
 	describe("substitute", function () {
 		it("returns a new type environment where the given type has been replaced", function () {
 			// arrange
-			const t = new Type("number");
-			const newT = new Type("number");
+			const t = NullType.create();
+			const newT = NumberType.create();
 
 			const x = new Symbol("x");
 			const typeEnvironment = new TypeEnvironment(new Immutable.Map([[x, t]]));
@@ -123,9 +123,9 @@ describe("TypeEnvironment", function () {
 
 		it("returns a new type environment where the given type and all types that have used the given type as type parameter are replaced", function () {
 			// arrange
-			const t = new StringType();
-			const newT = new NumberType();
-			const maybe = new MaybeType(t);
+			const t = StringType.create();
+			const newT = NumberType.create();
+			const maybe = MaybeType.of(t);
 
 			const x = new Symbol("x");
 			const y = new Symbol("y");
@@ -141,7 +141,7 @@ describe("TypeEnvironment", function () {
 
 		it("returns this if the old and new type are the same instance", function () {
 			// arrange
-			const t = new TypeVariable();
+			const t = TypeVariable.create();
 
 			const x = new Symbol("x");
 			const y = new Symbol("y");
@@ -151,7 +151,23 @@ describe("TypeEnvironment", function () {
 				.setType(y, t);
 
 			// act, assert
-			expect(typeEnvironment.substitute(t, t)).to.equal(typeEnvironment);
+			expect(typeEnvironment.substitute(t, t)).to.be.equals(typeEnvironment);
+		});
+
+		it("returns this if no type has been substituted", function () {
+			// arrange
+			const t = TypeVariable.create();
+			const t2 = TypeVariable.create();
+
+			const x = new Symbol("x");
+			const y = new Symbol("y");
+
+			const typeEnvironment = new TypeEnvironment()
+				.setType(x, t)
+				.setType(y, t);
+
+			// act, assert
+			expect(typeEnvironment.substitute(t2, t)).to.be.equal(typeEnvironment);
 		});
 	});
 
@@ -161,8 +177,8 @@ describe("TypeEnvironment", function () {
 			const name = new Symbol("name", SymbolFlags.Variable);
 			const age = new Symbol("age", SymbolFlags.Variable);
 
-			const before = new TypeEnvironment().setType(name, new StringType());
-			const after = before.setType(age, new NumberType());
+			const before = new TypeEnvironment().setType(name, StringType.create());
+			const after = before.setType(age, NumberType.create());
 
 			// act
 			const difference = after.difference(before);
@@ -178,9 +194,9 @@ describe("TypeEnvironment", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const before = new TypeEnvironment()
-				.setType(name, new StringType())
-				.setType(age, new NumberType());
-			const after = before.setType(age, new MaybeType(new NumberType()));
+				.setType(name, StringType.create())
+				.setType(age, NumberType.create());
+			const after = before.setType(age, MaybeType.of(NumberType.create()));
 
 			// act
 			const difference = after.difference(before);
@@ -196,14 +212,14 @@ describe("TypeEnvironment", function () {
 			const age = new Symbol("age", SymbolFlags.Variable);
 
 			const before = new TypeEnvironment()
-				.setType(name, new StringType())
-				.setType(age, new NumberType());
+				.setType(name, StringType.create())
+				.setType(age, NumberType.create());
 
 			// act
 			const difference = before.difference(before);
 
 			// assert
-			expect(difference.isEmpty).to.be.true;
+			expect(difference).to.eql(new TypeEnvironment());
 		});
 
 		it("returns this if all mappings are new compared to the type environment before", function () {
@@ -213,14 +229,217 @@ describe("TypeEnvironment", function () {
 
 			const before = new TypeEnvironment();
 			const after = before
-				.setType(name, new StringType())
-				.setType(age, new NumberType());
+				.setType(name, StringType.create())
+				.setType(age, NumberType.create());
 
 			// act
 			const difference = after.difference(before);
 
 			// assert
-			expect(difference).to.equal(after);
+			expect(difference).to.equals(after);
+		});
+	});
+
+	describe("add", function () {
+		it("returns a new type environment that contains the mapping of this type environment and the passed in", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, StringType.create());
+			const env2 = environment.setType(age, NumberType.create());
+
+			// act
+			const added = env1.add(env2);
+
+			// assert
+			expect(added.getType(name)).to.be.instanceOf(StringType);
+			expect(added.getType(age)).to.be.instanceOf(NumberType);
+		});
+
+		it("does not override mappings from the this type environment", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, StringType.create());
+			const env2 = environment
+				.setType(age, NumberType.create())
+				.setType(name, NullType.create());
+
+			// act
+			const added = env1.add(env2);
+
+			// assert
+			expect(added.getType(name)).to.be.instanceOf(StringType);
+			expect(added.getType(age)).to.be.instanceOf(NumberType);
+		});
+
+		it("returns this if no new mappings have been added", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment
+				.setType(name, StringType.create())
+				.setType(age, NumberType.create());
+			const env2 = environment
+				.setType(age, NumberType.create())
+				.setType(name, StringType.create());
+
+			// act
+			const added = env1.add(env2);
+
+			// assert
+			expect(added).to.equals(env1);
+		});
+	});
+
+	describe("replaceTypes", function () {
+		it("replaces the types for the symbols with the new type", function () {
+			// arrange
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(age, TypeVariable.create());
+			const env2 = environment.setType(age, NumberType.create());
+
+			// act
+			const replaced = env1.replaceTypes(env2);
+
+			// assert
+			expect(replaced.getType(age)).to.be.instanceOf(NumberType);
+		});
+
+		it("does not replace the types of excluded symbols", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, TypeVariable.create())
+				.setType(age, NullType.create());
+			const env2 = environment.setType(age, NumberType.create())
+				.setType(name, StringType.create());
+
+			// act
+			const replaced = env1.replaceTypes(env2, [age]);
+
+			// assert
+			expect(replaced.getType(name)).to.be.instanceOf(StringType);
+			expect(replaced.getType(age)).to.be.instanceOf(NullType);
+		});
+
+		it("does not add new members", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, TypeVariable.create());
+			const env2 = environment.setType(age, NumberType.create())
+				.setType(name, StringType.create());
+
+			// act
+			const replaced = env1.replaceTypes(env2);
+
+			// assert
+			expect(replaced.getType(age)).not.to.be.defined;
+		});
+	});
+
+	describe("equals", function () {
+		it("returns true if the two type environments contain the same mappings to the same type instances", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const nameT = StringType.create();
+			const ageT = NumberType.create();
+
+			const env1 = environment.setType(name, nameT).setType(age, ageT);
+			const env2 = environment.setType(name, nameT).setType(age, ageT);
+
+			// act, assert
+			expect(env1.equals(env2)).to.be.true;
+			expect(env2.equals(env1)).to.be.true;
+		});
+
+		it("returns true if the two type environments contains the same mappings with equal types", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, new StringType()).setType(age, new NumberType());
+			const env2 = environment.setType(name, new StringType()).setType(age, new NumberType());
+
+			// act, assert
+			expect(env1.equals(env2)).to.be.true;
+			expect(env2.equals(env1)).to.be.true;
+		});
+
+		it("returns false if the two type environment contains the same mappings but with different types", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, StringType.create()).setType(age, NullType.create());
+			const env2 = environment.setType(name, StringType.create()).setType(age, NumberType.create());
+
+			// act, assert
+			expect(env1.equals(env2)).to.be.false;
+			expect(env2.equals(env1)).to.be.false;
+		});
+
+		it("returns false if the two type environment do not contain the same mappings", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, StringType.create());
+			const env2 = environment.setType(name, StringType.create()).setType(age, NumberType.create());
+
+			// act, assert
+			expect(env1.equals(env2)).to.be.false;
+			expect(env2.equals(env1)).to.be.false;
+		});
+	});
+
+	describe("hashCode", function () {
+		it("returns the same hash code for two type environments containing the same mappings to the same type instances", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const nameT = StringType.create();
+			const ageT = NumberType.create();
+
+			const env1 = environment.setType(name, nameT).setType(age, ageT);
+			const env2 = environment.setType(name, nameT).setType(age, ageT);
+
+			// act, assert
+			expect(env1.hashCode()).to.equal(env2.hashCode());
+		});
+
+		it("returns different hash codes for two type environment containing the same mappings but with different types", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, StringType.create()).setType(age, NullType.create());
+			const env2 = environment.setType(name, StringType.create()).setType(age, NumberType.create());
+
+			// act, assert
+			expect(env1.hashCode()).not.to.equal(env2.hashCode());
+		});
+
+		it("returns different hash codes for two type environment that do not contain the same mappings", function () {
+			// arrange
+			const name = new Symbol("name", SymbolFlags.Variable);
+			const age = new Symbol("age", SymbolFlags.Variable);
+
+			const env1 = environment.setType(name, StringType.create());
+			const env2 = environment.setType(name, StringType.create()).setType(age, NumberType.create());
+
+			// act, assert
+			expect(env1.hashCode()).not.to.equal(env2.hashCode());
 		});
 	});
 });

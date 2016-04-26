@@ -5,7 +5,7 @@ import * as t from "babel-types";
 import {VariableDeclarationRefinementRule} from "../../../lib/type-inference/refinement-rules/variable-declaration-refinement-rule";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
-import {StringType, VoidType, NumberType} from "../../../lib/semantic-model/types";
+import {StringType, VoidType, NumberType, TypeVariable} from "../../../lib/semantic-model/types";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 import {Program} from "../../../lib/semantic-model/program";
 
@@ -50,7 +50,7 @@ describe("VariableDeclarationRefinementRule", function () {
 				const symbol = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(identifier, symbol);
 
-				sinon.stub(context, "infer").returns(new StringType());
+				sinon.stub(context, "infer").returns(StringType.create());
 
 				// act
 				const refined = rule.refine(declarator, context);
@@ -59,20 +59,37 @@ describe("VariableDeclarationRefinementRule", function () {
 				expect(refined).to.be.instanceOf(StringType);
 			});
 
-			it ("updates the type of the variable declarator in the type environment if the declarator has an init expression", function () {
+			it("updates the type of the variable declarator in the type environment if the declarator has an init expression", function () {
 				// arrange
 				const identifier = t.identifier("x");
 				const declarator = t.variableDeclarator(identifier, t.stringLiteral("abcd"));
 				const symbol = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(identifier, symbol);
 
-				sinon.stub(context, "infer").returns(new StringType());
+				sinon.stub(context, "infer").returns(StringType.create());
 
 				// act
 				rule.refine(declarator, context);
 
 				// assert
 				expect(context.getType(symbol)).to.be.instanceOf(StringType);
+			});
+
+			it ("sets a fresh type as the type of the variable", function () {
+				// arrange
+				const identifier = t.identifier("x");
+				const declarator = t.variableDeclarator(identifier, t.stringLiteral("abcd"));
+				const symbol = new Symbol("x", SymbolFlags.Variable);
+				program.symbolTable.setSymbol(identifier, symbol);
+				const xT = TypeVariable.create();
+
+				sinon.stub(context, "infer").returns(xT);
+
+				// act
+				rule.refine(declarator, context);
+
+				// assert
+				expect(context.getType(symbol)).to.be.instanceOf(TypeVariable).and.not.to.equal(xT);
 			});
 
 			it("returns VoidType if the declarator has no init expression", function () {
@@ -96,7 +113,7 @@ describe("VariableDeclarationRefinementRule", function () {
 			it("returns VoidType", function () {
 				// arrange
 				const declaration = t.variableDeclaration("let", [t.variableDeclarator(t.identifier("x"), t.stringLiteral("abd"))]);
-				sinon.stub(context, "infer").returns(new StringType());
+				sinon.stub(context, "infer").returns(StringType.create());
 				sinon.stub(context, "getSymbol").returns(new Symbol("x", SymbolFlags.Variable));
 				sinon.stub(context, "setType");
 
@@ -113,12 +130,12 @@ describe("VariableDeclarationRefinementRule", function () {
 				const x = t.variableDeclarator(t.identifier("x"), t.stringLiteral("abcd"));
 				const xSymbol = new Symbol("x", SymbolFlags.Variable);
 				context.getSymbol.withArgs(x.id).returns(xSymbol);
-				context.infer.withArgs(x.init).returns(new StringType());
+				context.infer.withArgs(x.init).returns(StringType.create());
 
 				const y = t.variableDeclarator(t.identifier("y"), t.numericLiteral(5));
 				const ySymbol = new Symbol("y", SymbolFlags.Variable);
 				context.getSymbol.withArgs(y.id).returns(ySymbol);
-				context.infer.withArgs(y.init).returns(new NumberType());
+				context.infer.withArgs(y.init).returns(NumberType.create());
 
 				const declaration = t.variableDeclaration("let", [x, y]);
 

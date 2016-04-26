@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as t from "babel-types";
 import {UnaryExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/unary-expression-refinement-rule";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
-import {NumberType, VoidType, BooleanType, NullType, MaybeType} from "../../../lib/semantic-model/types";
+import {NumberType, VoidType, BooleanType, NullType, MaybeType, StringType} from "../../../lib/semantic-model/types";
 
 describe("UnaryExpressionRefinementRule", function () {
 	let rule, context;
@@ -42,18 +42,18 @@ describe("UnaryExpressionRefinementRule", function () {
 
 		it("throws if the operator is unknown", function () {
 			// arrange
-			const expression = t.unaryExpression("typeof", t.identifier("x"));
+			const expression = t.unaryExpression("delete", t.identifier("x"));
 			sinon.stub(context, "infer");
 
 			// act, assert
-			expect(() => rule.refine(expression, context)).to.throw("The operator typeof for unary expressions is not yet supported");
+			expect(() => rule.refine(expression, context)).to.throw("The operator delete for unary expressions is not yet supported");
 		});
 
 		describe("void", function () {
 			it("returns type void", function () {
 				// arrange
 				const expression = t.unaryExpression("void", t.identifier("x"));
-				sinon.stub(context, "infer").returns(new NumberType());
+				sinon.stub(context, "infer").returns(NumberType.create());
 
 				// act, assert
 				expect(rule.refine(expression, context)).to.be.instanceOf(VoidType);
@@ -64,10 +64,21 @@ describe("UnaryExpressionRefinementRule", function () {
 			it("returns boolean type", function () {
 				// arrange
 				const expression = t.unaryExpression("!", t.identifier("x"));
-				sinon.stub(context, "infer").returns(new NumberType());
+				sinon.stub(context, "infer").returns(NumberType.create());
 
 				// act, assert
 				expect(rule.refine(expression, context)).to.be.instanceOf(BooleanType);
+			});
+		});
+
+		describe("typeof", function () {
+			it("returns string type", function () {
+				// arrange
+				const expression = t.unaryExpression("typeof", t.identifier("x"));
+				sinon.stub(context, "infer").returns(NumberType.create());
+
+				// act, assert
+				expect(rule.refine(expression, context)).to.be.instanceOf(StringType);
 			});
 		});
 
@@ -76,8 +87,8 @@ describe("UnaryExpressionRefinementRule", function () {
 				it("returns number type", function () {
 					// arrange
 					const expression = t.unaryExpression(operator, t.identifier("x"));
-					sinon.stub(context, "infer").returns(new NullType());
-					sinon.stub(context, "unify").returns(new MaybeType(new NumberType()));
+					sinon.stub(context, "infer").returns(NullType.create());
+					sinon.stub(context, "unify").returns(MaybeType.of(NumberType.create()));
 
 					// act, assert
 					expect(rule.refine(expression, context)).to.be.instanceOf(NumberType);
@@ -87,7 +98,7 @@ describe("UnaryExpressionRefinementRule", function () {
 					// arrange
 					const expression = t.unaryExpression(operator, t.identifier("x"));
 					sinon.stub(context, "unify");
-					sinon.stub(context, "infer").returns(new NullType());
+					sinon.stub(context, "infer").returns(NullType.create());
 
 					// act
 					rule.refine(expression, context);

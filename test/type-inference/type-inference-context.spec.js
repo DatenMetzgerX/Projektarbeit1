@@ -18,7 +18,7 @@ describe("TypeInferenceContext", function () {
 		it("returns the type for the given symbol from the underlining type environment", function () {
 			// arrange
 			const x = new Symbol("x", SymbolFlags.Identifier);
-			const xType = new StringType();
+			const xType = StringType.create();
 			const typeEnvironment = new TypeEnvironment().setType(x, xType);
 			const context = new TypeInferenceContext(program, typeEnvironment);
 
@@ -31,7 +31,7 @@ describe("TypeInferenceContext", function () {
 		it("sets the type in the type environment", function () {
 			// arrange
 			const x = new Symbol("x", SymbolFlags.Identifier);
-			const xType = new StringType();
+			const xType = StringType.create();
 			const context = new TypeInferenceContext(program);
 
 			// act
@@ -45,8 +45,8 @@ describe("TypeInferenceContext", function () {
 	describe("substitute", function () {
 		it("calls substitute on the type environment", function () {
 			// arrange
-			const t1 = new StringType();
-			const t2 = new NumberType();
+			const t1 = StringType.create();
+			const t2 = NumberType.create();
 			const typeEnvironment = new TypeEnvironment();
 			context = new TypeInferenceContext(program, typeEnvironment);
 

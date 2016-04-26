@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {Type, FunctionType, VoidType, StringType, BooleanType, TypeVariable} from "../../../lib/semantic-model/types/index";
+import {Type, FunctionType, VoidType} from "../../../lib/semantic-model/types";
 
 describe("FunctionType", function () {
 
@@ -7,7 +7,7 @@ describe("FunctionType", function () {
 		it("returns an array containing the this and return type for a function without parameters", function () {
 			// arrange
 			const thisType = new Type("this");
-			const returnType = new VoidType();
+			const returnType = VoidType.create();
 			const functionType = new FunctionType(thisType, [], returnType, {});
 
 			// act, assert
@@ -19,7 +19,7 @@ describe("FunctionType", function () {
 			const thisType = new Type("this");
 			const param1 = new Type("number");
 			const param2 = new Type("string");
-			const returnType = new VoidType();
+			const returnType = VoidType.create();
 			const functionType = new FunctionType(thisType, [param1, param2], returnType, {});
 
 			// act, assert
@@ -33,7 +33,7 @@ describe("FunctionType", function () {
 			const functionType = new FunctionType(new Type("oldThis"), [new Type("number")], new Type("OldReturn"), {});
 
 			// act
-			const newFunction = functionType.withTypeParameters([new Type("this"), new VoidType(), new Type("number"), new Type("string")], functionType.id);
+			const newFunction = functionType.withTypeParameters([new Type("this"), VoidType.create(), new Type("number"), new Type("string")], functionType.id);
 
 			// assert
 			expect(newFunction).not.to.equal(functionType);
@@ -45,7 +45,7 @@ describe("FunctionType", function () {
 			const thisType = new Type("this");
 			const param1 = new Type("number");
 			const param2 = new Type("string");
-			const returnType = new VoidType();
+			const returnType = VoidType.create();
 			const functionType = new FunctionType(new Type("oldThis"), [param1], new Type("OldReturn"), {});
 
 			// act
@@ -64,41 +64,7 @@ describe("FunctionType", function () {
 			const functionType = new FunctionType(new Type("this"), [new Type("number"), new Type("string")], new Type("number"), {});
 
 			// act, assert
-			expect(functionType.prettyName).to.equal("this.(number, string) -> number");
-		});
-	});
-
-	describe("hasCompleteSignature", function () {
-		it("returns true if all types in the function signature are base types", function () {
-			// arrange
-			const func = new FunctionType(new StringType(), [new StringType()], new BooleanType());
-
-			// act, assert
-			expect(func.hasCompleteSignature).to.be.true;
-		});
-
-		it("returns false if the this type is a type variable", function () {
-			// arrange
-			const func = new FunctionType(new TypeVariable(), [new StringType()], new BooleanType());
-
-			// act, assert
-			expect(func.hasCompleteSignature).to.be.false;
-		});
-
-		it("returns false if a parameter is a type variable", function () {
-			// arrange
-			const func = new FunctionType(new StringType(), [new TypeVariable()], new BooleanType());
-
-			// act, assert
-			expect(func.hasCompleteSignature).to.be.false;
-		});
-
-		it("returns false if the return type is a type variable", function () {
-			// arrange
-			const func = new FunctionType(new StringType(), [new StringType()], new TypeVariable());
-
-			// act, assert
-			expect(func.hasCompleteSignature).to.be.false;
+			expect(functionType.prettyName).to.equals("this.(number, string) -> number");
 		});
 	});
 });

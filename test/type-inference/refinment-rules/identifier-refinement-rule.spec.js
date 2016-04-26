@@ -46,7 +46,7 @@ describe("IdentifierRefinementRule", function () {
 		it("resolves the type from the type environment", function () {
 			// arrange
 			const identifier = t.identifier("x");
-			const type = new NumberType();
+			const type = NumberType.create();
 			const symbol = new Symbol("x", SymbolFlags.Variable);
 			program.symbolTable.setSymbol(identifier, symbol);
 			context.setType(symbol, type);
@@ -56,23 +56,6 @@ describe("IdentifierRefinementRule", function () {
 
 			// assert
 			expect(refinedType).to.be.instanceOf(NumberType);
-		});
-
-		it("returns a fresh copy of the variable to support cases like `z = null; person.age = z; z = 10;` In this case, z has type number, " +
-			"but this should not be reflected to person.age, whose type still needs to be null as this is the most accurate information known about person.age.", function () {
-			// arrange
-			const identifier = t.identifier("x");
-			const type = new NumberType();
-
-			const symbol = new Symbol("x", SymbolFlags.Variable);
-			program.symbolTable.setSymbol(identifier, symbol);
-			context.setType(symbol, type);
-
-			// act
-			const refinedType = rule.refine(identifier, context);
-
-			// assert
-			expect(refinedType).not.to.equal(type);
 		});
 
 		it("throws an error if type of the identifier is not know and therefor the identifier has been used before it's declaration", function () {

@@ -5,8 +5,9 @@ import * as t from "babel-types";
 import {Program} from "../../lib/semantic-model/program";
 import Symbol, {SymbolFlags} from "../../lib/semantic-model/symbol";
 import {HindleyMilnerContext} from "../../lib/type-inference/hindley-milner-context";
-import {NumberType, StringType, RecordType, NullType, MaybeType, VoidType} from "../../lib/semantic-model/types";
+import {NumberType, StringType, RecordType, NullType, MaybeType, VoidType, AnyType} from "../../lib/semantic-model/types";
 import {TypeInferenceContext} from "../../lib/type-inference/type-inference-context";
+import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 
 describe("HindleyMilnerContext", function () {
 	let typeInferenceAnalysis,
@@ -25,13 +26,24 @@ describe("HindleyMilnerContext", function () {
 		it("returns the type environment from the type inference context", function () {
 			expect(context.typeEnvironment).to.equal(typeInferenceContext.typeEnvironment);
 		});
+
+		it("sets the type environment of the type inference context", function () {
+			// arrange
+			const env1 = new TypeEnvironment();
+
+			// act
+			typeInferenceContext.typeEnvironment = env1;
+
+			// assert
+			expect(typeInferenceContext.typeEnvironment).to.equal(env1);
+		});
 	});
 
 	describe("infer", function () {
 		it("calls the infer function of the type inference analysis", function () {
 			// arrange
 			const node = {};
-			const type = new NumberType();
+			const type = NumberType.create();
 
 			typeInferenceAnalysis.infer.returns(type);
 
@@ -48,8 +60,8 @@ describe("HindleyMilnerContext", function () {
 		it("calls the unify function of the type inference analysis", function () {
 			// arrange
 			const node = {};
-			const type1 = new NumberType();
-			const type2 = new NumberType();
+			const type1 = NumberType.create();
+			const type2 = NumberType.create();
 
 			typeInferenceAnalysis.unify.returns(type1);
 
@@ -81,7 +93,7 @@ describe("HindleyMilnerContext", function () {
 		it("returns the type from the type inference context", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-			const type = new NumberType();
+			const type = NumberType.create();
 			typeInferenceContext.setType(symbol, type);
 
 			// act, assert
@@ -93,7 +105,7 @@ describe("HindleyMilnerContext", function () {
 		it("sets the type in the type inference context", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-			const type = new NumberType();
+			const type = NumberType.create();
 
 			// act
 			context.setType(symbol, type);
@@ -107,8 +119,8 @@ describe("HindleyMilnerContext", function () {
 		it("calls the substitute function on the type inference context", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.Variable);
-			const type = new NumberType();
-			const newType = new StringType();
+			const type = NumberType.create();
+			const newType = StringType.create();
 
 			context.setType(symbol, type);
 			sinon.spy(typeInferenceContext, "substitute");
@@ -123,7 +135,7 @@ describe("HindleyMilnerContext", function () {
 	});
 
 	describe("getObjectType", function () {
-		it("returns the type of the identifier if the object is an identifier node", function () {
+		it("returns the infered type for the object node", function () {
 			// arrange
 			const objectNode = t.identifier("person");
 			const nameNode = t.memberExpression(objectNode, t.identifier("name"));
@@ -132,77 +144,18 @@ describe("HindleyMilnerContext", function () {
 			const name = new Symbol("name", SymbolFlags.Property);
 
 			program.symbolTable.setSymbol(objectNode, person);
-			program.symbolTable.setSymbol(nameNode, name);
+			program.symbolTable.setSymbol(nameNode.property, name);
 
 			const personType = new RecordType();
 			context.setType(person, personType);
+
+			typeInferenceAnalysis.infer.withArgs(objectNode).returns(personType);
 
 			// act
 			const objectType = context.getObjectType(nameNode);
 
 			// assert
 			expect(objectType).to.equal(personType);
-		});
-
-		it("returns the type of the parent property if it is a nested member access", function () {
-			// arrange
-			const personNode = t.identifier("person");
-			const addressNode = t.memberExpression(personNode, t.identifier("address"));
-			const streetNode = t.memberExpression(addressNode, t.identifier("street"));
-
-			const person = new Symbol("person", SymbolFlags.Variable);
-			const address = new Symbol("address", SymbolFlags.Property);
-			const street = new Symbol("street", SymbolFlags.Property);
-			person.addMember(address);
-			address.addMember(street);
-
-			program.symbolTable.setSymbol(personNode, person);
-			program.symbolTable.setSymbol(addressNode, address);
-			program.symbolTable.setSymbol(streetNode, street);
-
-			const addressType = new RecordType();
-			const personType = RecordType.create(RecordType, [[address, addressType]]);
-
-			context.setType(person, personType);
-
-			// act
-			const objectType = context.getObjectType(streetNode);
-
-			// assert
-			expect(objectType).to.equal(addressType);
-		});
-
-		it("infers the type of a literal", function () {
-			// arrange
-			const objectNode = t.stringLiteral("Zürich");
-			const lengthNode = t.memberExpression(objectNode, t.identifier("length"));
-
-			const length = new Symbol("length", SymbolFlags.Property);
-
-			program.symbolTable.setSymbol(lengthNode, length);
-			typeInferenceAnalysis.infer.withArgs(objectNode).returns(new StringType());
-
-			// act
-			const objectType = context.getObjectType(lengthNode);
-
-			// assert
-			expect(objectType).to.be.instanceOf(StringType);
-		});
-
-		it("throws if the parent node type is not known", function () {
-			// arrange
-			const thisNode = t.thisExpression();
-			const nameNode = t.memberExpression(thisNode, t.identifier("node"));
-
-			const name = new Symbol("name", SymbolFlags.Property);
-			program.symbolTable.setSymbol(thisNode, Symbol.THIS);
-			program.symbolTable.setSymbol(nameNode, name);
-
-			const thisType = new RecordType();
-			context.setType(Symbol.THIS, thisType);
-
-			// act, assert
-			expect(() => context.getObjectType(nameNode)).to.throw("Node type ThisExpression for the object of a member expression not yet supported.");
 		});
 
 		it("fails if the object type cannot be unified with the record type", function () {
@@ -214,10 +167,11 @@ describe("HindleyMilnerContext", function () {
 			const name = new Symbol("name", SymbolFlags.Property);
 
 			program.symbolTable.setSymbol(personNode, person);
-			program.symbolTable.setSymbol(nameNode, name);
+			program.symbolTable.setSymbol(nameNode.property, name);
 
-			const personType = new NumberType();
+			const personType = NumberType.create();
 			context.setType(person, personType);
+			typeInferenceAnalysis.infer.withArgs(personNode).returns(personType);
 
 			// act
 			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Type number is not a record type and cannot be converted to a record type, cannot be used as object.");
@@ -232,12 +186,13 @@ describe("HindleyMilnerContext", function () {
 			const name = new Symbol("name", SymbolFlags.Property);
 
 			program.symbolTable.setSymbol(personNode, person);
-			program.symbolTable.setSymbol(nameNode, name);
+			program.symbolTable.setSymbol(nameNode.property, name);
 
-			const personType = new NullType();
+			const personType = NullType.create();
 			context.setType(person, personType);
+			typeInferenceAnalysis.infer.withArgs(personNode).returns(personType);
 
-			typeInferenceAnalysis.unify.returns(new MaybeType(new RecordType()));
+			typeInferenceAnalysis.unify.returns(MaybeType.of(new RecordType()));
 
 			// act
 			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type null.");
@@ -252,15 +207,38 @@ describe("HindleyMilnerContext", function () {
 			const name = new Symbol("name", SymbolFlags.Property);
 
 			program.symbolTable.setSymbol(personNode, person);
-			program.symbolTable.setSymbol(nameNode, name);
+			program.symbolTable.setSymbol(nameNode.property, name);
 
-			const personType = new VoidType();
+			const personType = VoidType.create();
 			context.setType(person, personType);
+			typeInferenceAnalysis.infer.withArgs(personNode).returns(personType);
 
 			typeInferenceAnalysis.unify.returns(new RecordType());
 
 			// act
 			expect(() => context.getObjectType(nameNode)).to.throw("Type inference failure: Potential null pointer when accessing property name on null or not initialized object of type undefined.");
+		});
+
+		it("returns any type if the type of the parent object is any", function () {
+			// arrange
+			const objectNode = t.identifier("person");
+			const nameNode = t.memberExpression(objectNode, t.identifier("name"));
+
+			const person = new Symbol("person", SymbolFlags.Variable);
+			const name = new Symbol("name", SymbolFlags.Property);
+
+			program.symbolTable.setSymbol(objectNode, person);
+			program.symbolTable.setSymbol(nameNode.property, name);
+
+			const personType = AnyType.create();
+			context.setType(person, personType);
+			typeInferenceAnalysis.infer.withArgs(objectNode).returns(personType);
+
+			// act
+			const objectType = context.getObjectType(nameNode);
+
+			// assert
+			expect(objectType).to.be.instanceOf(AnyType);
 		});
 	});
 
@@ -303,6 +281,30 @@ describe("HindleyMilnerContext", function () {
 			expect(fresh).not.to.equal(context);
 			expect(fresh._typeInferenceAnalysis).to.equal(context._typeInferenceAnalysis);
 			expect(fresh._typeInferenceContext).not.to.equal(context._typeInferenceContext);
+		});
+	});
+
+	describe("replaceTypes", function () {
+
+		it("sets the type environment to the type environment with the replaced types", function () {
+			// arrange
+			const env1 = new TypeEnvironment();
+			const env2 = new TypeEnvironment();
+			const result = new TypeEnvironment();
+
+			const name = new Symbol("name", SymbolFlags.Variable);
+			sinon.stub(env1, "replaceTypes").returns(result);
+			context.typeEnvironment = env1;
+
+			const otherContext = context.fresh();
+			otherContext.typeEnvironment = env2;
+
+			// act
+			context.replaceTypes(otherContext, [name]);
+
+			// assert
+			expect(context.typeEnvironment).to.equal(result);
+			sinon.assert.calledWith(env1.replaceTypes, env2, [name]);
 		});
 	});
 });

@@ -73,7 +73,7 @@ describe("FunctionRefinementRule", function () {
 			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
 			cfg.getExitEdges.returns([]);
 
-			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("abcd", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("abcd", SymbolFlags.Function));
 
 			// act, assert
 			expect(rule.refine(functionDeclaration, context)).to.be.instanceOf(FunctionType);
@@ -85,7 +85,7 @@ describe("FunctionRefinementRule", function () {
 			cfg.getExitEdges.returns([]);
 
 			const functionSymbol = new Symbol("abcd", SymbolFlags.Function);
-			program.symbolTable.setSymbol(functionDeclaration.id, functionSymbol);
+			program.symbolTable.setSymbol(functionDeclaration, functionSymbol);
 
 			// act
 			rule.refine(functionDeclaration, context);
@@ -100,7 +100,7 @@ describe("FunctionRefinementRule", function () {
 			const x = new Symbol("x", SymbolFlags.Variable);
 			const y = new Symbol("y", SymbolFlags.Variable);
 
-			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("multiply", SymbolFlags.Function));
 			program.symbolTable.setSymbol(functionDeclaration.params[0], x);
 			program.symbolTable.setSymbol(functionDeclaration.params[1], y);
 
@@ -120,7 +120,7 @@ describe("FunctionRefinementRule", function () {
 			const statement = t.expressionStatement(t.assignmentExpression("=", t.identifier("x"), t.identifier("y")));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
 
-			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("multiply", SymbolFlags.Function));
 			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
 			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
@@ -139,7 +139,7 @@ describe("FunctionRefinementRule", function () {
 			const statement = t.returnStatement(t.binaryExpression("*", t.identifier("x"), t.identifier("y")));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
 
-			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("multiply", SymbolFlags.Function));
 			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
 			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
@@ -159,7 +159,7 @@ describe("FunctionRefinementRule", function () {
 			const throwExit = t.throwStatement(t.identifier("z"));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
 
-			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("multiply", SymbolFlags.Function));
 			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
 			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
@@ -180,7 +180,7 @@ describe("FunctionRefinementRule", function () {
 			const otherExit = t.expressionStatement(t.binaryExpression("*", t.identifier("x"), t.identifier("y")));
 			const functionDeclaration = t.functionDeclaration(t.identifier("multiply"), [t.identifier("x"), t.identifier("y")], t.blockStatement([statement]));
 
-			program.symbolTable.setSymbol(functionDeclaration.id, new Symbol("multiply", SymbolFlags.Function));
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("multiply", SymbolFlags.Function));
 			program.symbolTable.setSymbol(functionDeclaration.params[0], new Symbol("x", SymbolFlags.Variable));
 			program.symbolTable.setSymbol(functionDeclaration.params[1], new Symbol("y", SymbolFlags.Variable));
 
@@ -193,6 +193,34 @@ describe("FunctionRefinementRule", function () {
 
 			// assert
 			expect(refined.returnType).to.be.instanceOf(VoidType);
+		});
+
+		it("sets the type environment of the declaration in the function type", function () {
+			// arrange
+			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
+			cfg.getExitEdges.returns([]);
+
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("abcd", SymbolFlags.Function));
+
+			// act
+			const func = rule.refine(functionDeclaration, context);
+
+			// assert
+			expect(func.typeEnvironment).to.equal(context.typeEnvironment);
+		});
+
+		it("sets the function declaration node", function () {
+			// arrange
+			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
+			cfg.getExitEdges.returns([]);
+
+			program.symbolTable.setSymbol(functionDeclaration, new Symbol("abcd", SymbolFlags.Function));
+
+			// act
+			const func = rule.refine(functionDeclaration, context);
+
+			// assert
+			expect(func.declaration).to.equal(functionDeclaration);
 		});
 	});
 });

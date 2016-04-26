@@ -15,11 +15,11 @@ describe("TMaybeUnificationRule", function () {
 
 	describe("canUnify", function () {
 		it("returns true if t1 is a maybe type and t2 is another type", function () {
-			expect(rule.canUnify(new MaybeType(new Type("number")), new Type("number"))).to.be.true;
+			expect(rule.canUnify(MaybeType.of(new Type("number")), new Type("number"))).to.be.true;
 		});
 
 		it("returns true if t1 is another type and t2 is maybe type", function () {
-			expect(rule.canUnify(new Type("number"), new MaybeType(new Type("number")))).to.be.true;
+			expect(rule.canUnify(new Type("number"), MaybeType.of(new Type("number")))).to.be.true;
 		});
 
 		it("returns false if neither t1 nor t2 are a maybe type", function () {
@@ -27,14 +27,14 @@ describe("TMaybeUnificationRule", function () {
 		});
 
 		it("returns false if one type is a maybe type and the other is the null type (this case is handled by null-maybe-unification)", function () {
-			expect(rule.canUnify(new MaybeType(new Type("number")), new NullType())).to.be.false;
+			expect(rule.canUnify(MaybeType.of(new Type("number")), NullType.create())).to.be.false;
 		});
 	});
 
 	describe("unify", function () {
 		it("returns the maybe type", function () {
 			// arrange
-			const maybe = new MaybeType(new Type("number"));
+			const maybe = MaybeType.of(new Type("number"));
 
 			// act, assert
 			expect(rule.unify(maybe, new Type("number"), unificator)).to.equal(maybe);
@@ -42,10 +42,10 @@ describe("TMaybeUnificationRule", function () {
 
 		it("fails if MaybeType.of cannot be unified with the other type", function () {
 			// arrange
-			const maybe = new MaybeType(new NumberType("number"));
+			const maybe = MaybeType.of(NumberType.create("number"));
 
 			// act, assert
-			expect(() => rule.unify(new StringType(), maybe, unificator)).to.throw("Unification for type 'string' and 'number' failed because there exists no rule that can be used to unify the given types.");
+			expect(() => rule.unify(StringType.create(), maybe, unificator)).to.throw("Unification for type 'string' and 'number' failed because there exists no rule that can be used to unify the given types.");
 		});
 	});
 });

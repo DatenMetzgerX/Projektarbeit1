@@ -17,8 +17,8 @@ describe("ParametrizedTypesUnificationRule", function () {
 	describe("canUnify", function () {
 		it("returns true if both types are parametrized types", function () {
 			// arrange
-			const t1 = new TestParametrizedType("Maybe", [new NumberType()]);
-			const t2 = new TestParametrizedType("Maybe", [new StringType()]);
+			const t1 = new TestParametrizedType("Maybe", [NumberType.create()]);
+			const t2 = new TestParametrizedType("Maybe", [StringType.create()]);
 
 			// act, assert
 			expect(rule.canUnify(t1, t2)).to.be.true;
@@ -26,8 +26,8 @@ describe("ParametrizedTypesUnificationRule", function () {
 
 		it("returns false if t1 not a parametrized type", function () {
 			// arrange
-			const t1 = new StringType();
-			const t2 = new TestParametrizedType("Maybe", [new NumberType()]);
+			const t1 = StringType.create();
+			const t2 = new TestParametrizedType("Maybe", [NumberType.create()]);
 
 			// act, assert
 			expect(rule.canUnify(t1, t2)).to.be.false;
@@ -35,8 +35,8 @@ describe("ParametrizedTypesUnificationRule", function () {
 
 		it("returns false if t2 not a parametrized type", function () {
 			// arrange
-			const t1 = new TestParametrizedType("Maybe", [new NumberType()]);
-			const t2 = new StringType();
+			const t1 = new TestParametrizedType("Maybe", [NumberType.create()]);
+			const t2 = StringType.create();
 
 			// act, assert
 			expect(rule.canUnify(t1, t2)).to.be.false;
@@ -46,8 +46,8 @@ describe("ParametrizedTypesUnificationRule", function () {
 	describe("unify", function () {
 		it("returns t1 if the type parameters are equal", function () {
 			// arrange
-			const typeParameter1 = new NumberType();
-			const typeParameter2 = new NumberType();
+			const typeParameter1 = NumberType.create();
+			const typeParameter2 = NumberType.create();
 			const t1 = new TestParametrizedType("Maybe", [typeParameter1]);
 			const t2 = new TestParametrizedType("Maybe", [typeParameter2]);
 
@@ -59,8 +59,8 @@ describe("ParametrizedTypesUnificationRule", function () {
 
 		it("unifies all type parameters", function () {
 			// arrange
-			const typeParameter1 = new NumberType();
-			const typeParameter2 = new NumberType();
+			const typeParameter1 = NumberType.create();
+			const typeParameter2 = NumberType.create();
 
 			const t1 = new TestParametrizedType("Maybe", [typeParameter1]);
 			const t2 = new TestParametrizedType("Maybe", [typeParameter2]);
@@ -73,8 +73,8 @@ describe("ParametrizedTypesUnificationRule", function () {
 		});
 
 		it("fails if the types have not the same number of type parameters", function () {
-			const t1 = new TestParametrizedType("Maybe", [new NumberType()]);
-			const t2 = new TestParametrizedType("Maybe", [new NumberType(), new StringType()]);
+			const t1 = new TestParametrizedType("Maybe", [NumberType.create()]);
+			const t2 = new TestParametrizedType("Maybe", [NumberType.create(), StringType.create()]);
 
 			// act, assert
 			expect(() => rule.unify(t1, t2, context)).to.throw("Unification for type 'Maybe<number>' and 'Maybe<number, string>' failed because the parametrized types have a different number of type parameters and therefore cannot be unified.");

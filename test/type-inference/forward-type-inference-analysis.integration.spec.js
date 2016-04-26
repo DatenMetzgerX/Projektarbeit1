@@ -3,7 +3,7 @@ import {expect} from "chai";
 import {Symbol} from "../../lib/semantic-model/symbol";
 import {Program} from "../../lib/semantic-model/program";
 import {infer} from "../../lib/infer";
-import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, RecordType} from "../../lib/semantic-model/types";
+import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, RecordType, ArrayType, AnyType, ObjectType} from "../../lib/semantic-model/types";
 
 describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 
@@ -79,85 +79,6 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		expect(addressType.hasProperty(address.getMember("street")));
 	});
 
-	it("adds added properties in a function call to the type in the callers context", function () {
-		// act
-		const {typeEnvironment, scope} = inferTypes(`
-		function setName(x, name) {
-			x.name = name;
-		}
-		
-		let p = {};
-		setName(p, "Test");
-		`);
-
-		const p = scope.resolveSymbol("p");
-		const pType = typeEnvironment.getType(p);
-
-		// assert
-		expect(pType).to.be.instanceOf(RecordType);
-		expect(pType.getType(new Symbol("name"))).to.be.instanceOf(StringType);
-	});
-
-	it("throws if a function access members of an object that is null or not defined", function () {
-		expect(() => inferTypes(`
-		function getStreet(x) {
-			return x.address.street;
-		}
-		
-		getStreet({});
-		`)).to.throw("Type inference failure: Potential null pointer when accessing property street on null or not initialized object of type undefined.");
-	});
-
-	it("a member is void if it is accessed before it's declaration", function () {
-		// act
-		const {typeEnvironment, scope} = inferTypes(`
-		function getName(x) {
-			return x.name;
-		}
-		
-		let name = getName({});
-		`);
-
-		const name = scope.resolveSymbol("name");
-
-		// assert
-		expect(typeEnvironment.getType(name)).to.be.instanceOf(VoidType);
-	});
-
-	it("supports functions as arguments", function () {
-		// act
-		const {typeEnvironment, scope} = inferTypes(`
-		function id(x) {
-			return x;
-		}
-		
-		const ten = id(id)(10);
-		`);
-
-		const ten = scope.resolveSymbol("ten");
-
-		// assert
-		expect(typeEnvironment.getType(ten)).to.be.instanceOf(NumberType);
-	});
-
-	it("does not change the type of the callers argument when the function assigns to the parameters of the function", function () {
-		// act
-		const {typeEnvironment, scope} = inferTypes(`
-		function toNumber(x) {
-			x = 10;
-			return x;
-		}
-		
-		let input = "10";
-		toNumber(input);
-		`);
-
-		const ten = scope.resolveSymbol("input");
-
-		// assert
-		expect(typeEnvironment.getType(ten)).to.be.instanceOf(StringType);
-	});
-
 	it("throws an error if a not declared identifier is passed to a function call", function () {
 		expect(() => inferTypes(`
 		function toNumber(x) {
@@ -166,7 +87,7 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		}
 		
 		toNumber(x);
-		`)).to.throw("Type inference failure: The identifier x is not defined");
+		`)).to.throw("Type inference failure: The symbol x is being used before it's declaration");
 	});
 
 	it("it does not refine the type for identifiers used in calculations to not reduce the accuracy of their inferred type (x=null is here the most accurate information)", function () {
@@ -217,56 +138,343 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		expect(typeEnv2.getType(x)).to.be.instanceOf(NumberType);
 	});
 
-	it("can infer the type of recursive functions", function () {
-		// act
-		const {scope, typeEnvironment} = inferTypes(`
-		function successor(x) {
-			if (x === 0) {
-				return 1;
+	describe("members", function () {
+		it("adds added properties in a function call to the type in the callers context", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			function setName(x, name) {
+				x.name = name;
 			}
-		
-			return successor(x - 1) + 1;
-		}
-		let eleven = successor(10000);
-		`);
+			
+			let p = {};
+			setName(p, "Test");
+			`);
 
-		// assert
-		const eleven = scope.resolveSymbol("eleven");
+			const p = scope.resolveSymbol("p");
+			const pType = typeEnvironment.getType(p);
 
-		expect(typeEnvironment.getType(eleven)).to.be.instanceOf(NumberType);
+			// assert
+			expect(pType).to.be.instanceOf(RecordType);
+			expect(pType.getType(new Symbol("name"))).to.be.instanceOf(StringType);
+		});
+
+		it("throws if a function access members of an object that is null or not defined", function () {
+			expect(() => inferTypes(`
+			function getStreet(x) {
+				return x.address.street;
+			}
+			
+			getStreet({});
+			`)).to.throw("Type inference failure: Potential null pointer when accessing property street on null or not initialized object of type undefined.");
+		});
+
+		it("a member is void if it is accessed before it's declaration", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			function getName(x) {
+				return x.name;
+			}
+			
+			let name = getName({});
+			`);
+
+			const name = scope.resolveSymbol("name");
+
+			// assert
+			expect(typeEnvironment.getType(name)).to.be.instanceOf(VoidType);
+		});
+
+		it("returns type any for computed properties", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			let keys = []; // e.g. Object.keys
+			let o = {};
+			const v = o[keys[0]];
+			`);
+
+			const v = scope.resolveSymbol("v");
+
+			// assert
+			expect(typeEnvironment.getType(v)).to.be.instanceOf(AnyType);
+		});
+
+		it("returns type any for a member access on a computed property", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			let keys = []; // e.g. Object.keys
+			let o = {};
+			const v = o[keys[i]].length;
+			`);
+
+			const v = scope.resolveSymbol("v");
+
+			// assert
+			expect(typeEnvironment.getType(v)).to.be.instanceOf(AnyType);
+		});
+
+		it("allows assignment to a computed property", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			let keys = ['name']; // e.g. Object.keys
+			let o = {};
+			o[keys[0]] = "test";
+			const name = o.name;
+			`);
+
+			const name = scope.resolveSymbol("name");
+
+			// assert
+			expect(typeEnvironment.getType(name)).to.be.instanceOf(VoidType);
+		});
 	});
 
-	it("can invoke built in function types", function() {
-		// act
-		const {scope, typeEnvironment} = inferTypes("const uppercase = 'Micha Reiser'.toUpperCase();");
+	describe("function call", function () {
+		it("a built in function with optional parameters can be invoked", function () {
+			// act
+			const {scope, typeEnvironment} = inferTypes("const substr = 'Micha Reiser'.substring(4);");
 
-		// assert
-		const uppercase = scope.resolveSymbol("uppercase");
-		expect(typeEnvironment.getType(uppercase)).to.be.instanceOf(StringType);
+			// assert
+			const substring = scope.resolveSymbol("substr");
+			expect(typeEnvironment.getType(substring)).to.be.instanceOf(StringType);
+		});
+
+		it("resolves a type variable from the outer context", function () {
+			// act
+			const {scope, typeEnvironment } = inferTypes(`
+				let x;
+				
+				function a() {
+					x = 10;
+				}
+				a();
+				const b = x;
+			`);
+
+			// assert
+			const b = scope.resolveSymbol("b");
+			expect(typeEnvironment.getType(b)).to.be.an.instanceOf(NumberType);
+		});
+
+		it("does not change the type of the callers argument when the function assigns to the parameters of the function", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			function toNumber(x) {
+				x = 10;
+				return x;
+			}
+			
+			let input = "10";
+			toNumber(input);
+			`);
+
+			const ten = scope.resolveSymbol("input");
+
+			// assert
+			expect(typeEnvironment.getType(ten)).to.be.instanceOf(StringType);
+		});
+
+		it("does not update the type of the callers argument when the function reassigns the variable", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			function defaults(options) {
+				options = { test: true };
+				return options;
+			}
+			
+			let calculationOptions = { nullAsZero: true }
+			defaults(calculationOptions);
+			`);
+
+			const calculationOptions = scope.resolveSymbol("calculationOptions");
+
+			// assert
+			const type = typeEnvironment.getType(calculationOptions);
+			expect(type).to.be.instanceOf(ObjectType);
+			expect(type.hasProperty(new Symbol("test"))).to.be.false;
+			expect(type.hasProperty(new Symbol("nullAsZero"))).to.be.true;
+		});
+
+		it("throws if a built in function is called where the this type is not a subtype of the required this type", function () {
+			expect(() => inferTypes(`
+				const substr = "".substr;
+				substr(3);
+			`)).to.throw("Type inference failure: The function cannot be called with this of type 'undefined' whereas 'string' is required.");
+		});
+
+		it("supports functions as arguments", function () {
+			// act
+			const {typeEnvironment, scope} = inferTypes(`
+			function id(x) {
+				return x;
+			}
+			
+			const ten = id(id)(10);
+			`);
+
+			const ten = scope.resolveSymbol("ten");
+
+			// assert
+			expect(typeEnvironment.getType(ten)).to.be.instanceOf(NumberType);
+		});
+
+		it("supports closures", function () {
+			const {scope, typeEnvironment} = inferTypes(`
+			const result = [];
+			function filter(i) {
+				if (i % 2 === 0) {
+					result.push(i);
+				}
+			}
+			
+			let i = 0;
+			while (i < 10) {
+				filter(i++);
+			}
+			`);
+
+			// assert
+			const result = scope.resolveSymbol("result");
+
+			expect(typeEnvironment.getType(result)).to.be.instanceOf(ArrayType).and.has.property("of").that.is.an.instanceOf(NumberType);
+		});
+
+		it("can infer the type of recursive functions", function () {
+			// act
+			const {scope, typeEnvironment} = inferTypes(`
+			function successor(x) {
+				if (x === 0) {
+					return 1;
+				}
+			
+				return successor(x - 1) + 1;
+			}
+			let eleven = successor(10000);
+			`);
+
+			// assert
+			const eleven = scope.resolveSymbol("eleven");
+
+			expect(typeEnvironment.getType(eleven)).to.be.instanceOf(NumberType);
+		});
+
+		it("can invoke built in function types", function() {
+			// act
+			const {scope, typeEnvironment} = inferTypes("const uppercase = 'Micha Reiser'.toUpperCase();");
+
+			// assert
+			const uppercase = scope.resolveSymbol("uppercase");
+			expect(typeEnvironment.getType(uppercase)).to.be.instanceOf(StringType);
+		});
+
+		it("throws if a required argument is missing when calling a built in function", function () {
+			expect(() => inferTypes("'Micha Reiser'.substring();")).to.throw("Type inference failure: The argument 1 with type \'undefined\' is not a subtype of the required parameter type \'number\'.");
+		});
+
+		it("throws if an argument of a built in function is not a subtype of the parameter type", function () {
+			expect(() => inferTypes("'Micha Reiser'.substring('3');")).to.throw("Type inference failure: Unification for type \'string\' and \'number\' failed because there exists no rule that can be used to unify the given types.");
+		});
 	});
 
-	it("throws if a required argument is missing when calling a built in function", function () {
-		expect(() => inferTypes("'Micha Reiser'.substring();")).to.throw("Type inference failure: The argument 1 with type \'undefined\' is not a subtype of the required parameter type \'number\'.");
-	});
+	describe("array", function () {
+		it("infers the type of an array", function () {
+			// act
+			const {scope, typeEnvironment} = inferTypes("const numbers = [3, 4, 5, 6]");
 
-	it("throws if an argument of a built in function is not a subtype of the parameter type", function () {
-		expect(() => inferTypes("'Micha Reiser'.substring('3');")).to.throw("Type inference failure: The argument 1 with type \'string\' is not a subtype of the required parameter type \'number\'.");
-	});
+			// assert
+			const numbers = scope.resolveSymbol("numbers");
+			const numbersType = typeEnvironment.getType(numbers);
 
-	it("a built in function with optional parameters can be invoked", function () {
-		// act
-		const {scope, typeEnvironment} = inferTypes("const substr = 'Micha Reiser'.substring(4);");
+			expect(numbersType).to.be.instanceOf(ArrayType);
+			expect(numbersType).to.have.property("of").that.is.an.instanceOf(NumberType);
+		});
 
-		// assert
-		const substring = scope.resolveSymbol("substr");
-		expect(typeEnvironment.getType(substring)).to.be.instanceOf(StringType);
-	});
+		it("an array is of type any if the elements have no other common type", function () {
+			// act
+			const {scope, typeEnvironment} = inferTypes("const numbers = [3, 'four', 5, 'six']");
 
-	it("throws if a built in function is called where the this type is not a subtype of the required this type", function () {
-		expect(() => inferTypes(`
-			const substr = "".substr;
-			substr(3);
-		`)).to.throw("Type inference failure: The function cannot be called with this of type 'undefined' whereas 'string' is required.");
+			// assert
+			const numbers = scope.resolveSymbol("numbers");
+			const numbersType = typeEnvironment.getType(numbers);
+
+			expect(numbersType).to.be.instanceOf(ArrayType);
+			expect(numbersType).to.have.property("of").that.is.an.instanceOf(AnyType);
+		});
+
+		it("infers the type of an array to the most common subtype", function () {
+			// act
+			const {scope, typeEnvironment} = inferTypes(`
+			const p1 = {name: 'Test' };
+			const p2 = {name: 'Test2', street: '...'};
+			const p3 = {name: 'Test3', age: 12};
+			const persons = [p1, p2, p3];
+			`);
+
+			// assert
+			const persons = scope.resolveSymbol("persons");
+			const personsType = typeEnvironment.getType(persons);
+
+			expect(personsType).to.be.instanceOf(ArrayType);
+			expect(personsType).to.have.property("of").that.is.an.instanceOf(ObjectType);
+			expect(personsType.of.getType(new Symbol("name"))).to.be.instanceOf(StringType);
+			expect(personsType.of.getType(new Symbol("street"))).to.be.undefined;
+			expect(personsType.of.getType(new Symbol("age"))).to.be.undefined;
+		});
+
+		it("can access array elements", function () {
+			// act
+			const {scope, typeEnvironment} = inferTypes(`
+			const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+			const two = numbers[1];
+			numbers[1] = 4;
+			`);
+
+			// assert
+			const two = scope.resolveSymbol("two");
+
+			expect(typeEnvironment.getType(two)).to.be.instanceOf(NumberType);
+		});
+
+		it("can assign values to an array element", function () {
+			const {scope, typeEnvironment} = inferTypes(`
+			const numbers = [];
+			numbers[0] = 4;
+			`);
+
+			// assert
+			const numbers = scope.resolveSymbol("numbers");
+
+			expect(typeEnvironment.getType(numbers)).to.be.instanceOf(ArrayType).and.has.property("of").that.is.an.instanceOf(NumberType);
+		});
+
+		it("can add values to an array", function () {
+			const {scope, typeEnvironment} = inferTypes(`
+			const numbers = [];
+			numbers.push(3);
+			`);
+
+			// assert
+			const numbers = scope.resolveSymbol("numbers");
+
+			expect(typeEnvironment.getType(numbers)).to.be.instanceOf(ArrayType).and.has.property("of").that.is.an.instanceOf(NumberType);
+		});
+
+		it("can invoke array methods", function () {
+			const {scope, typeEnvironment} = inferTypes(`
+			const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+			const even = numbers.filter(function (n) { return n % 2 == 0; });
+			const mapped = numbers.map(function (n) { return [n]; });
+			const summed = numbers.reduce(function (current, n) { return current + n; }, 0); 
+			`);
+
+			// assert
+			const even = scope.resolveSymbol("even");
+			const mapped = scope.resolveSymbol("mapped");
+			const sum = scope.resolveSymbol("summed");
+
+			expect(typeEnvironment.getType(even)).to.be.instanceOf(ArrayType).and.has.property("of").that.is.an.instanceOf(NumberType);
+			expect(typeEnvironment.getType(mapped)).to.be.instanceOf(ArrayType).and.has.property("of").that.is.an.instanceOf(ArrayType);
+			expect(typeEnvironment.getType(sum)).to.be.instanceOf(NumberType);
+		});
 	});
 
     /**

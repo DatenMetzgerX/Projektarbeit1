@@ -88,7 +88,7 @@ describe("Symbol", function () {
 		it("returns the name of the symbol", function () {
 			// arrange
 			const symbol = new Symbol("x", SymbolFlags.BlockScopedVariable);
-			symbol.type = new NumberType();
+			symbol.type = NumberType.create();
 
 			// act, assert
 			expect(symbol.toString()).to.equal("x");

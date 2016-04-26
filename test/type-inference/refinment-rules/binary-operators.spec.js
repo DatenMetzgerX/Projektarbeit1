@@ -24,8 +24,8 @@ describe("BinaryOperators", function () {
 
 			it("refines the type to NumberType", function () {
 				// arrange
-				const leftParameter = new NullType();
-				const rightParameter = new MaybeType(new NumberType());
+				const leftParameter = NullType.create();
+				const rightParameter = MaybeType.of(NumberType.create());
 
 				// act
 				const refined = operator.refine(leftParameter, rightParameter, unify);
@@ -36,8 +36,8 @@ describe("BinaryOperators", function () {
 
 			it("calls unify for the left- and right parameter together with the operator type", function () {
 				// arrange
-				const leftParameter = new MaybeType(new NumberType());
-				const rightParameter = new MaybeType(new NumberType());
+				const leftParameter = MaybeType.of(NumberType.create());
+				const rightParameter = MaybeType.of(NumberType.create());
 
 				// act
 				operator.refine(leftParameter, rightParameter, unify);
@@ -62,8 +62,8 @@ describe("BinaryOperators", function () {
 
 			it("returns BoolType as operator result", function () {
 				// arrange
-				const leftType = new NumberType();
-				const rightType = new NumberType();
+				const leftType = NumberType.create();
+				const rightType = NumberType.create();
 
 				// act
 				const refined = operator.refine(leftType, rightType, unify);
@@ -74,8 +74,8 @@ describe("BinaryOperators", function () {
 
 			it("fails if the right and left parameter type cannot be unified", function () {
 				// arrange
-				const leftType = new NumberType();
-				const rightType = new StringType();
+				const leftType = NumberType.create();
+				const rightType = StringType.create();
 
 				unify.throws(new Error("Unification of string and number not possible"));
 
@@ -97,8 +97,8 @@ describe("BinaryOperators", function () {
 
 			it("returns BoolType as operator result", function () {
 				// arrange
-				const leftType = new NumberType();
-				const rightType = new NumberType();
+				const leftType = NumberType.create();
+				const rightType = NumberType.create();
 
 				// act
 				const refined = operator.refine(leftType, rightType, unify);

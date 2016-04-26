@@ -3,7 +3,7 @@ import sinon from "sinon";
 import * as t from "babel-types";
 
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {StringType, RecordType, ObjectType, VoidType} from "../../../lib/semantic-model/types";
+import {StringType, RecordType, ObjectType, VoidType, AnyType} from "../../../lib/semantic-model/types";
 import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {MemberExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/member-expression-refinement-rule";
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
@@ -18,6 +18,7 @@ describe("MemberExpressionRefinementRule", function () {
 		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
 
 		sandbox.stub(context, "unify");
+		sandbox.stub(context, "infer");
 
 		rule = new MemberExpressionRefinementRule();
 		memberExpression = t.memberExpression(t.identifier("person"), t.identifier("name"));
@@ -47,10 +48,8 @@ describe("MemberExpressionRefinementRule", function () {
 			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
 			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
-			const personType = ObjectType.create([[nameSymbol, new StringType()]]);
-			context.setType(personSymbol, personType);
-
-			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
+			const personType = ObjectType.create([[nameSymbol, StringType.create()]]);
+			context.infer.withArgs(memberExpression.object).returns(personType);
 
 			// act
 			const refined = rule.refine(memberExpression, context);
@@ -75,15 +74,31 @@ describe("MemberExpressionRefinementRule", function () {
 			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
 
 			const personType = new RecordType();
-			context.setType(personSymbol, personType);
-
-			context.unify.withArgs(RecordType.ANY, personType).returns(personType);
+			context.infer.withArgs(memberExpression.object).returns(personType);
 
 			// act
 			const refined = rule.refine(memberExpression, context);
 
 			// assert
 			expect(refined).to.be.instanceOf(VoidType);
+		});
+
+		it("returns any if the type of the object is any", function () {
+			const personSymbol = new Symbol("person", SymbolFlags.Variable);
+			const nameSymbol = new Symbol("name", SymbolFlags.Property);
+			personSymbol.addMember(nameSymbol);
+
+			program.symbolTable.setSymbol(memberExpression.object, personSymbol);
+			program.symbolTable.setSymbol(memberExpression.property, nameSymbol);
+
+			const personType = AnyType.create();
+			context.infer.withArgs(memberExpression.object).returns(personType);
+
+			// act
+			const refined = rule.refine(memberExpression, context);
+
+			// assert
+			expect(refined).to.be.instanceOf(AnyType);
 		});
 	});
 });
