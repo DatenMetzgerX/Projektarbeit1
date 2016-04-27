@@ -378,6 +378,10 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		it("throws if an argument of a built in function is not a subtype of the parameter type", function () {
 			expect(() => inferTypes("'Micha Reiser'.substring('3');")).to.throw("Type inference failure: Unification for type \'string\' and \'number\' failed because there exists no rule that can be used to unify the given types.");
 		});
+
+		it("can invoke functions of built in objects", function () {
+			expect(() => inferTypes("console.log('x');")).not.to.throw();
+		});
 	});
 
 	describe("array", function () {
@@ -495,7 +499,7 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		infer(sourceFile, program);
 
 		const cfg = sourceFile.ast.cfg;
-	    const typeEnv = cfg.getNode(null) ? cfg.getNode(null).annotation.in : TypeEnvironment.EMPTY;
+		const typeEnv = cfg.getNode(null) ? cfg.getNode(null).annotation.in : TypeEnvironment.EMPTY;
 		return { typeEnvironment: typeEnv, scope: sourceFile.scope, ast: sourceFile.ast };
 	}
 });

@@ -279,7 +279,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -292,7 +292,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				let x = 10;
 				`);
@@ -305,7 +305,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(current, intend) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -320,7 +320,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(current, intend) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -334,7 +334,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(current, intend) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -348,7 +348,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -360,7 +360,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -372,7 +372,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -384,7 +384,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -396,7 +396,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -422,7 +422,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				(function (count) {
-					console.log(count);
+					logger.log(count);
 				})
 				`);
 
@@ -773,7 +773,7 @@ describe("SymbolExtractor", function () {
 		describe("CallExpression", function () {
 			it("creates a symbol for each identifier used in the arguments", function () {
 				// act
-				const ast = extractSymbols("console.log(x, y, z)");
+				const ast = extractSymbols("logger.log(x, y, z)");
 
 				// assert
 				expect(ast.program.scope).to.have.ownSymbol("x");
@@ -788,7 +788,7 @@ describe("SymbolExtractor", function () {
 
 			it("associates the argument nodes with the corresponding symbols", function () {
 				// act
-				const ast = extractSymbols("console.log(x, y)");
+				const ast = extractSymbols("logger.log(x, y)");
 
 				// assert
 				const args = ast.program.body[0].expression.arguments;
