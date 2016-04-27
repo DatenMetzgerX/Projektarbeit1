@@ -261,6 +261,87 @@ describe("SymbolExtractor", function () {
 	});
 
 	describe("Expressions", function () {
+
+		describe("ThisExpression", function () {
+			it("creates a new symbol for the first usage of this in a function", function () {
+				// act
+				const ast = extractSymbols(`
+				function add(x) {
+					this.sum += x;
+				}
+				`);
+
+				// assert
+				const func = ast.program.body[0];
+				const scope = func.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+
+				const thisExpression = func.body.body[0].expression.left.object;
+				expect(program.symbolTable.getSymbol(thisExpression)).not.to.be.undefined;
+			});
+
+			it("reuses the previously defined this symbol", function () {
+				// act
+				const ast = extractSymbols(`
+				function add(x) {
+					this.sum += x;
+					return this.sum;
+				}
+				`);
+
+				// assert
+				const func = ast.program.body[0];
+				const scope = func.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+
+				const firstThis = func.body.body[0].expression.left.object;
+				const secondThis = func.body.body[1].argument.object;
+				expect(program.symbolTable.getSymbol(secondThis)).to.equal(program.symbolTable.getSymbol(firstThis));
+			});
+
+			it("resolves the this from the function scope and not from the current scope", function () {
+				// act
+				const ast = extractSymbols(`
+				function add(x) {
+					this.sum += x;
+					{
+						return this.sum;
+					}
+				}
+				`);
+
+				// assert
+				const func = ast.program.body[0];
+				const scope = func.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+
+				const firstThis = func.body.body[0].expression.left.object;
+				const subBlock = func.body.body[1];
+				const secondThis = subBlock.body[0].argument.object;
+
+				expect(subBlock.scope).not.to.have.ownSymbol("this");
+				expect(program.symbolTable.getSymbol(secondThis)).to.equal(program.symbolTable.getSymbol(firstThis));
+			});
+
+			it("does not throw if this is used outside a function declaration", function () {
+				// act
+				const ast = extractSymbols(`
+					this.name;
+				`);
+
+				// assert
+				const expression = ast.program.body[0].expression;
+				const thisStatement = expression.object;
+				const scope = ast.program.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+				expect(program.symbolTable.getSymbol(thisStatement)).not.to.be.undefined;
+			});
+		});
+
 		describe("ArrayExpression", function () {
 			it("sets the symbols for identifiers used in the array", function () {
 				const ast = extractSymbols("[p1, p2, 10]");

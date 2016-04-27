@@ -7,6 +7,7 @@ import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-c
 import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-context";
 import {TypeEnvironment} from "../../../lib/type-inference/type-environment";
 import {Program} from "../../../lib/semantic-model/program";
+import {Scope} from "../../../lib/semantic-model/scope";
 import {ObjectType, NumberType, VoidType, FunctionType, MaybeType, StringType, TypeVariable, ArrayType, BooleanType, NullType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 
@@ -39,7 +40,7 @@ describe("CallExpressionRefinementRule", function () {
 			it("returns the return type of the called function", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -57,7 +58,7 @@ describe("CallExpressionRefinementRule", function () {
 			it("returns void if the called function is void", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -73,7 +74,7 @@ describe("CallExpressionRefinementRule", function () {
 			it("sets this to void if the callee is not a member expression", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -88,8 +89,9 @@ describe("CallExpressionRefinementRule", function () {
 				// assert
 				const analyseCall = typeInferenceAnalysis.analyse.getCall(0);
 				const analyseTypeEnv = analyseCall.args[1];
+				const thiz = logDeclaration.scope.resolveSymbol("this");
 
-				expect(analyseTypeEnv.getType(Symbol.THIS)).to.be.instanceOf(VoidType);
+				expect(analyseTypeEnv.getType(thiz)).to.be.instanceOf(VoidType);
 			});
 
 			it("sets this to the object of the callee, if the callee is a member expression", function () {
@@ -97,7 +99,7 @@ describe("CallExpressionRefinementRule", function () {
 				const personNode = t.identifier("person");
 				const logMember = t.memberExpression(personNode, t.identifier("log"));
 				const callExpression = t.callExpression(logMember, [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -118,8 +120,9 @@ describe("CallExpressionRefinementRule", function () {
 				// assert
 				const analyseCall = typeInferenceAnalysis.analyse.getCall(0);
 				const analyseTypeEnv = analyseCall.args[1];
+				const thiz = logDeclaration.scope.resolveSymbol("this");
 
-				expect(analyseTypeEnv.getType(Symbol.THIS)).to.be.equals(personType);
+				expect(analyseTypeEnv.getType(thiz)).to.be.equals(personType);
 			});
 
 			// a function passed as callback is triggered in a different context then where it has been declared
@@ -128,7 +131,7 @@ describe("CallExpressionRefinementRule", function () {
 			it("adds type mappings from the function declaration context to the call context", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -156,7 +159,7 @@ describe("CallExpressionRefinementRule", function () {
 			it("updates changes types in the caller's context", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -181,7 +184,7 @@ describe("CallExpressionRefinementRule", function () {
 				it("assigns the types of the arguments to the parameters", function () {
 					// arrange
 					const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-					const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+					const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 					const m = new Symbol("m", SymbolFlags.Variable);
 					const mType = StringType.create();
@@ -204,7 +207,7 @@ describe("CallExpressionRefinementRule", function () {
 				it("assigns void to missing parameters", function () {
 					// arrange
 					const callExpression = t.callExpression(t.identifier("log"), []);
-					const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+					const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 					const m = new Symbol("m", SymbolFlags.Variable);
 					program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -225,7 +228,7 @@ describe("CallExpressionRefinementRule", function () {
 				it("ignores unused arguments", function () {
 					// arrange
 					const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-					const logDeclaration = t.functionDeclaration(t.identifier("log"), [], t.blockStatement([]));
+					const logDeclaration = functionDeclaration(t.identifier("log"));
 
 					typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(new TypeVariable(), [], VoidType.create(), logDeclaration));
 					typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
@@ -240,7 +243,7 @@ describe("CallExpressionRefinementRule", function () {
 					// arrange
 					const personExpression = t.identifier("person");
 					const callExpression = t.callExpression(t.identifier("setName"), [personExpression]);
-					const setNameDeclaration = t.functionDeclaration(t.identifier("setName"), [t.identifier("person")], t.blockStatement([])); // body is p.name = 'Test'
+					const setNameDeclaration = functionDeclaration(t.identifier("setName"), t.identifier("person")); // body is p.name = 'Test'
 
 					const person = new Symbol("person", SymbolFlags.Variable);
 					program.symbolTable.setSymbol(personExpression, person);
@@ -272,7 +275,7 @@ describe("CallExpressionRefinementRule", function () {
 					// arrange
 					const personExpression = t.identifier("person");
 					const callExpression = t.callExpression(t.identifier("setName"), [personExpression]);
-					const setNameDeclaration = t.functionDeclaration(t.identifier("setName"), [t.identifier("person")], t.blockStatement([])); // body is p = { name: 'Test' }
+					const setNameDeclaration = functionDeclaration(t.identifier("setName"), t.identifier("person")); // body is p = { name: 'Test' }
 
 					const person = new Symbol("person", SymbolFlags.Variable);
 					program.symbolTable.setSymbol(personExpression, person);
@@ -304,7 +307,7 @@ describe("CallExpressionRefinementRule", function () {
 					this.timeout(5000);
 
 					// arrange
-					const functionDeclaration = t.functionDeclaration(t.identifier("f"), [], t.blockStatement([]));
+					const func = functionDeclaration(t.identifier("f"));
 
 					const c1 = t.callExpression(t.identifier("f"), []);
 					const calls = [];
@@ -317,7 +320,7 @@ describe("CallExpressionRefinementRule", function () {
 						calls.push(t.callExpression(t.identifier("f"), args));
 					}
 
-					const functionType = new FunctionType(new TypeVariable(), [], VoidType.create(), functionDeclaration);
+					const functionType = new FunctionType(new TypeVariable(), [], VoidType.create(), func);
 					for (const call of calls.concat(c1)) {
 						typeInferenceAnalysis.infer.withArgs(call.callee).returns(functionType);
 					}
@@ -341,11 +344,11 @@ describe("CallExpressionRefinementRule", function () {
 
 				it("detects recursive calls with the same arguments and uses the return type of the previously called function", function () {
 					// arrange
-					const functionDeclaration = t.functionDeclaration(t.identifier("successor"), [t.identifier("x")], t.blockStatement([]));
+					const func = functionDeclaration(t.identifier("successor"), t.identifier("x"));
 					const x = new Symbol("x", SymbolFlags.Variable);
-					program.symbolTable.setSymbol(functionDeclaration.params[0], x);
+					program.symbolTable.setSymbol(func.params[0], x);
 
-					const funcT = new FunctionType(new TypeVariable(), [], VoidType.create(), functionDeclaration);
+					const funcT = new FunctionType(new TypeVariable(), [], VoidType.create(), func);
 
 					const call = t.callExpression(t.identifier("successor"), [t.numericLiteral(4)]);
 					typeInferenceAnalysis.infer.withArgs(call.callee).returns(funcT);
@@ -459,7 +462,7 @@ describe("CallExpressionRefinementRule", function () {
 
 			it("analyses the body of a callback that has been passed as argument", function () {
 				// arrange
-				const predicateDeclaration = t.functionDeclaration(t.identifier("isEven"), [t.identifier("x")], t.blockStatement([])); // body x % 2 === 0;
+				const predicateDeclaration = functionDeclaration(t.identifier("isEven"), t.identifier("x")); // body x % 2 === 0;
 				const predicate = new FunctionType(VoidType.create(), [TypeVariable.create()], TypeVariable.create(), predicateDeclaration);
 				const x = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(predicateDeclaration.params[0], x);
@@ -493,7 +496,7 @@ describe("CallExpressionRefinementRule", function () {
 
 			it("it throws if the return type of the callback is not a subtype of the expected return type for the callback", function () {
 				// arrange
-				const predicateDeclaration = t.functionDeclaration(t.identifier("isEven"), [t.identifier("x")], t.blockStatement([])); // body return null;
+				const predicateDeclaration = functionDeclaration(t.identifier("isEven"), t.identifier("x")); // body return null;
 				const predicate = new FunctionType(VoidType.create(), [TypeVariable.create()], TypeVariable.create(), predicateDeclaration);
 				const x = new Symbol("x", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(predicateDeclaration.params[0], x);
@@ -535,7 +538,7 @@ describe("CallExpressionRefinementRule", function () {
 			it("is the inferred function of the callee", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				const logDeclaration = t.functionDeclaration(t.identifier("log"), [t.identifier("m")], t.blockStatement([]));
+				const logDeclaration = functionDeclaration(t.identifier("log"), t.identifier("m"));
 
 				const m = new Symbol("m", SymbolFlags.Variable);
 				program.symbolTable.setSymbol(logDeclaration.params[0], m);
@@ -562,6 +565,12 @@ describe("CallExpressionRefinementRule", function () {
 				expect(() => rule.refine(callExpression, context)).to.throw("Type inference failure: Cannot invoke the non function type string.");
 			});
 		});
-
 	});
+
+	function functionDeclaration(identifier, ...params) {
+		const declaration = t.functionDeclaration(identifier, params, t.blockStatement([]));
+		declaration.scope = new Scope();
+		declaration.scope.addSymbol(new Symbol("this", SymbolFlags.Variable));
+		return declaration;
+	}
 });
