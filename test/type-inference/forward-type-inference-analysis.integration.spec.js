@@ -2,10 +2,15 @@ import {expect} from "chai";
 
 import {Symbol} from "../../lib/semantic-model/symbol";
 import {Program} from "../../lib/semantic-model/program";
+import {TypeEnvironment} from "../../lib/type-inference/type-environment";
 import {infer} from "../../lib/infer";
 import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, RecordType, ArrayType, AnyType, ObjectType} from "../../lib/semantic-model/types";
 
 describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
+
+	it("can analyse an empty program", function () {
+		expect(() => inferTypes("// alert('Hello world!');")).not.to.throw();
+	});
 
 	it("infers the types for declared variables correctly", function () {
 		// act
@@ -373,6 +378,10 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		it("throws if an argument of a built in function is not a subtype of the parameter type", function () {
 			expect(() => inferTypes("'Micha Reiser'.substring('3');")).to.throw("Type inference failure: Unification for type \'string\' and \'number\' failed because there exists no rule that can be used to unify the given types.");
 		});
+
+		it("can invoke functions of built in objects", function () {
+			expect(() => inferTypes("console.log('x');")).not.to.throw();
+		});
 	});
 
 	describe("array", function () {
@@ -490,6 +499,7 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		infer(sourceFile, program);
 
 		const cfg = sourceFile.ast.cfg;
-		return { typeEnvironment: cfg.getNode(null).annotation.in, scope: sourceFile.scope, ast: sourceFile.ast };
+		const typeEnv = cfg.getNode(null) ? cfg.getNode(null).annotation.in : TypeEnvironment.EMPTY;
+		return { typeEnvironment: typeEnv, scope: sourceFile.scope, ast: sourceFile.ast };
 	}
 });

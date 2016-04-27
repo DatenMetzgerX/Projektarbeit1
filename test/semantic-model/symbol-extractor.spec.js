@@ -261,6 +261,87 @@ describe("SymbolExtractor", function () {
 	});
 
 	describe("Expressions", function () {
+
+		describe("ThisExpression", function () {
+			it("creates a new symbol for the first usage of this in a function", function () {
+				// act
+				const ast = extractSymbols(`
+				function add(x) {
+					this.sum += x;
+				}
+				`);
+
+				// assert
+				const func = ast.program.body[0];
+				const scope = func.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+
+				const thisExpression = func.body.body[0].expression.left.object;
+				expect(program.symbolTable.getSymbol(thisExpression)).not.to.be.undefined;
+			});
+
+			it("reuses the previously defined this symbol", function () {
+				// act
+				const ast = extractSymbols(`
+				function add(x) {
+					this.sum += x;
+					return this.sum;
+				}
+				`);
+
+				// assert
+				const func = ast.program.body[0];
+				const scope = func.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+
+				const firstThis = func.body.body[0].expression.left.object;
+				const secondThis = func.body.body[1].argument.object;
+				expect(program.symbolTable.getSymbol(secondThis)).to.equal(program.symbolTable.getSymbol(firstThis));
+			});
+
+			it("resolves the this from the function scope and not from the current scope", function () {
+				// act
+				const ast = extractSymbols(`
+				function add(x) {
+					this.sum += x;
+					{
+						return this.sum;
+					}
+				}
+				`);
+
+				// assert
+				const func = ast.program.body[0];
+				const scope = func.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+
+				const firstThis = func.body.body[0].expression.left.object;
+				const subBlock = func.body.body[1];
+				const secondThis = subBlock.body[0].argument.object;
+
+				expect(subBlock.scope).not.to.have.ownSymbol("this");
+				expect(program.symbolTable.getSymbol(secondThis)).to.equal(program.symbolTable.getSymbol(firstThis));
+			});
+
+			it("does not throw if this is used outside a function declaration", function () {
+				// act
+				const ast = extractSymbols(`
+					this.name;
+				`);
+
+				// assert
+				const expression = ast.program.body[0].expression;
+				const thisStatement = expression.object;
+				const scope = ast.program.scope;
+
+				expect(scope).to.have.ownSymbol("this");
+				expect(program.symbolTable.getSymbol(thisStatement)).not.to.be.undefined;
+			});
+		});
+
 		describe("ArrayExpression", function () {
 			it("sets the symbols for identifiers used in the array", function () {
 				const ast = extractSymbols("[p1, p2, 10]");
@@ -279,7 +360,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -292,7 +373,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				let x = 10;
 				`);
@@ -305,7 +386,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(current, intend) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -320,7 +401,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(current, intend) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -334,7 +415,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(current, intend) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -348,7 +429,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -360,7 +441,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -372,7 +453,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -384,7 +465,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -396,7 +477,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
-					console.log(count);
+					logger.log(count);
 				}
 				`);
 
@@ -422,7 +503,7 @@ describe("SymbolExtractor", function () {
 				// act
 				const ast = extractSymbols(`
 				(function (count) {
-					console.log(count);
+					logger.log(count);
 				})
 				`);
 
@@ -773,7 +854,7 @@ describe("SymbolExtractor", function () {
 		describe("CallExpression", function () {
 			it("creates a symbol for each identifier used in the arguments", function () {
 				// act
-				const ast = extractSymbols("console.log(x, y, z)");
+				const ast = extractSymbols("logger.log(x, y, z)");
 
 				// assert
 				expect(ast.program.scope).to.have.ownSymbol("x");
@@ -788,7 +869,7 @@ describe("SymbolExtractor", function () {
 
 			it("associates the argument nodes with the corresponding symbols", function () {
 				// act
-				const ast = extractSymbols("console.log(x, y)");
+				const ast = extractSymbols("logger.log(x, y)");
 
 				// assert
 				const args = ast.program.body[0].expression.arguments;
@@ -807,6 +888,20 @@ describe("SymbolExtractor", function () {
 				// assert
 				const callExpression = ast.program.body[0].expression;
 				expect(program.symbolTable.getSymbol(callExpression.callee)).to.be.equal(log);
+			});
+
+			it("Can handle member expressions on results of a call expressions", function () {
+				const ast = extractSymbols(`
+				angular.module('chatrooms').controller(
+					  'appController',
+					  ['$scope', 'user', function($scope, user) {
+					    const placeholder = 'Enter a witty nickname';
+					    const loginRequest = function(username) { user.loginRequest(username); };
+					}]);
+				`);
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.callee.object)).not.to.be.undefined;
 			});
 		});
 
@@ -919,6 +1014,24 @@ describe("SymbolExtractor", function () {
 			it("is supported", function () {
 				// act, assert
 				expect(() => extractSymbols("null")).not.to.throw();
+			});
+		});
+
+		describe("DirectiveLiteral", function () {
+			it("is supported", function () {
+				expect(() => extractSymbols("'use strict';")).not.to.throw();
+			});
+		});
+
+		describe("TemplateLiteral", function () {
+			it("extracts the identifiers from the expressions", function () {
+				// act
+				const ast = extractSymbols("`Hallo ${user}`");
+
+				// assert
+				const templateLiteral = ast.program.body[0].expression;
+				expect(ast.program.scope).to.have.ownSymbol("user");
+				expect(program.symbolTable.getSymbol(templateLiteral.expressions[0])).not.to.be.undefined;
 			});
 		});
 	});
