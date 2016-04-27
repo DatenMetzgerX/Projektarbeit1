@@ -1022,6 +1022,18 @@ describe("SymbolExtractor", function () {
 				expect(() => extractSymbols("'use strict';")).not.to.throw();
 			});
 		});
+
+		describe("TemplateLiteral", function () {
+			it("extracts the identifiers from the expressions", function () {
+				// act
+				const ast = extractSymbols("`Hallo ${user}`");
+
+				// assert
+				const templateLiteral = ast.program.body[0].expression;
+				expect(ast.program.scope).to.have.ownSymbol("user");
+				expect(program.symbolTable.getSymbol(templateLiteral.expressions[0])).not.to.be.undefined;
+			});
+		});
 	});
 
 	describe("Clauses", function () {

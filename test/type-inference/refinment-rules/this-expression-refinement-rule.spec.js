@@ -9,7 +9,7 @@ import {Program} from "../../../lib/semantic-model/program";
 import {ThisExpressionRefinementRule} from "../../../lib/type-inference/refinement-rules/this-expression-refinement-rule";
 
 describe("ThisExpressionRefinementRule", function () {
-	let rule, context, program, sandbox;
+	let rule, context, program;
 
 	beforeEach(function () {
 		program = new Program();
