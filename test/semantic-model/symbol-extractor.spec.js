@@ -808,6 +808,20 @@ describe("SymbolExtractor", function () {
 				const callExpression = ast.program.body[0].expression;
 				expect(program.symbolTable.getSymbol(callExpression.callee)).to.be.equal(log);
 			});
+
+			it("Can handle member expressions on results of a call expressions", function () {
+				const ast = extractSymbols(`
+				angular.module('chatrooms').controller(
+					  'appController',
+					  ['$scope', 'user', function($scope, user) {
+					    const placeholder = 'Enter a witty nickname';
+					    const loginRequest = function(username) { user.loginRequest(username); };
+					}]);
+				`);
+
+				// assert
+				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.callee.object)).not.to.be.undefined;
+			});
 		});
 
 		describe("MemberExpression", function () {

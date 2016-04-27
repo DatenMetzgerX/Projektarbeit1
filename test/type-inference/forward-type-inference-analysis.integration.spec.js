@@ -8,7 +8,7 @@ import {NumberType, StringType, BooleanType, NullType, VoidType, MaybeType, Reco
 
 describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 
-	it.only("can analyse an empty program", function () {
+	it("can analyse an empty program", function () {
 		expect(() => inferTypes("// alert('Hello world!');")).not.to.throw();
 	});
 
