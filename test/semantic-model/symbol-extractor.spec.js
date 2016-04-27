@@ -935,6 +935,12 @@ describe("SymbolExtractor", function () {
 				expect(() => extractSymbols("null")).not.to.throw();
 			});
 		});
+
+		describe("DirectiveLiteral", function () {
+			it("is supported", function () {
+				expect(() => extractSymbols("'use strict';")).not.to.throw();
+			});
+		});
 	});
 
 	describe("Clauses", function () {
