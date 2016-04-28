@@ -37,12 +37,15 @@ describe("CfgBuilder", function () {
 	});
 
 	describe("EmptyStatement", function () {
-		it("creates an edge to the successor node", () => {
-			const {ast, cfg} = toCfg(";");
+		it("skips an empty statement", () => {
+			const {ast, cfg} = toCfg("let x = 10;;x++");
 
 			// assert
-			const emptyStatement = ast.program.body[0];
-			expect(cfg.isConnected(emptyStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
+			const declaration = ast.program.body[0];
+			const emptyStatement = ast.program.body[1];
+			const update = ast.program.body[2];
+			expect(cfg.getNode(emptyStatement)).to.be.undefined;
+			expect(cfg.isConnected(declaration, update, BRANCHES.UNCONDITIONAL)).to.be.true;
 		});
 	});
 
