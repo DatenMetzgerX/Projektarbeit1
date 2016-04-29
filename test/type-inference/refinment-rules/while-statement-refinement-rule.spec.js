@@ -26,7 +26,15 @@ describe("WhileStatementRefinementRule", function () {
 			expect(rule.canRefine(whileStatement)).to.be.true;
 		});
 
-		it("returns false if the node is not a while statement", function () {
+		it("returns true if the node is a do while statement", function () {
+			// arrange
+			const doWhileStatement = t.doWhileStatement(t.booleanLiteral(true), t.blockStatement([]));
+
+			// act, assert
+			expect(rule.canRefine(doWhileStatement)).to.be.true;
+		});
+
+		it("returns false if the node is neither a while nor do while statement", function () {
 			expect(rule.canRefine(t.identifier("x"))).to.be.false;
 		});
 	});
