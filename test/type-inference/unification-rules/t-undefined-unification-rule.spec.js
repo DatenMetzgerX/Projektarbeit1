@@ -1,7 +1,7 @@
 import {expect} from "chai";
 
 import {TUndefinedUnificationRule} from "../../../lib/type-inference/unification-rules/t-undefined-unification-rule";
-import {StringType, VoidType} from "../../../lib/semantic-model/types";
+import {StringType, VoidType, AnyType} from "../../../lib/semantic-model/types";
 
 describe("TUndefinedUnificationRule", function () {
 	let rule;
@@ -14,6 +14,11 @@ describe("TUndefinedUnificationRule", function () {
 		it("returns true if one of the types is undefined", function () {
 			expect(rule.canUnify(StringType.create(), VoidType.create())).to.be.true;
 			expect(rule.canUnify(VoidType.create(), StringType.create())).to.be.true;
+		});
+		
+		it("returns false if the other type is any", function () {
+			expect(rule.canUnify(AnyType.create(), VoidType.create())).to.be.false;
+			expect(rule.canUnify(VoidType.create(), AnyType.create())).to.be.false;
 		});
 
 		it("returns false if neither of the types is VoidType", function () {

@@ -192,6 +192,18 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
+		describe("DoWhileStatement", function () {
+			it("registers the identifiers in the test expression", function () {
+				// act
+				const ast = extractSymbols("do {} while (x)");
+
+				// assert
+				const scope = ast.program.scope;
+				expect(scope).to.have.ownSymbol("x");
+				expect(program.symbolTable.getSymbol(ast.program.body[0].test)).not.to.be.undefined;
+			});
+		});
+
 		describe("ForStatement", function () {
 			it("adds identifiers used in the init, test or update expression to the current scope", function () {
 				// act
