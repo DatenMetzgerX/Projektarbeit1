@@ -824,6 +824,42 @@ describe("CfgBuilder", function () {
 		});
 	});
 
+	describe("ThrowStatement", function () {
+		it("connects the throw statement with the exit node", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			if (!x) {
+			    throw "Ohoh";
+			}
+			console.log(x);
+			`);
+
+			// assert
+			const ifStatement = ast.program.body[0];
+			const throwStatement = ifStatement.consequent.body[0];
+
+			expect(cfg.isConnected(throwStatement, null, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+
+		it("connects the throw statement with the enclosing catch clause", function () {
+			// act
+			const { ast, cfg } = toCfg(`
+			try {
+			    throw "Ohoh";
+			} catch (e) {
+				console.log(x);
+			}
+			`);
+
+			// assert
+			const tryStatement = ast.program.body[0];
+			const throwStatement = tryStatement.block.body[0];
+			const catchClause = tryStatement.handler;
+
+			expect(cfg.isConnected(throwStatement, catchClause, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+	});
+
 	describe("CatchClause", function () {
 		it("connects the catch clause with it's body", function () {
 			// act
