@@ -1,0 +1,245 @@
+% Encoding: UTF-8
+
+@InProceedings{JensenMadsenMoller2011,
+  author    = {Simon Holm Jensen and Magnus Madsen and Anders M\o{}ller},
+  title     = {Modeling the {HTML} {DOM} and Browser {API} in Static Analysis of {J}ava{S}cript Web Applications},
+  booktitle = {Proc. 8th joint meeting of the European Software Engineering Conference and the ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE)},
+  year      = {2011},
+  month     = {September},
+  abstract  = {Developers of JavaScript web applications have little tool support for catching errors early in development. In comparison, an abundance of tools exist for statically typed languages, including sophisticated integrated development environments and specialized static analyses. Transferring such technologies to the domain of JavaScript web applications is challenging. In this paper, we discuss the challenges, which include the dynamic aspects of JavaScript and the complex interactions between JavaScript, HTML, and the browser. From this, we present the first static analysis that is capable of reasoning about the flow of control and data in modern JavaScript applications that interact with the HTML DOM and browser API.
+
+One application of such a static analysis is to detect type-related and dataflow-related programming errors. We report on experiments with a range of modern web applications, including Chrome Experiments and IE Test Drive applications, to measure the precision and performance of the technique. The experiments indicate that the analysis is able to show absence of errors related to missing object properties and to identify dead and unreachable code. By measuring the precision of the types inferred for object properties, the analysis is precise enough to show that most expressions have unique types. By also producing precise call graphs, the analysis additionally shows that most invocations in the programs are monomorphic. We furthermore study the usefulness of the analysis to detect spelling errors in the code. Despite the encouraging results, not all problems are solved and some of the experiments indicate a potential for improvement, which allows us to identify central remaining challenges and outline directions for future work.},
+  comment   = {The effect of the HTML DOM and it's event on a type checker},
+  keywords  = {JavaScript, Type Analysis, DOM Events},
+  url       = {http://cs.au.dk/~amoeller/papers/dom/paper.pdf},
+  urldate   = {2016-04-26},
+}
+
+@InProceedings{JensenMollerThiemann2009,
+  author    = {Simon Holm Jensen and Anders M\o{}ller and Peter Thiemann},
+  title     = {Type Analysis for {J}ava{S}cript},
+  booktitle = {Proc. 16th International Static Analysis Symposium (SAS)},
+  year      = {2009},
+  volume    = {5673},
+  series    = {LNCS},
+  month     = {August},
+  publisher = {Springer-Verlag},
+  abstract  = {JavaScript is the main scripting language for Web browsers, and it is essential to modern Web applications. Programmers have started using it for writing complex applications, but there is still little tool support available during development.
+
+We present a static program analysis infrastructure that can infer detailed and sound type information for JavaScript programs using abstract interpretation. The analysis is designed to support the full language as defined in the ECMAScript standard, including its peculiar object model and all built-in functions. The analysis results can be used to detect common programming errors - or rather, prove their absence, and for producing type information for program comprehension.
+
+Preliminary experiments conducted on real-life JavaScript code indicate that the approach is promising regarding analysis precision on small and medium size programs, which constitute the majority of JavaScript applications. With potential for further improvement, we propose the analysis as a foundation for building tools that can aid JavaScript programmers.},
+  comment   = {Basic article about type inference. shows some difficulties},
+  keywords  = {JavaScript, Type Analysis},
+  url       = {http://cs.au.dk/~amoeller/papers/tajs/paper.pdf},
+  urldate   = {2016-04-26},
+}
+
+@InProceedings{AndreasenMoller2014,
+  author    = {Esben Andreasen and Anders M\o{}ller},
+  title     = {Determinacy in Static Analysis for j{Q}uery},
+  booktitle = {Proc. ACM SIGPLAN Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)},
+  year      = {2014},
+  month     = oct,
+  abstract  = {Static analysis for JavaScript can potentially help programmers find errors early during development. Although much progress has been made on analysis techniques, a major obstacle is the prevalence of libraries, in particular jQuery, which apply programming patterns that have detrimental consequences on the analysis precision and performance.
+
+Previous work on dynamic determinacy analysis has demonstrated how information about program expressions that always resolve to a fixed value in some call context may lead to significant scalability improvements of static analysis for such code. We present a static dataflow analysis for JavaScript that infers and exploits determinacy information on-the-fly, to enable analysis of some of the most complex parts of jQuery. The analysis combines selective context and path sensitivity, constant propagation, and branch pruning, based on a systematic investigation of the main causes of analysis imprecision when using a more basic analysis.
+
+The techniques are implemented in the TAJS analysis tool and evaluated on a collection of small programs that use jQuery. Our results show that the proposed analysis techniques boost both precision and performance, specifically for inferring type information and call graphs.},
+  comment   = {How large libraries like jQuery can be analysed},
+  keywords  = {JavaScript, Libraries, jQuery},
+  url       = {http://cs.au.dk/~amoeller/papers/jquery/paper.pdf},
+  urldate   = {2016-04-26},
+}
+
+@MastersThesis{Odgaard2014,
+  author   = {Morten Passow Odgaard},
+  title    = {JavaScript Type Inference Using Dynamic Analysis},
+  school   = {Aarhus University},
+  year     = {2014},
+  abstract = {JavaScript has become the programming language of the web and the language is used in large
+systems in ways it was never designed for.
+
+Though much progress has been made with linting tools and unit testing practices as well as
+static type analysis and inference, the area of generating JavaScript API annotations based on
+unit tests is uncharted. Tests contain type knowledge that can be made available to current code
+editors and analysis tools by converting the knowledge into type annotations.
+
+This paper presents a type inference and annotation system that uses dynamic analysis based
+on test cases to automatically generate JSDoc type annotations for JavaScript programs and
+libraries. A system prototype is implemented in JavaScript and evaluated with encouraging
+results. The type inference method is found to be accurate in practice. Automatic generation
+of JSDoc type annotations shows promise although more work is required to properly annotate
+module-based code.},
+  comment  = {Generating type annotations from executed unit tests. Dynamic analysis},
+  keywords = {Type Inference, Unit Tests, Dynamic},
+  url      = {http://cs.au.dk/fileadmin/site_files/cs/Masters_and_diplomas/MortenPassowOdgaard.pdf},
+  urldate  = {2016-04-26},
+}
+
+@PhdThesis{Anderson2006,
+  author   = {Christopher Lyon Anderson},
+  title    = {Type Inference for JavaScript},
+  school   = {University of London},
+  year     = {2006},
+  abstract = {Object-oriented scripting languages like JavaScript are popular, in part because of
+their dynamic features. These include the runtime modification of objects and
+classes, through addition of fields or updating of methods. These features make
+static typing difficult and usually dynamic typing is used. Consequently, errors
+such as access to non-existent members, are not detected until runtime.
+
+We provide a static type system that can cope with dynamic features such as
+member addition, while providing the usual safety guarantees. Since the structure
+of objects may change over time, we employ a structural type system to track the
+changes. We show how type inference can be used to infer the structure of objects
+and give corresponding structural types. Therefore, the programmer can enjoy
+the safety offered by static typing, without having to give explicit types in their
+programs.
+
+We develop JS0, a formalisation of JavaScript with features including dynamic
+addition of fields and updating of methods. We give an operational semantics and
+static type system for JS0 using structural types. Our types allow objects to evolve
+in a controlled manner by classifying members as definite or potential. A member is
+potential until it has been assigned to and then it becomes definite. We prove that
+our type system is sound.
+
+We develop a type inference algorithm for JS0 based on a system of constraints
+between type variables. We define a translation between constraints and types that
+allows us to generate a type annotated JS0 program from an untype JS0 program.
+We prove that the constraints are sound with respect to the type system and that our
+translation is deterministic. We define a well-formedness criterion on constraints
+and conjecture that well-formed constraints are satisfiable. Therefore, combined
+with the soundness of constraints and the soundness of the type system, we conjecture
+that programs that generate well-formed constraints will not get stuck.},
+  comment  = {Modeled a type system for javascript},
+  keywords = {Type Inference, JavaScript,},
+  url      = {http://dev.pubs.doc.ic.ac.uk/chrisandersonphd/chrisandersonphd.pdf},
+  urldate  = {2016-04-26},
+}
+
+@Misc{Lewis,
+  author   = {Noam Lewis},
+  title    = {Inernu},
+  comment  = {A JavaScript type checker. Based on Hinldey Milner},
+  keywords = {Type Checker, Infernu, Hindley Milner},
+  url      = {https://noamlewis.wordpress.com/2015/01/20/introducing-sjs-a-type-inferer-and-checker-for-javascript/},
+  urldate  = {2016-04-26},
+}
+
+@Misc{Haverbeke,
+  author   = {Marijn Haverbeke},
+  title    = {Ternjs},
+  comment  = {Provides intellisense for javascript. Uses abstract value to infer the types},
+  keywords = {ternjs, Intellisense, autocompletion, code analysis},
+  url      = {http://ternjs.net/},
+  urldate  = {2016-04-26},
+}
+
+@Misc{Facebook2014,
+  author   = {Facebook},
+  title    = {Flow, a new static type checker for JavaScript},
+  month    = {nov},
+  year     = {2014},
+  keywords = {Type Checker, JavaScript},
+  url      = {https://code.facebook.com/posts/1505962329687926/flow-a-new-static-type-checker-for-javascript/},
+  urldate  = {2016-04-26},
+}
+
+@Misc{Microsoft2012,
+  author   = {Microsoft},
+  title    = {TypeScript},
+  year     = {2012},
+  keywords = {TypeScript, Type Checker},
+  url      = {https://www.typescriptlang.org/},
+  urldate  = {2016-04-26},
+}
+
+@Misc{McKenna,
+  author   = {Brian McKenna},
+  title    = {Roy},
+  month    = {2011},
+  comment  = {To JS Language},
+  keywords = {Transpiler},
+  url      = {http://roy.brianmckenna.org/},
+  urldate  = {2016-04-26},
+}
+
+@MastersThesis{Ekblad2012,
+  author   = {Anton Ekblad},
+  title    = {Towards a Declarative Web},
+  school   = {University of Gothenburg},
+  year     = {2012},
+  abstract = {Owing to its platform independence, ubiquity and ease of deployment,
+the web browser is quickly becoming not only a platform for large-scale
+application development, but the platform for application development.
+However, the de facto standard language of the web, Javascript, suffers
+from poor language design, a lack of static checks and a highly verbose
+programming model. Meanwhile, the Haskell functional language is gaining
+prominence as a language well suited for writing robust applications.
+This thesis explores the viability of developing applications for the
+browser platform using Haskell. In doing so, it presents an implementation
+of a compiler from Haskell, including bleeding edge extensions specific
+to the state of the art GHC compiler, to comparatively lean Javascript
+code, together with a base library for writing web applications, based on
+Functional Reactive Programming.},
+  comment  = {Haskell to JS Transpiler},
+  keywords = {Haste, Transpiler},
+  url      = {http://haste-lang.org/pubs/hastereport.pdf},
+  urldate  = {2016-04-26},
+}
+
+@Standard{Ecma2015,
+  title        = {ECMAScript{\textregistered} 2015 Language Specification},
+  organization = {Ecma International},
+  author       = {Ecma International},
+  number       = {6.0},
+  month        = {jun},
+  year         = {2015},
+  url          = {http://www.ecma-international.org/ecma-262/6.0/ECMA-262.pdf},
+  urldate      = {2016-04-26},
+}
+
+@Misc{jQuery2016,
+  author  = {jQuery Foundation},
+  title   = {ESLint},
+  year    = {2016},
+  url     = {http://eslint.org/},
+  urldate = {2016-04-26},
+}
+
+@Misc{Kangax2016,
+  author  = {Kangax},
+  title   = {ECMAScript 6 compatibility table},
+  month   = {May},
+  year    = {2016},
+  url     = {https://kangax.github.io/compat-table/es6/},
+  urldate = {2016-05-02},
+}
+
+@Misc{Reiser2016,
+  author       = {Micha Reiser},
+  title        = {ESChecker},
+  howpublished = {online},
+  year         = {2016},
+  url          = {https://github.com/DatenMetzgerX/ESChecker},
+}
+
+@Article{Milner1978,
+  author  = {Robin Milner},
+  title   = {A theory of type polymorphism in programming},
+  journal = {Journal of Computer and System Sciences},
+  year    = {1978},
+  volume  = {17},
+  pages   = {348--375},
+}
+
+@Book{NielsonNielsonHankin1999,
+  title     = {Principles of Program Analysis},
+  publisher = {Springer-Verlag New York, Inc.},
+  year      = {1999},
+  author    = {Nielson, Flemming and Nielson, Hanne R. and Hankin, Chris},
+  address   = {Secaucus, NJ, USA},
+  isbn      = {3540654100},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

@@ -4,3 +4,5 @@ graph.png
 coverage
 es5
 esdoc
+*.bak
+doc/.texpadtmp

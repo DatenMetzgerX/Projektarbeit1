@@ -1,0 +1,32 @@
+\section{Benefits of an ES6 based analysis}
+The ECMAScript 6 (ES6) standard has been published on June 17, 2015 and therefore is also known as ES2015. Current browsers and Node 6 support in average 90\%~\cite{Kangax2016} of the new standard and older environments can be supported by using ES6 to ES5 transpilers and polyfills. Hence applications written in pure ES6 are growing. The analysis focuses on code written in ES6 and therefore can benefit from the following simplifications.
+
+\subsection{let and const}
+The declarations of variables declared with \javascriptinline/var/ are moved to the top of the enclosing function or file. This is known as hoisting. Their scope is not the enclosing block scope, instead the enclosing function or the global scope). A \javascriptinline/var/ declared variable can be accessed before its declaration. 
+
+ES6 introduces \javascriptinline{let} and \javascriptinline{const} declaration. \javascriptinline{Let} and \javascriptinline{const} variables are bound to there enclosing block scope and hoisting does not apply. This simplifies the analysis as no pre processing is needed to find all declared variables in a function or the global scope. 
+
+Furthermore, \javascriptinline{const} declared variables are readonly (but not immutable) and the value is always assigned in the declaration. Therefore the type of a \javascriptinline{const} defined variable never changes.
+
+The analysis treads \javascriptinline{var} and \javascriptinline{let} declarations equally. Meaning that \javascriptinline{var} declarations are also block scoped. Access to a \javascriptinline{var} declared variable before its declaration is therefore an error.
+
+\subsection{Strict mode}
+Strict mode has been introduced in ECMAScript 5. Strict mode allows to opt in to a restricted variant of JavaScript. Strict mode is not only a subset of JavaScript, it intentionally changes the semantics from normal code. It eliminates silent errors by throwing exceptions instead and prohibits some error prone or difficult to optimize syntaxes and semantics from earlier ECMAScript versions. 
+
+Strict mode can be explicitly enabled by adding the \javascriptinline{"use strict"} directive before any other statement. If it is the first statement in a file, then strict mode is enabled for the whole file. If it is the first statement in a function, then strict mode is only enabled for this function and all called functions. Strict mode is enforced for scripts using ES6 modules~\cite[10.2.1]{Ecma2015}. Therefore it can be expected that ES6 code is using strict mode. For this reason, the analysis only supports ES6 code. An explanation of the changed semantics in strict mode that has a beneficial effect on static analysis follows.
+
+\paragraph{Prohibited with statement}
+The with statement is prohibited in strict mode~\cite[Annex C]{Ecma2015}. The with statement allows to access properties of a specific object in a block without the need to use member expressions.
+
+\begin{javascriptcode}
+var x = 17;
+with (obj)
+{
+	x;
+}
+\end{javascriptcode}
+
+E.g. the identifier \javascriptinline{x} in the with block can reference the property \javascriptinline{obj.x}, if the object has a property \javascriptinline{x} or the variable \javascriptinline{x} from the outer scope. The with statement makes lexical scoping a non trivial task~\cite{JensenMollerThiemann2009}. The removal of the with statement from the language allows static scoping.
+
+\paragraph{Assignment to not declared variables}
+Assignment to not declared variables introduce a global variable in non strict mode. Strict mode prohibits assignment to not declared variables and throws an error instead. Therefore variables can only be defined with an explicit declaration.
