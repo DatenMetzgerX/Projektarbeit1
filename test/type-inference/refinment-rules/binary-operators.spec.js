@@ -11,7 +11,7 @@ describe("BinaryOperators", function () {
 		unify.returnsArg(0);
 	});
 
-	for (const numberOperator of ["+", "-", "*", "/", "<<", ">>", ">>>", "%", "|", "^", "&"]) {
+	for (const numberOperator of ["+", "-", "*", "/", "<<", ">>", ">>>", "%", "|", "^", "&", "<", ">", "<=", ">="]) {
 		describe(numberOperator, function () {
 
 			beforeEach(function () {
