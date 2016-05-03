@@ -367,7 +367,7 @@ describe("SymbolExtractor", function () {
 			});
 		});
 
-		describe("FunctionExpression", function () {
+		describe("FunctionDeclaration", function () {
 			it("creates a new child scope and assigns it to the function node", function () {
 				// act
 				const ast = extractSymbols(`
@@ -473,7 +473,7 @@ describe("SymbolExtractor", function () {
 				expect(ast.program.scope.getOwnSymbol("dump")).to.have.property("declaration", ast.program.body[0]);
 			});
 
-			it("sets the Function flag for the FunctionDeclaration", function () {
+			it("sets the Function and hoisted flag for the FunctionDeclaration", function () {
 				// act
 				const ast = extractSymbols(`
 				function dump(count) {
@@ -482,7 +482,7 @@ describe("SymbolExtractor", function () {
 				`);
 
 				// assert
-				expect(ast.program.scope.getOwnSymbol("dump")).to.have.property("flags", SymbolFlags.Function);
+				expect(ast.program.scope.getOwnSymbol("dump")).to.have.property("flags", SymbolFlags.Function | SymbolFlags.Hoisted);
 			});
 
 			it("does not create a symbol for the function in the function scope", function () {
@@ -523,7 +523,7 @@ describe("SymbolExtractor", function () {
 				expect(program.symbolTable.getSymbol(ast.program.body[0].expression)).not.to.be.undefined;
 			});
 
-			it("sets the symbolf or arrow functions", function () {
+			it("sets the symbol for arrow functions", function () {
 				// act
 				const ast = extractSymbols(`
 				x = n => n;
@@ -531,6 +531,24 @@ describe("SymbolExtractor", function () {
 
 				// assert
 				expect(program.symbolTable.getSymbol(ast.program.body[0].expression.right)).not.to.be.undefined;
+			});
+
+			it("uses the same symbol for hoisted functions and references to these", function () {
+				// act
+				const ast = extractSymbols(`
+				function calculate() {
+					return add(5, 4);
+				}
+				
+				function add(x, y) {
+					return x + y;
+				}`);
+
+				// assert
+				const add = ast.program.scope.resolveSymbol("add");
+				const addCall = ast.program.body[0].body.body[0].argument;
+
+				expect(program.symbolTable.getSymbol(addCall.callee)).to.equal(add);
 			});
 		});
 

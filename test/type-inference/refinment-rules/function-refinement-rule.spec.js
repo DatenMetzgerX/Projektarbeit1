@@ -5,7 +5,6 @@ import sinon from "sinon";
 import {FunctionRefinementRule} from "../../../lib/type-inference/refinement-rules/function-refinement-rule";
 import {FunctionType, TypeVariable, VoidType} from "../../../lib/semantic-model/types";
 import {Symbol, SymbolFlags} from "../../../lib/semantic-model/symbol";
-import {HindleyMilnerContext} from "../../../lib/type-inference/hindley-milner-context";
 import {ControlFlowGraph, BRANCHES} from "../../../lib/cfg/control-flow-graph";
 import {Edge} from "../../../lib/cfg/edge";
 import {Node} from "../../../lib/cfg/node";
@@ -21,7 +20,7 @@ describe("FunctionRefinementRule", function () {
 		sinon.stub(cfg, "getExitEdges");
 
 		program = new Program();
-		context = new HindleyMilnerContext(null, new TypeInferenceContext(program));
+		context = new TypeInferenceContext(program);
 		sinon.stub(context, "getCfg").returns(cfg);
 	});
 
@@ -67,7 +66,7 @@ describe("FunctionRefinementRule", function () {
 		});
 	});
 
-	describe("refine", function () {
+	describe("inferFunctionType", function () {
 		it("returns a FunctionType for a function declaration", function () {
 			// arrange
 			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
@@ -76,7 +75,7 @@ describe("FunctionRefinementRule", function () {
 			program.symbolTable.setSymbol(functionDeclaration, new Symbol("abcd", SymbolFlags.Function));
 
 			// act, assert
-			expect(rule.refine(functionDeclaration, context)).to.be.instanceOf(FunctionType);
+			expect(FunctionRefinementRule.inferFunctionType(functionDeclaration, context)).to.be.instanceOf(FunctionType);
 		});
 
 		it("Sets the function type in the symbol table", function () {
@@ -88,7 +87,7 @@ describe("FunctionRefinementRule", function () {
 			program.symbolTable.setSymbol(functionDeclaration, functionSymbol);
 
 			// act
-			rule.refine(functionDeclaration, context);
+			FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(context.getType(functionSymbol)).to.be.instanceOf(FunctionType);
@@ -107,7 +106,7 @@ describe("FunctionRefinementRule", function () {
 			cfg.getExitEdges.returns([]);
 
 			// act
-			const refined = rule.refine(functionDeclaration, context);
+			const refined = FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(refined.thisType).to.be.instanceOf(TypeVariable); // will be changed when the this parameter will be implemented
@@ -128,7 +127,7 @@ describe("FunctionRefinementRule", function () {
 			cfg.getExitEdges.returns([exit1]);
 
 			// act
-			const refined = rule.refine(functionDeclaration, context);
+			const refined = FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(refined.returnType).to.be.instanceOf(VoidType);
@@ -147,7 +146,7 @@ describe("FunctionRefinementRule", function () {
 			cfg.getExitEdges.returns([exit1]);
 
 			// act
-			const refined = rule.refine(functionDeclaration, context);
+			const refined = FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(refined.returnType).to.be.instanceOf(TypeVariable);
@@ -168,7 +167,7 @@ describe("FunctionRefinementRule", function () {
 			cfg.getExitEdges.returns([exit1, throwEdge]);
 
 			// act
-			const refined = rule.refine(functionDeclaration, context);
+			const refined = FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(refined.returnType).to.be.instanceOf(TypeVariable);
@@ -189,24 +188,10 @@ describe("FunctionRefinementRule", function () {
 			cfg.getExitEdges.returns([exit1, exit2]);
 
 			// act
-			const refined = rule.refine(functionDeclaration, context);
+			const refined = FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(refined.returnType).to.be.instanceOf(VoidType);
-		});
-
-		it("sets the type environment of the declaration in the function type", function () {
-			// arrange
-			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
-			cfg.getExitEdges.returns([]);
-
-			program.symbolTable.setSymbol(functionDeclaration, new Symbol("abcd", SymbolFlags.Function));
-
-			// act
-			const func = rule.refine(functionDeclaration, context);
-
-			// assert
-			expect(func.typeEnvironment).to.equal(context.typeEnvironment);
 		});
 
 		it("sets the function declaration node", function () {
@@ -217,10 +202,62 @@ describe("FunctionRefinementRule", function () {
 			program.symbolTable.setSymbol(functionDeclaration, new Symbol("abcd", SymbolFlags.Function));
 
 			// act
-			const func = rule.refine(functionDeclaration, context);
+			const func = FunctionRefinementRule.inferFunctionType(functionDeclaration, context);
 
 			// assert
 			expect(func.declaration).to.equal(functionDeclaration);
+		});
+	});
+
+	describe("refine", function () {
+		it("sets the type environment of the declaration in the function type", function () {
+			// arrange
+			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
+			const functionT = new FunctionType(TypeVariable.create(), [], TypeVariable.create());
+			const abcd = new Symbol("abcd", SymbolFlags.Function);
+			cfg.getExitEdges.returns([]);
+
+			program.symbolTable.setSymbol(functionDeclaration, abcd);
+			context.setType(abcd, functionT);
+
+			// act
+			const func = rule.refine(functionDeclaration, context);
+
+			// assert
+			expect(func.typeEnvironment).to.equal(context.typeEnvironment);
+		});
+
+		it("resolves the type of a function declaration from the context", function () {
+			// arrange
+			const functionDeclaration = t.functionDeclaration(t.identifier("abcd"), [], t.blockStatement([]));
+			const functionT = new FunctionType(TypeVariable.create(), [], TypeVariable.create());
+			const abcd = new Symbol("abcd", SymbolFlags.Function);
+
+			cfg.getExitEdges.returns([]);
+
+			program.symbolTable.setSymbol(functionDeclaration, abcd);
+			context.setType(abcd, functionT);
+
+			// act
+			const func = rule.refine(functionDeclaration, context);
+
+			// assert
+			expect(func).to.equal(functionT);
+		});
+
+		it("infers the type of a function expression", function () {
+			// arrange
+			const functionExpression = t.functionExpression(null, [], t.blockStatement([]));
+			cfg.getExitEdges.returns([]);
+
+			program.symbolTable.setSymbol(functionExpression, new Symbol("anonymous"));
+
+			// act
+			const func = rule.refine(functionExpression, context);
+
+			// assert
+			expect(func).not.to.be.undefined;
+			expect(func.returnType).to.be.instanceOf(VoidType);
 		});
 	});
 });
