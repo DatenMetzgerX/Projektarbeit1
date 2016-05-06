@@ -79,13 +79,27 @@ describe("HindleyMilnerContext", function () {
 			// arrange
 			const node = {};
 
-			typeInferenceAnalysis.analyse.returns(context.typeEnvironment);
+			typeInferenceAnalysis.analyse.returns(new Map([[null, context.typeEnvironment]]));
 
 			// act
 			context.analyse(node);
 
 			// assert
 			sinon.assert.calledWith(typeInferenceAnalysis.analyse, node, context.typeEnvironment);
+		});
+
+		it("updates the type environment to the type environment of the exit node", function () {
+			// arrange
+			const node = {};
+			const exitNodeTypeEnv = new TypeEnvironment();
+
+			typeInferenceAnalysis.analyse.returns(new Map([[null, exitNodeTypeEnv]]));
+
+			// act
+			context.analyse(node);
+
+			// assert
+			expect(context.typeEnvironment).to.equal(exitNodeTypeEnv);
 		});
 	});
 

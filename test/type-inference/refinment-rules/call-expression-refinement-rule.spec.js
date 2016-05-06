@@ -49,7 +49,7 @@ describe("CallExpressionRefinementRule", function () {
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 
 				const logTypeEnvironment = context.typeEnvironment.setType(Symbol.RETURN, VoidType.create());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(logTypeEnvironment);
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, logTypeEnvironment]]));
 
 				// assert
 				expect(rule.refine(callExpression, context)).to.be.instanceOf(VoidType);
@@ -65,7 +65,8 @@ describe("CallExpressionRefinementRule", function () {
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(TypeVariable.create(), [TypeVariable.create()], VoidType.create(), logDeclaration));
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(context.typeEnvironment.setType(Symbol.RETURN, VoidType.create()));
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body)
+					.returns(new Map([[null, context.typeEnvironment.setType(Symbol.RETURN, VoidType.create())]]));
 
 				// assert
 				expect(rule.refine(callExpression, context)).to.be.instanceOf(VoidType);
@@ -81,7 +82,7 @@ describe("CallExpressionRefinementRule", function () {
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(TypeVariable.create(), [TypeVariable.create()], VoidType.create(), logDeclaration));
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, TypeEnvironment.EMPTY]]));
 
 				// act
 				rule.refine(callExpression, context);
@@ -110,7 +111,7 @@ describe("CallExpressionRefinementRule", function () {
 				typeInferenceAnalysis.infer.withArgs(personNode).returns(personType);
 				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(TypeVariable.create(), [TypeVariable.create()], VoidType.create(), logDeclaration));
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, TypeEnvironment.EMPTY]]));
 
 				sinon.stub(context, "getObjectType").withArgs(logMember).returns(personType);
 
@@ -142,7 +143,7 @@ describe("CallExpressionRefinementRule", function () {
 
 				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(logType);
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, TypeEnvironment.EMPTY]]));
 
 				// act
 				rule.refine(callExpression, context);
@@ -171,7 +172,8 @@ describe("CallExpressionRefinementRule", function () {
 				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(logType);
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 				// The type of x has changed during the function execution. The change needs to be reflected to the callers context
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(context.typeEnvironment.setType(x, StringType.create()));
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body)
+					.returns(new Map([[null, context.typeEnvironment.setType(x, StringType.create())]]));
 
 				// act
 				rule.refine(callExpression, context);
@@ -192,7 +194,7 @@ describe("CallExpressionRefinementRule", function () {
 
 					typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(TypeVariable.create(), [TypeVariable.create()], VoidType.create(), logDeclaration));
 					typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(mType);
-					typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
+					typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, TypeEnvironment.EMPTY]]));
 
 					// act
 					rule.refine(callExpression, context);
@@ -213,7 +215,7 @@ describe("CallExpressionRefinementRule", function () {
 					program.symbolTable.setSymbol(logDeclaration.params[0], m);
 
 					typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(TypeVariable.create(), [TypeVariable.create()], VoidType.create(), logDeclaration));
-					typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returnsArg(1);
+					typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, TypeEnvironment.EMPTY]]));
 
 					// act
 					rule.refine(callExpression, context);
@@ -259,7 +261,7 @@ describe("CallExpressionRefinementRule", function () {
 					typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(personType);
 
 					// a property name is added in the called function to the person object
-					typeInferenceAnalysis.analyse = (node, typeEnvironment) => typeEnvironment.substitute(personType, personType.addProperty(new Symbol("name"), StringType.create()));
+					typeInferenceAnalysis.analyse = (node, typeEnvironment) => new Map([[null, typeEnvironment.substitute(personType, personType.addProperty(new Symbol("name"), StringType.create()))]]);
 
 					// act
 					rule.refine(callExpression, context);
@@ -291,7 +293,7 @@ describe("CallExpressionRefinementRule", function () {
 					typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(personType);
 
 					// a property name is added in the called function to the person object
-					typeInferenceAnalysis.analyse = (node, typeEnvironment) => typeEnvironment.setType(personParameter, ObjectType.create([[ new Symbol("name"), StringType.create() ]]));
+					typeInferenceAnalysis.analyse = (node, typeEnvironment) => new Map([[null, typeEnvironment.setType(personParameter, ObjectType.create([[ new Symbol("name"), StringType.create() ]]))]]);
 
 					// act
 					rule.refine(callExpression, context);
@@ -333,7 +335,7 @@ describe("CallExpressionRefinementRule", function () {
 
 						rule.refine(calls[nextCall++], context);
 
-						return typeEnvironment;
+						return new Map([[null, typeEnvironment]]);
 					};
 
 					typeInferenceAnalysis.infer.returns(NumberType.create());
@@ -361,7 +363,7 @@ describe("CallExpressionRefinementRule", function () {
 						program.symbolTable.setSymbol(recursiveCall.arguments[0].left, x);
 						rule.refine(recursiveCall, context);
 
-						return typeEnvironment.setType(Symbol.RETURN, NumberType.create());
+						return new Map([[null, typeEnvironment.setType(Symbol.RETURN, NumberType.create())]]);
 					};
 
 					typeInferenceAnalysis.infer.returns(NumberType.create());
@@ -547,7 +549,7 @@ describe("CallExpressionRefinementRule", function () {
 				typeInferenceAnalysis.infer.withArgs(callExpression.arguments[0]).returns(StringType.create());
 
 				const logTypeEnvironment = context.typeEnvironment.setType(Symbol.RETURN, VoidType.create());
-				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(logTypeEnvironment);
+				typeInferenceAnalysis.analyse.withArgs(logDeclaration.body).returns(new Map([[null, logTypeEnvironment]]));
 
 				// act
 				rule.refine(callExpression, context);
