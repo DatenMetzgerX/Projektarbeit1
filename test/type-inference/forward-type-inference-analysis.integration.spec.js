@@ -129,14 +129,14 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 
 	it("refines the types between each cfg step", function () {
 		// act
-		const {scope, ast} = inferTypes(`
+		const {scope, ast, typeEnvironments} = inferTypes(`
 		let x = null;
 		x = 15;
 		`);
 
 		// assert
-		const typeEnv1 = ast.cfg.getNode(ast.program.body[0]).annotation.out;
-		const typeEnv2 = ast.cfg.getNode(ast.program.body[1]).annotation.out;
+		const typeEnv1 = typeEnvironments.get(ast.program.body[0]);
+		const typeEnv2 = typeEnvironments.get(ast.program.body[1]);
 		const x = scope.resolveSymbol("x");
 
 		expect(typeEnv1.getType(x)).to.be.instanceOf(NullType);
@@ -371,6 +371,24 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 			expect(typeEnvironment.getType(uppercase)).to.be.instanceOf(StringType);
 		});
 
+		it("infers the correct return type for a function that calls a function in a loop", function() {
+			// act
+			const {scope, typeEnvironment} = inferTypes(`
+			function compute() {
+				for (let i = 0; i < 10; ++i) {
+					(function () { return i % 2 === 0; })();
+				}
+				return "done";
+			}
+			
+			const result = compute(); 
+			`);
+
+			// assert
+			const result = scope.resolveSymbol("result");
+			expect(typeEnvironment.getType(result)).to.be.instanceOf(StringType);
+		});
+
 		it("throws if a required argument is missing when calling a built in function", function () {
 			expect(() => inferTypes("'Micha Reiser'.substring();")).to.throw("Type inference failure: The argument 1 with type \'undefined\' is not a subtype of the required parameter type \'number\'.");
 		});
@@ -496,10 +514,8 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 		const program = new Program();
 		const sourceFile = program.createSourceFile("./type-inference.integration-test.js", code);
 
-		infer(sourceFile, program);
-
-		const cfg = sourceFile.ast.cfg;
-		const typeEnv = cfg.getNode(null) ? cfg.getNode(null).annotation.in : TypeEnvironment.EMPTY;
-		return { typeEnvironment: typeEnv, scope: sourceFile.scope, ast: sourceFile.ast };
+		const typeEnvironments = infer(sourceFile, program);
+		const typeEnv = typeEnvironments.get(null) || TypeEnvironment.EMPTY;
+		return { typeEnvironment: typeEnv, scope: sourceFile.scope, ast: sourceFile.ast, typeEnvironments: typeEnvironments };
 	}
 });
