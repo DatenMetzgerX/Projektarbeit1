@@ -712,6 +712,33 @@ describe("CfgBuilder", function () {
 		});
 	});
 
+	describe("FunctionExpression", function (){
+		it("creates cfg nodes for the body of the function expression", function () {
+			// act
+			const {ast, cfg} = toCfg("array.map(function (x) { return x * 2; })");
+
+			// assert
+			const callExpression = ast.program.body[0].expression;
+			const functionExpression = callExpression.arguments[0];
+
+			expect(cfg.isConnected(functionExpression.body, functionExpression.body.body[0], BRANCHES.UNCONDITIONAL)).to.be.true;
+			expect(cfg.isConnected(functionExpression.body.body[0], null, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+	});
+
+	describe("ArrowFunctionExpression", function () {
+		it("creates a cfg node for the body expression of an arrow function expression", function () {
+			// act
+			const {ast, cfg} = toCfg("array.map(x => x * 2)");
+
+			// assert
+			const callExpression = ast.program.body[0].expression;
+			const arrowExpression = callExpression.arguments[0];
+
+			expect(cfg.isConnected(arrowExpression.body, null, BRANCHES.UNCONDITIONAL)).to.be.true;
+		});
+	});
+
 	describe("ReturnStatement", function () {
 		it("returns null as successor", function () {
 			//
