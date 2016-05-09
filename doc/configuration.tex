@@ -14,16 +14,16 @@
 \usepackage[outputdir=.texpadtmp,section]{minted}
 
 % \begin{javascriptcode}...
-\newminted{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, numberblanklines=false, xleftmargin=3.5ex}
+\newminted{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex}
 
 % \javascript/code/
 \newmintinline{javascript}{}
 
 % \javascriptfile{name}
-\newmintedfile{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, numberblanklines=false, xleftmargin=3.5ex}
+\newmintedfile{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex}
 
 %%% DOCUMENT Properties
-\title{Type inference and type checking for ECMAScript 6}
+\title{Type inference and type checking for JavaScript strict mode}
 
 \author{Micha Reiser\affiliation{
 		University of Applied Sciences Rapperswil\\
@@ -31,3 +31,5 @@
     	FS2016 (\today)
     }	
 }
+
+\hyphenation{ECMAScript}

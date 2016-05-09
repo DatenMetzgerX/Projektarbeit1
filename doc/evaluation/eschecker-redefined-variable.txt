@@ -1,0 +1,8 @@
+Initial memory usage 40.6328125
+./doc/evaluation/redefined-variable.js
+Final type environment in exit node:
+console -> {log: any.(any, any) -> undefined}
+document -> {getElementById: any.(string) -> Maybe<{addEventListener: any.(string, any.({bubbles: boolean, cancelable: boolean, defaultPrevented: boolean, type: string, preventDefault: any.() -> undefined, stopImmediatePropagation: any.() -> undefined, stopPropagation: any.() -> undefined}) -> any, any, any) -> undefined}>}
+x -> {name: string}
+Final memory usage: 42.9140625
+Success

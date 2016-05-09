@@ -1,0 +1,18 @@
+Initial memory usage 40.6328125
+./doc/evaluation/built-ins.js
+Type inference failed for node 
+  2 | 
+  3 | const doubled = array.map(x => x * 2);
+> 4 | const sum = array.reduce(0, (accum, x) => accum + x);
+    |                         ^
+Error: Unification for type 'number' and 'undefined.(@ (62), number, number, number[]) -> @ (62)' failed because there exists no rule that can be used to unify the given types.
+    at UnificationError (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/type-unificator.js:33:3)
+    at NotUnifiableError (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/type-unificator.js:51:3)
+    at TypeUnificator._getUnificationRuleOrThrow (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/type-unificator.js:121:11)
+    at TypeUnificator._unifyBaseTypes (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/type-unificator.js:113:15)
+    at TypeUnificator.unify (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/type-unificator.js:89:16)
+    at HindleyMilner.unify (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/hindley-milner.js:105:36)
+    at Object.unify (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/forward-type-inference-analysis.js:140:49)
+    at HindleyMilnerContext.unify (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/hindley-milner-context.js:82:38)
+    at CallExpressionRefinementRule._handleExternalDeclaredFunction (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/refinement-rules/call-expression-refinement-rule.js:97:35)
+    at CallExpressionRefinementRule.refine (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/refinement-rules/call-expression-refinement-rule.js:54:15)

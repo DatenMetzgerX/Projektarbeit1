@@ -1,0 +1,45 @@
+built-ins-es5.js:6:17: Error: 
+  Failed unifying:  {reduce: dk, ..dj}
+             With:  [Number]
+          Because:  
+  Failed unifying:  {reduce: dk, ..dj}
+             With:  {
+                            concat: [Number].([Number] -> [Number]),
+                            every: [Number].(((Number, Number, [Number]) -> Boolean) -> Boolean),
+                            filter: [Number].(((Number, Number, [Number]) -> Boolean) -> [Number]),
+                            indexOf: [Number].((Number, Number) -> Number),
+                            join: [Number].(String -> String),
+                            lastIndexOf: [Number].(Number -> Number),
+                            length: Number,
+                            map: forall dl. [Number].(((Number, Number, [Number]) -> dl) -> [dl]),
+                            pop: [Number].(() -> Number),
+                            push: [Number].(Number -> Number),
+                            reverse: [Number].(() -> [Number]),
+                            shift: [Number].(() -> Number),
+                            slice: [Number].((Number, Number) -> [Number]),
+                            some: [Number].(((Number, Number, [Number]) -> Boolean) -> [Number]),
+                            sort: [Number].(((Number, Number) -> Number) -> [Number]),
+                            splice: [Number].((Number, Number) -> [Number]),
+                            unshift: [Number].(() -> Number)
+                        }
+          Because:  
+  Failed unifying:  {reduce: b, ..a}
+             With:  {
+                            concat: [Number].([Number] -> [Number]),
+                            every: [Number].(((Number, Number, [Number]) -> Boolean) -> Boolean),
+                            filter: [Number].(((Number, Number, [Number]) -> Boolean) -> [Number]),
+                            indexOf: [Number].((Number, Number) -> Number),
+                            join: [Number].(String -> String),
+                            lastIndexOf: [Number].(Number -> Number),
+                            length: Number,
+                            map: forall dl. [Number].(((Number, Number, [Number]) -> dl) -> [dl]),
+                            pop: [Number].(() -> Number),
+                            push: [Number].(Number -> Number),
+                            reverse: [Number].(() -> [Number]),
+                            shift: [Number].(() -> Number),
+                            slice: [Number].((Number, Number) -> [Number]),
+                            some: [Number].(((Number, Number, [Number]) -> Boolean) -> [Number]),
+                            sort: [Number].(((Number, Number) -> Number) -> [Number]),
+                            splice: [Number].((Number, Number) -> [Number]),
+                            unshift: [Number].(() -> Number)
+                        }

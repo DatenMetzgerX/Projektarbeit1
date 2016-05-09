@@ -1,0 +1,102 @@
+===========  Loading files ===========
+Loading doc/evaluation/callbacks-es5.js
+===========  Data flow analysis ===========
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 1, worklist size: 1)
+doc/evaluation/callbacks-es5.js:9:13 (node transfers: 7, worklist size: 1)
+doc/evaluation/callbacks-es5.js:9:13 (node transfers: 18, worklist size: 1)
+doc/evaluation/callbacks-es5.js:9:13 (node transfers: 19, worklist size: 1)
+doc/evaluation/callbacks-es5.js:10:15 (node transfers: 23, worklist size: 1)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 24, worklist size: 1)
+doc/evaluation/callbacks-es5.js:2:15 (node transfers: 27, worklist size: 1)
+doc/evaluation/callbacks-es5.js:2:15 (node transfers: 28, worklist size: 1)
+doc/evaluation/callbacks-es5.js:2:15 (node transfers: 29, worklist size: 1)
+doc/evaluation/callbacks-es5.js:3:18 (node transfers: 32, worklist size: 1)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 38, worklist size: 1)
+doc/evaluation/callbacks-es5.js:4:15 (node transfers: 46, worklist size: 1)
+doc/evaluation/callbacks-es5.js:10:26 (node transfers: 47, worklist size: 1)
+doc/evaluation/callbacks-es5.js:11:9 (node transfers: 48, worklist size: 1)
+doc/evaluation/callbacks-es5.js:12:1 (node transfers: 51, worklist size: 1)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 52, worklist size: 1)
+doc/evaluation/callbacks-es5.js:3:38 (node transfers: 53, worklist size: 1)
+doc/evaluation/callbacks-es5.js:3:18 (node transfers: 58, worklist size: 1)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 64, worklist size: 2)
+doc/evaluation/callbacks-es5.js:4:15 (node transfers: 72, worklist size: 2)
+doc/evaluation/callbacks-es5.js:10:26 (node transfers: 73, worklist size: 3)
+doc/evaluation/callbacks-es5.js:11:9 (node transfers: 74, worklist size: 3)
+doc/evaluation/callbacks-es5.js:12:1 (node transfers: 77, worklist size: 3)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 78, worklist size: 2)
+doc/evaluation/callbacks-es5.js:3:38 (node transfers: 79, worklist size: 2)
+doc/evaluation/callbacks-es5.js:3:18 (node transfers: 84, worklist size: 2)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 90, worklist size: 2)
+doc/evaluation/callbacks-es5.js:4:15 (node transfers: 98, worklist size: 2)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 99, worklist size: 2)
+doc/evaluation/callbacks-es5.js:6:9 (node transfers: 100, worklist size: 1)
+doc/evaluation/callbacks-es5.js:7:1 (node transfers: 101, worklist size: 1)
+doc/evaluation/callbacks-es5.js:10:15 (node transfers: 102, worklist size: 1)
+doc/evaluation/callbacks-es5.js:14:13 (node transfers: 109, worklist size: 1)
+doc/evaluation/callbacks-es5.js:14:13 (node transfers: 110, worklist size: 1)
+doc/evaluation/callbacks-es5.js:15:15 (node transfers: 114, worklist size: 1)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 115, worklist size: 2)
+doc/evaluation/callbacks-es5.js:2:15 (node transfers: 118, worklist size: 2)
+doc/evaluation/callbacks-es5.js:2:15 (node transfers: 119, worklist size: 2)
+doc/evaluation/callbacks-es5.js:2:15 (node transfers: 120, worklist size: 2)
+doc/evaluation/callbacks-es5.js:3:18 (node transfers: 123, worklist size: 2)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 129, worklist size: 3)
+doc/evaluation/callbacks-es5.js:4:15 (node transfers: 137, worklist size: 3)
+doc/evaluation/callbacks-es5.js:15:26 (node transfers: 138, worklist size: 5)
+doc/evaluation/callbacks-es5.js:16:9 (node transfers: 139, worklist size: 5)
+doc/evaluation/callbacks-es5.js:17:1 (node transfers: 142, worklist size: 6)
+doc/evaluation/callbacks-es5.js:17:1 (node transfers: 143, worklist size: 5)
+doc/evaluation/callbacks-es5.js:10:26 (node transfers: 144, worklist size: 5)
+doc/evaluation/callbacks-es5.js:11:9 (node transfers: 145, worklist size: 5)
+doc/evaluation/callbacks-es5.js:12:1 (node transfers: 148, worklist size: 5)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 149, worklist size: 4)
+doc/evaluation/callbacks-es5.js:3:38 (node transfers: 150, worklist size: 4)
+doc/evaluation/callbacks-es5.js:3:18 (node transfers: 155, worklist size: 4)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 161, worklist size: 4)
+doc/evaluation/callbacks-es5.js:4:15 (node transfers: 169, worklist size: 4)
+doc/evaluation/callbacks-es5.js:4:3 (node transfers: 170, worklist size: 4)
+doc/evaluation/callbacks-es5.js:6:9 (node transfers: 171, worklist size: 3)
+doc/evaluation/callbacks-es5.js:7:1 (node transfers: 172, worklist size: 3)
+doc/evaluation/callbacks-es5.js:7:1 (node transfers: 173, worklist size: 2)
+doc/evaluation/callbacks-es5.js:15:15 (node transfers: 174, worklist size: 2)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 175, worklist size: 2)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 176, worklist size: 3)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 177, worklist size: 2)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 178, worklist size: 3)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 179, worklist size: 2)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 180, worklist size: 3)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 181, worklist size: 2)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 182, worklist size: 2)
+doc/evaluation/callbacks-es5.js:1:1 (node transfers: 183, worklist size: 1)
+===========  Scan ===========
+Array:	doc/evaluation/callbacks-es5.js:9:13	->	[@Array[native]]
+array:	doc/evaluation/callbacks-es5.js:9:13	->	[@Array#node17]
+map:	doc/evaluation/callbacks-es5.js:10:15	->	[@map#fun1]
+array:	doc/evaluation/callbacks-es5.js:10:19	->	[@Array#node17]
+doubled:	doc/evaluation/callbacks-es5.js:10:15	->	[@Array#node50]
+Array:	doc/evaluation/callbacks-es5.js:14:13	->	[@Array[native]]
+names:	doc/evaluation/callbacks-es5.js:14:13	->	[@Array#node30]
+map:	doc/evaluation/callbacks-es5.js:15:15	->	[@map#fun1]
+names:	doc/evaluation/callbacks-es5.js:15:19	->	[@Array#node30]
+lengths:	doc/evaluation/callbacks-es5.js:15:15	->	[@Array#node50]
+Array:	doc/evaluation/callbacks-es5.js:2:15	->	[@Array[native]]
+result:	doc/evaluation/callbacks-es5.js:2:15	->	[@Array#node50]
+i:	doc/evaluation/callbacks-es5.js:3:15	->	0.0
+i:	doc/evaluation/callbacks-es5.js:3:18	->	UInt
+array:	doc/evaluation/callbacks-es5.js:3:22	->	[@Array#node17, @Array#node30]
+length:	doc/evaluation/callbacks-es5.js:3:22	->	UInt
+result:	doc/evaluation/callbacks-es5.js:4:3	->	[@Array#node50]
+push:	doc/evaluation/callbacks-es5.js:4:3	->	[@Array.prototype.push[native]]
+mapper:	doc/evaluation/callbacks-es5.js:4:15	->	[@<anonymous>#fun2, @<anonymous>#fun3]
+array:	doc/evaluation/callbacks-es5.js:4:22	->	[@Array#node17, @Array#node30]
+i:	doc/evaluation/callbacks-es5.js:4:28	->	UInt
+null:	doc/evaluation/callbacks-es5.js:4:22	->	Undef|UInt|IdentStr
+result:	doc/evaluation/callbacks-es5.js:6:9	->	[@Array#node50]
+i:	doc/evaluation/callbacks-es5.js:3:38	->	UInt
+i:	doc/evaluation/callbacks-es5.js:3:36	->	UInt
+x:	doc/evaluation/callbacks-es5.js:11:9	->	Undef|UInt|IdentStr
+name:	doc/evaluation/callbacks-es5.js:16:9	->	Undef|UInt|IdentStr
+length:	doc/evaluation/callbacks-es5.js:16:9	->	Undef|UInt
+doc/evaluation/callbacks-es5.js:16:9: [maybe] TypeError, accessing property of null/undefined
+doc/evaluation/callbacks-es5.js:16:9: [maybe] Reading absent property length

@@ -1,0 +1,50 @@
+built-ins.js:4
+  4: const sum = array.reduce(0, 
+                 ^ call of method `reduce`. Function cannot be called on any member of intersection type
+  4: const sum = array.reduce(0, 
+                 ^ intersection
+  Member 1:
+  199:     reduce<U>(
+           ^ polymorphic type: function type. See lib: /private/tmp/flow/flowlib_2f08267d/core.js:199
+  Error:
+    4: const sum = array.reduce(0, 
+                                ^ number. This type is incompatible with
+  200:       callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_2f08267d/core.js:200
+  Member 2:
+  203:     reduce<U>(
+           ^ polymorphic type: function type. See lib: /private/tmp/flow/flowlib_2f08267d/core.js:203
+  Error:
+    4: const sum = array.reduce(0, 
+                                ^ number. This type is incompatible with
+  204:       callbackfn: (previousValue: T|U, currentValue: T, currentIndex: number, array: Array<T>) => U
+ 
+callbacks.js:13
+ 13: const lengths = map(names, name => name.length);
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function call
+ 10: const doubled = map(array, x => x * 2);
+                                     ^ string. This type is incompatible with
+ 10: const doubled = map(array, x => x * 2);
+                                     ^^^^^ number
+
+callbacks.js:13
+ 13: const lengths = map(names, name => name.length);
+                                             ^^^^^^ property `length`. Property not found in
+ 13: const lengths = map(names, name => name.length);
+                                        ^^^^ Number
+effects.js:8
+  8: setAddress(person, "Bahnhofstrasse 12", 8001);
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function call
+  2: 	p.address = { street, zip } ;
+     	  ^^^^^^^ property `address`. Property not found in
+  2: 	p.address = { street, zip } ;
+     	^ object literal
+
+effects.js:9
+  9: const street = person.address.street;
+                           ^^^^^^^ property `address`. Property not found in
+  9: const street = person.address.street;
+                    ^^^^^^ object literal
+
+
+Found 5 errors

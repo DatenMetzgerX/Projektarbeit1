@@ -1,0 +1,10 @@
+Initial memory usage 40.47265625
+./doc/evaluation/effects.js
+Final type environment in exit node:
+console -> {log: any.(any, any) -> undefined}
+document -> {getElementById: any.(string) -> Maybe<{addEventListener: any.(string, any.({bubbles: boolean, cancelable: boolean, defaultPrevented: boolean, type: string, preventDefault: any.() -> undefined, stopImmediatePropagation: any.() -> undefined, stopPropagation: any.() -> undefined}) -> any, any, any) -> undefined}>}
+person -> {lastName: string, address: {street: string, zip: number}}
+setAddress -> @ (45).(@ (42), @ (43), @ (44)) -> undefined
+street -> string
+Final memory usage: 43.2265625
+Success

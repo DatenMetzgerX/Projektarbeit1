@@ -1,0 +1,18 @@
+===========  Loading files ===========
+Loading doc/evaluation/redefined-variable-es5.js
+===========  Data flow analysis ===========
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 1, worklist size: 1)
+doc/evaluation/redefined-variable-es5.js:2:5 (node transfers: 3, worklist size: 1)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 10, worklist size: 1)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 11, worklist size: 2)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 12, worklist size: 1)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 13, worklist size: 2)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 14, worklist size: 1)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 15, worklist size: 2)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 16, worklist size: 1)
+doc/evaluation/redefined-variable-es5.js:1:1 (node transfers: 17, worklist size: 1)
+===========  Scan ===========
+name:	doc/evaluation/redefined-variable-es5.js:2:7	->	"Micha"
+x:	doc/evaluation/redefined-variable-es5.js:2:1	->	[@Object#node2]
+x:	doc/evaluation/redefined-variable-es5.js:4:1	->	[@Object#node2]
+name:	doc/evaluation/redefined-variable-es5.js:4:1	->	"Micha"

@@ -1,0 +1,21 @@
+Initial memory usage 40.9375
+./doc/evaluation/event-handlers.js
+Type inference failed for node 
+   8 | 
+   9 | if (search) {
+> 10 | 	search.addEventListener("keydown", onKeyDown, 
+     | 	      ^
+  11 | 		false);
+  12 | 	search.addEventListener("click", onKeyDown, 
+  13 | 		false);
+Error: Type inference failure: Potential null pointer when accessing property addEventListener on null or not initialized object of type Maybe<{addEventListener: any.(string, any.({bubbles: boolean, cancelable: boolean, defaultPrevented: boolean, type: string, preventDefault: any.() -> undefined, stopImmediatePropagation: any.() -> undefined, stopPropagation: any.() -> undefined}) -> any, any, any) -> undefined}>.
+    at TypeInferenceError (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/type-inference-error.js:28:3)
+    at HindleyMilnerContext.getObjectType (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/hindley-milner-context.js:129:10)
+    at MemberExpressionRefinementRule.refine (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/refinement-rules/member-expression-refinement-rule.js:30:32)
+    at HindleyMilner.infer (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/hindley-milner.js:85:37)
+    at Object.infer (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/forward-type-inference-analysis.js:136:49)
+    at HindleyMilnerContext.infer (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/hindley-milner-context.js:61:38)
+    at CallExpressionRefinementRule._getCalleeType (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/refinement-rules/call-expression-refinement-rule.js:178:38)
+    at CallExpressionRefinementRule.refine (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/refinement-rules/call-expression-refinement-rule.js:49:29)
+    at HindleyMilner.infer (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/hindley-milner.js:85:37)
+    at Object.infer (/Users/micha/git/Projektarbeit1/es5/lib/type-inference/forward-type-inference-analysis.js:136:49)

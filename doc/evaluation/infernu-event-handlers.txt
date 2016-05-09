@@ -1,0 +1,1 @@
+event-handlers-es5.js:1:14: Error: Unbound variable: '"document"'

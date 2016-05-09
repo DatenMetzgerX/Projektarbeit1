@@ -1,0 +1,23 @@
+===========  Loading files ===========
+Loading doc/evaluation/built-ins-es5.js
+===========  Data flow analysis ===========
+doc/evaluation/built-ins-es5.js:1:1 (node transfers: 1, worklist size: 1)
+doc/evaluation/built-ins-es5.js:1:13 (node transfers: 5, worklist size: 1)
+doc/evaluation/built-ins-es5.js:1:13 (node transfers: 16, worklist size: 1)
+doc/evaluation/built-ins-es5.js:1:13 (node transfers: 17, worklist size: 1)
+doc/evaluation/built-ins-es5.js:2:15 (node transfers: 22, worklist size: 1)
+dk.brics.tajs.util.AnalysisException: doc/evaluation/built-ins-es5.js:2:15: No transfer function for native function Array.prototype.map
+	at dk.brics.tajs.analysis.nativeobjects.ECMAScriptFunctions.evaluate(Unknown Source)
+	at dk.brics.tajs.analysis.HostAPIs.evaluate(Unknown Source)
+	at dk.brics.tajs.analysis.FunctionCalls.callFunction(Unknown Source)
+	at dk.brics.tajs.analysis.js.NodeTransfer.visit(Unknown Source)
+	at dk.brics.tajs.analysis.js.NodeTransfer.visit(Unknown Source)
+	at dk.brics.tajs.flowgraph.jsnodes.CallNode.visitBy(Unknown Source)
+	at dk.brics.tajs.analysis.Transfer.visit(Unknown Source)
+	at dk.brics.tajs.analysis.Transfer.visit(Unknown Source)
+	at dk.brics.tajs.flowgraph.jsnodes.Node.visitBy(Unknown Source)
+	at dk.brics.tajs.analysis.Transfer.transfer(Unknown Source)
+	at dk.brics.tajs.analysis.Transfer.transfer(Unknown Source)
+	at dk.brics.tajs.solver.GenericSolver.solve(Unknown Source)
+	at dk.brics.tajs.Main.run(Unknown Source)
+	at dk.brics.tajs.Main.main(Unknown Source)

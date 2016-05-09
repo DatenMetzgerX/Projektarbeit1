@@ -1,0 +1,10 @@
+//  currentId : Number
+var currentId = 0;
+
+//       uniqueId : a.(() -> Number)
+function uniqueId() {
+	return ++currentId;
+}
+
+uniqueId();
+

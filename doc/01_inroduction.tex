@@ -1,43 +1,24 @@
 \section{Introduction}
-The role of JavaScript dramatically changed over the last years. From an unpopular language used to add dynamic effects to webpages to a widely used language with a strong and growing community. It emerged from a browser only language to a general programing language used to write web-,  desktop- and mobile- applications and also server components. These new applications have an effect on the size of code written in Javascript and the team members involved in JavaScript projects. Programing in larger teams and projects requires better tooling that supports effective development and refactoring. 
+The role of JavaScript dramatically changed over the last years. From an unpopular language used to add dynamic effects to webpages to a widely used language with a strong and growing community. It emerged from a browser only language to a general programing language used to write web-,  desktop- and mobile- applications but also server components. This shift is reflected in an increasing complexity and number of JavaScript projects. To tackle the higher complexity, a better tooling support is needed for effective development and refactoring.  
 
-JavaScript does not provide any static analysis for proving the soundness of a program. Type and nullability checking is performed at runtime. To verify the correctness of a program, every line of code needs to be executed. This can either be achieved by a coverage of 100\% or by performing manual tests. Either of these solutions require an enormous effort, hence the test coverage in general is below 100\% and manual tests are limited to some functionalities. Performing refactorings or adding new functionality is therefore a risky task, as the programer has a very limited assurance if the changes are correct. Specially refactorings are an error prone task in JavaScript, as IDE's cannot provide the same tooling support as for statically typed languages. 
+JavaScript does not provide any static analysis for proving the soundness of a program. Type and nullability checking is performed at runtime. Performing refactorings or adding new functionality is therefore a risky task, as the programer has a very limited tooling for testing if changes have been applied correctly. By applying the type checking statically instead of at runtime, common errors like accessing not declared variables, missing arguments, arguments in incorrect order or invoking a non function type can be detected and reported to the developer, without the need to execute the program. 
 
-Many refactoring errors or wrong assumptions about a signature of function can be detected by using type checking. Type checking can provide an immediate feedback to type errors without an additional effort from the programmer. Very common errors are accessing not declared variables, missingt arguments, arguments in the wrong order or invoking non function types. These kind of errors can be detected by using type checking. 
-
-As JavaScript is an implicitly typed language, type inference is needed to perform type checking. The very dynamic nature of JavaScript makes type inference a non trivial task for multiple reasons~\cite{JensenMollerThiemann2009}. 
+JavaScript is an implicitly typed language and therefore requires type inference for type checking. Type inference for JavaScript is a non trivial task because of the very dynamic nature of JavaScript~\cite{JensenMollerThiemann2009}. An explanation of the most important aspects follows.
 
 \begin{description}
-	\item[Dynamic Objects] A JavaScript object is a mapping from a string key to a value. New properties can be dynamically added or removed from an object. The property names can be dynamically computed, leading to reflection like code.  
+	\item[Dynamic Objects] A JavaScript object is a mapping from a string key to a value. Adding new properties or removing existing once can be performed dynamically. The names of properties can be computed values. Such operations often require reflection in statically typed languages.
+
+	\item[Side effects] JavaScript has support for higher order functions, functions accepting other functions as parameter. In comparison to functional languages, functions do not need to be pure and therefore can have side effects to their declaration scope or passed parameters. 
 	
-	\item[Dynamic this] The object referenced by \javascriptinline/this/ depends on the invocation of the function (except for arrow functions and functions bound with \javascriptinline/bind/). It can explicitly be defined if \javascriptinline/call/ or \javascriptinline/apply/ is used. It is implicitly defined by the object of which the function is a member. If a method of an object is aliased to a variable and invoked, then the \javascriptinline/this/ object points to \javascriptinline/undefined/. The invocation of an aliased function is therefor not the same as the invocation of the original method.
+	\item[Closure] Functions have access to variables from their enclosing scope. Invoking a function requires that the function is evaluated in its declaration scope. 
 	
-	\item[Callee resolution] Type inference requires that the called function is known. Invoking a function has different affects on the passed arguments and to the variables in the enclosed closure. A invocation can add or remove properties of an argument, assign new values to parameter properties or variables from the enclosed closure. At the other hand, the function can access properties of its parameters and therefore requires parameters with a specific schema. 
+	\item[This binding] The object referenced by \javascriptinline/this/ depends on the kind of function and its usage. Arrow functions capture the \javascriptinline/this/ of the enclosing context. The \javascriptinline/this/ of function declarations or expressions depends on the usage. The \javascriptinline/this/ can explicitly be specified if the function is invoked using \javascriptinline/call/ or \javascriptinline/apply/. Otherwise the binding of \javascriptinline/this/ is implicitly defined. If the function is called as a method of an object, then \javascriptinline/this/ is equal to the object, to which the method belongs. If the function is not a member of an object, then \javascriptinline/this/ is \javascriptinline/undefined/. 
 
-The difficulty is to resolve the callee of a function. The called function can be a member of an object, therefore the callee depends on the object, or the function is a higher order function bound to a variable. 
-
-	\item[Closure] The context of a declared function needs to be associated with the function. TODO 
-
-	\item[Environment] JavaScript can either be executed in a browser or on the Server using NodeJS, Rhino or another JavaScript engine. These environments expose different native methods at runtime. These native methods cannot be analyzed, as they are part of the runtime. Hence, this methods need to be defined externally. 
+	\item[Environment] The preliminary target of JavaScript applications is still the Browser. But it can also be executed standalone using NodeJS, Rhino or another JavaScript engine. These engines expose different native objects and methods at runtime, e.g. the browser exposes the DOM-Model. The type checker needs to model these object and methods specially as their JavaScript-Code is not existent.
 
 \end{description}
 
+An alternative and quite popular approach for type checking programs executing in a JavaScript environment is by transpiling a source language into JavaScript. The source language either allows type inference or contains type annotations that make type checking possible. Well known examples are TypeScript~\cite{Microsoft2012} and Flow~\cite{Facebook2014}. The downside of a transpiled language is an additional required build step that slows down the development cycle and is a potential source for additional errors. A developer using a transpiled language needs to have a good understanding of the source language and JavaScript. This limits the number of potential recruiting candidates or requires additional training.
 
-
-Different projects solved the type inference problem by transpiling a static typed source language into JavaScript. Well known examples are TypeScript~\cite{Microsoft2012} and Flow~\cite{Facebook2014}. The downside of a transpiled language is an additional required build step that slows down the development cycle and is a potential source for additional errors. A developer using a transpiled language needs to have a good understanding of the source language and JavaScript. This limits the number of potential recruiting candidates or requires additional training.
-
-The goal of this project thesis is to show that type inference for the majority of written JavaScript code is possible without the need of type annotations. Its assumed, that reflection like code is mostly found in frameworks and not very wide spread. Additionally, new language features of ES6 like classes reduce the need for self made inheritance utility functions and therefore of reflection like code.
-
-
-
-%\begin{enumerate}
-%	\item Usage of JavaScript on the server
-%	\item Complexity and team size increases, citation?
-%	\item need for better built tools
-%	\item Related work \cite{JensenMollerThiemann2009}, \cite{Odgaard2014}
-%	\item Existing tools Flow\cite{Facebook2014}, TypeScript\cite{Microsoft2012}, Infernu\cite{Lewis}, TernJS\cite{Haverbeke}, and other transpilers\cite{McKenna, Ekblad2012}, \cite{jQuery2016}
-%	\item Differentiate from related work through focus on ES6, plain JS (e.g. with statement needs not to be supported). E.g. if strict mode is enabled (by default when module\cite[10.2.1]{Ecma2015}, then the with statement is not allowed\cite[Annex C]{Ecma2015}.
-%	\item Explain basic approach
-%	\item Hindley Milner based type inference and type checking combined with abstract interpretation
-%\end{enumerate}
+Its assumed that most of the code rarely uses reflection like code and therefore precise type inference is possible. Reflective code is most commonly used in libraries or frameworks. Type inference for frameworks and libraries can be substituted by using external declaration files to make type checking possible. The goal of this project thesis is to show a type inference and type checking algorithm for JavaScript that is precise and sound for the most common JavaScript code, but might be unsound or imprecise for non trivial code segments. The analysis is optimized for ECMAScript 6 code written in strict mode. Features prohibited in strict mode are not supported by the analysis.
 
