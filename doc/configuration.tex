@@ -1,7 +1,6 @@
 %%%%%%%%%%-----PACKAGES
-% \usepackage{amsmath}
-\usepackage{ebproof} % For Type derivation trees
 \usepackage{hyperref}
+\usepackage{cleveref}
 \usepackage[utf8]{inputenc}
 \usepackage[style=ieee]{biblatex}
 \bibliography{bibliography}
@@ -23,13 +22,14 @@
 \newmintedfile{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex}
 
 %%% DOCUMENT Properties
-\title{Type inference and type checking for JavaScript strict mode}
+\title{Type Inference and Type Checking for JavaScript Strict Mode}
 
-\author{Micha Reiser\affiliation{
+\author{Micha Reiser
+}
+\author{\affiliation{
 		University of Applied Sciences Rapperswil\\
     	Supervised by Luc Bläser\\
     	FS2016 (\today)
-    }	
-}
+}	}
 
 \hyphenation{ECMAScript}

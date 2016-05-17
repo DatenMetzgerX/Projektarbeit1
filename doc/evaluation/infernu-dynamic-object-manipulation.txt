@@ -1,0 +1,6 @@
+infernu: Not supported: 'for .. in' at "dynamic-object-manipulation-es5.js" (line 3, column 9) in
+for (var key in source) {
+   object[key] = object[key] ===
+       undefined ? source[key]
+       : object[key];
+}

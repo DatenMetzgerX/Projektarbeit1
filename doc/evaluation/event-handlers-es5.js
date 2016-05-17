@@ -7,6 +7,6 @@ function onKeyDown(event) {
 var search = document.getElementById("search");
 
 if (search) {
-	search.addEventListener("click", onKeyDown, false);
 	search.addEventListener("keydown", onKeyDown, false);
+	search.addEventListener("blur", onKeyDown, false);
 }

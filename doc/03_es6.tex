@@ -1,20 +1,19 @@
-\section{Benefits of analyzing strict mode}
+\section{Benefits of Strict Mode}\label{sec:strict-mode}
 Strict mode has been introduced in ECMAScript 5. Strict mode allows to opt in to a restricted variant of JavaScript. Strict mode is not only a subset of JavaScript, it intentionally changes the semantics from normal code. It eliminates silent errors by throwing exceptions instead and prohibits some error prone or difficult to optimize syntaxes and semantics from earlier ECMAScript versions. 
 
-Strict mode can be explicitly enabled by adding the \javascriptinline{"use strict"} directive before any other statement in a file or function. Using the directive in a file enables strict mode for the whole file, using it in a function enables strict mode for a specific function. Strict mode is enforced for scripts using ES6 modules~\cite[10.2.1]{Ecma2015}. Therefore it can be expected that ES6 code is using strict mode. The analysis only supports code written in strict mode to take advantages of the changed semantics. A description of the changed semantics follows
+Strict mode can be explicitly enabled by adding the \texttt{"use strict"} directive before any other statement in a file or function. Using the directive in a file enables strict mode for the whole file, using it in a function enables strict mode for a specific function. Strict mode is enforced for scripts using ECMAScript 6 modules~\cite[10.2.1]{Ecma2015}. Therefore it can be expected that newer code written is using strict mode. The analysis only supports code written in strict mode to take advantages of the changed semantics. A description of the changed semantics with an effect to the analysis follows.
 
-\paragraph{Prohibited with statement}
-The with statement is prohibited in strict mode~\cite[Annex C]{Ecma2015}. The with statement allows to access properties of an object in a block without the need to use member expressions. In the following example, the identifier \javascriptinline{x} on line four can either reference the property \javascriptinline{obj.x} or the variable \javascriptinline{x} defined on line one.
+\paragraph{Prohibited With Statement}
+The with statement is prohibited in strict mode~\cite[Annex C]{Ecma2015}. The with statement allows to access properties of an object in a block without the need to use member expressions. In the following example, the identifier \texttt{x} on line four can either reference the property \texttt{obj.x} or the variable \texttt{x} defined on line one.
 
 \begin{javascriptcode}
 var x = 17;
-with (obj)
-{
-	x;
+with (obj) {
+	x; // references obj.x or variable x
 }
 \end{javascriptcode}
 
-If the object \javascriptinline{obj} has a property \javascriptinline{x}, then the identifier references the property, otherwise it references the variable \javascriptinline{x}. This behavior makes lexical scoping a non trivial task~\cite{JensenMollerThiemann2009}. The removal of the with statement allows static scoping.
+If the object \texttt{obj} has a property \texttt{x}, then the identifier references the property, otherwise it references the variable \texttt{x}. This behavior makes lexical scoping a non trivial task~\cite{JensenMollerThiemann2009}. The removal of the with statement allows static scoping.
 
-\paragraph{Assignment to not declared variables}
-Assignment to not declared variables introduce a global variable in non strict mode. Strict mode prohibits assignment to not declared variables and throws an error instead. Variables can only be defined with an explicit declaration. Access to yet unknown variables is always an error.
+\paragraph{Assignment to not Declared Variables}
+An Assignment to a not declared variable introduce a global variable in non strict mode. Strict mode prohibits assignments to not declared variables and throws an error instead. In strict mode variables can not be implicitly declared. Therefore accessing a yet unknown variable is always an error.

@@ -1,0 +1,13 @@
+===========  Loading files ===========
+Loading ./doc/evaluation/angular-controller-es5.js
+===========  Data flow analysis ===========
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 1, worklist size: 1)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 3, worklist size: 1)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 4, worklist size: 2)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 5, worklist size: 1)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 6, worklist size: 2)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 7, worklist size: 1)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 8, worklist size: 2)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 9, worklist size: 1)
+./doc/evaluation/angular-controller-es5.js:1:1 (node transfers: 10, worklist size: 1)
+===========  Scan ===========

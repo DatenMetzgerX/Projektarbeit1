@@ -7,8 +7,6 @@ function onKeyDown(event) {
 const input = document.getElementById("pwd");
 
 if (input) {
-	input.addEventListener("keydown", onKeyDown, 
-		false);
-	input.addEventListener("click", onKeyDown, 
-		false);
+	input.addEventListener("keydown", onKeyDown, false);
+	input.addEventListener("blur", onKeyDown, false);
 }

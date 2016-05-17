@@ -1,0 +1,11 @@
+Initial memory usage 40.95703125
+./doc/evaluation/dynamic-object-manipulation.js
+Final type environment in exit node:
+Object -> {keys: any.({}) -> string[]}
+console -> {log: any.(any, any) -> string}
+defaults -> @ (49).(@ (46), @ (47)) -> @ (48)
+document -> {getElementById: any.(string) -> Maybe<{addEventListener: any.(string, any.({bubbles: boolean, cancelable: boolean, defaultPrevented: boolean, type: string, preventDefault: any.() -> string, stopImmediatePropagation: any.() -> string, stopPropagation: any.() -> string}) -> any, any, any) -> string}>}
+i -> number
+options -> any
+Final memory usage: 45.22265625
+Success

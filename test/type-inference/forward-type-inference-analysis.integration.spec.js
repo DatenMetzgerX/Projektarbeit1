@@ -229,7 +229,7 @@ describe("ForwardTypeInferenceAnalysis Integration Tests", function () {
 			const name = scope.resolveSymbol("name");
 
 			// assert
-			expect(typeEnvironment.getType(name)).to.be.instanceOf(VoidType);
+			expect(typeEnvironment.getType(name)).to.be.instanceOf(AnyType);
 		});
 	});
 

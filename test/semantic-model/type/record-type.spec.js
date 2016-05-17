@@ -80,12 +80,12 @@ describe("RecordType", function () {
 			expect(changedRecord.getType(name)).to.be.instanceOf(StringType);
 		});
 
-		it("returns this if a computed property is set", function () {
+		it("returns any if a computed property is set", function () {
 			// arrange
 			const record = createRecord();
 
 			// act, assert
-			expect(record.setType(Symbol.COMPUTED, StringType.create())).to.equal(record);
+			expect(record.setType(Symbol.COMPUTED, StringType.create())).to.be.instanceOf(AnyType);
 		});
 	});
 
