@@ -1,0 +1,13 @@
+\section{Related Work}\label{sec:related-work}
+The work relates with linters, transpiled languages and other type checkers for JavaScript. 
+
+Linters like ESLint~\cite{jQuery2016} are used to enforce a specific coding style across a project or to find errors using common bug patterns. Linters use simple static analysis techniques for bug identification. These analysis are mostly intra procedural analysis. This work focuses on errors deducible by type checking, based on a sophisticated inter procedural analysis. 
+
+
+An alternative and quite popular approach for type checking programs executing in a JavaScript environment is by transpiling a source language to JavaScript. The source language either allows type inference~\cite{Ekblad2012, McKenna} or contains enough type annotations so that type checking is possible. Well known examples are TypeScript~\cite{Microsoft2012} and Flow~\cite{Facebook2014}. The downside of a transpiled language is the need for an additional build step that slows down the development cycle and is a potential source for errors. A developer using a transpiled language needs to have a good understanding of the source language and JavaScript. This limits the number of potential recruiting candidates or requires additional training. This work differs from transpilers as the focus is on type checking JavaScript and a transpiled source language.
+
+TAJS~\cite{JensenMollerThiemann2009} is a sound type analyzer and type checker for JavaScript. The used algorithm is context and path sensitive. TAJS uses abstract interpretation for type inference. The goal of TAJS is a precise and sound type checker that supports the full JavaScript language. Compared to TAJS, this works is focused only on JavaScript programs using strict mode. Furthermore, the defined analysis is unsound to reduce the number of false positives.
+
+Infernu~\cite{Lewis} implements type inference and type checking for JavaScript. Infernu defines a strict type system that only allows a subset of JavaScript. It uses the Damas-Hindley-Milner Algorithm for type inference and type checking. This works differs from infernu as it is not limited to a self defined subset of JavaScript.
+
+Tern~\cite{Haverbeke} is an editor independent JavaScript analyzer with type inference. Editors can use the API of Tern to query type information, provide auto completion and jump to definition functionality. Tern uses abstract values and abstract interpretation for type inference. Tern can only infer types for functions with an invocation. Not invoked functions are not analyzed. The work differs from Tern as the project focuses on type checking and not on providing an API for editors. 

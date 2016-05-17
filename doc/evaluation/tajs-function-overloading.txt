@@ -1,0 +1,96 @@
+===========  Loading files ===========
+Loading doc/evaluation/function-overloading-es5.js
+===========  Data flow analysis ===========
+doc/evaluation/function-overloading-es5.js:1:1 (node transfers: 1, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:19:9 (node transfers: 6, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:19:9 (node transfers: 8, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:1:1 (node transfers: 9, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:2:6 (node transfers: 12, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:3:9 (node transfers: 16, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:7:6 (node transfers: 20, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:8:10 (node transfers: 24, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 26, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 27, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 28, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 31, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 35, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 39, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:13:34 (node transfers: 40, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 44, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 48, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 52, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:13:34 (node transfers: 53, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 57, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 61, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 65, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:16:9 (node transfers: 66, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:17:1 (node transfers: 67, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:19:9 (node transfers: 68, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:20:10 (node transfers: 72, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:1:1 (node transfers: 73, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:2:6 (node transfers: 76, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:3:9 (node transfers: 80, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:7:6 (node transfers: 84, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:8:10 (node transfers: 88, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 90, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 91, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 92, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 95, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 99, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 103, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:13:34 (node transfers: 104, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:16:9 (node transfers: 108, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:17:1 (node transfers: 109, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:20:10 (node transfers: 110, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:21:10 (node transfers: 115, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:1:1 (node transfers: 116, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:2:6 (node transfers: 119, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:3:9 (node transfers: 123, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:7:6 (node transfers: 127, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:8:10 (node transfers: 131, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 133, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 134, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:11:15 (node transfers: 135, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 138, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 142, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 146, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:13:34 (node transfers: 147, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 151, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 155, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 159, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:13:34 (node transfers: 160, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:13:21 (node transfers: 164, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 168, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:14:3 (node transfers: 172, worklist size: 3)
+doc/evaluation/function-overloading-es5.js:16:9 (node transfers: 173, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:17:1 (node transfers: 174, worklist size: 2)
+doc/evaluation/function-overloading-es5.js:21:10 (node transfers: 175, worklist size: 1)
+doc/evaluation/function-overloading-es5.js:1:1 (node transfers: 176, worklist size: 1)
+===========  Scan ===========
+range:	doc/evaluation/function-overloading-es5.js:19:9	->	[@range#fun1]
+r:	doc/evaluation/function-overloading-es5.js:19:9	->	[@Array#node40]
+range:	doc/evaluation/function-overloading-es5.js:20:10	->	[@range#fun1]
+r2:	doc/evaluation/function-overloading-es5.js:20:10	->	[@Array#node40]
+range:	doc/evaluation/function-overloading-es5.js:21:10	->	[@range#fun1]
+r3:	doc/evaluation/function-overloading-es5.js:21:10	->	[@Array#node40]
+end:	doc/evaluation/function-overloading-es5.js:2:6	->	Undef|UInt
+undefined:	doc/evaluation/function-overloading-es5.js:2:14	->	Undef
+start:	doc/evaluation/function-overloading-es5.js:3:9	->	UInt
+end:	doc/evaluation/function-overloading-es5.js:3:3	->	UInt
+start:	doc/evaluation/function-overloading-es5.js:4:3	->	0.0
+step:	doc/evaluation/function-overloading-es5.js:7:6	->	Undef|-1.0
+undefined:	doc/evaluation/function-overloading-es5.js:7:15	->	Undef
+step:	doc/evaluation/function-overloading-es5.js:8:3	->	1.0
+Array:	doc/evaluation/function-overloading-es5.js:11:15	->	[@Array[native]]
+result:	doc/evaluation/function-overloading-es5.js:11:15	->	[@Array#node40]
+start:	doc/evaluation/function-overloading-es5.js:13:14	->	UInt
+i:	doc/evaluation/function-overloading-es5.js:13:14	->	UInt
+i:	doc/evaluation/function-overloading-es5.js:13:21	->	UInt|NotUInt|NaN
+end:	doc/evaluation/function-overloading-es5.js:13:25	->	Undef|UInt
+result:	doc/evaluation/function-overloading-es5.js:14:3	->	[@Array#node40]
+push:	doc/evaluation/function-overloading-es5.js:14:3	->	[@Array.prototype.push[native]]
+i:	doc/evaluation/function-overloading-es5.js:14:15	->	UInt|NotUInt|NaN
+result:	doc/evaluation/function-overloading-es5.js:16:9	->	[@Array#node40]
+i:	doc/evaluation/function-overloading-es5.js:13:34	->	UInt|NotUInt|NaN
+step:	doc/evaluation/function-overloading-es5.js:13:38	->	Undef|UInt|NotUInt
+i:	doc/evaluation/function-overloading-es5.js:13:30	->	UInt|NotUInt|NaN

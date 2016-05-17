@@ -1,0 +1,18 @@
+//       map : Indexable ({length: Number, ..b}, Number, d) => a.(({length: Number, ..b}, (d -> c)) -> [c])
+function map(array, mapper) {
+//          result : [c]
+	var result = [];
+//               i : Number
+	for (var i = 0; i < array.length; ++i) {
+		result.push(mapper(array[i]));
+	}
+	return result;
+}
+
+//  array : [Number]
+var array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+//  doubled : [Number]
+var doubled = map(array, function (x) { 
+	return x * 2; 
+});
+

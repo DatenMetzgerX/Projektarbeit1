@@ -1,0 +1,34 @@
+===========  Loading files ===========
+Loading doc/evaluation/effects-es5.js
+===========  Data flow analysis ===========
+doc/evaluation/effects-es5.js:1:1 (node transfers: 1, worklist size: 1)
+doc/evaluation/effects-es5.js:5:14 (node transfers: 5, worklist size: 1)
+doc/evaluation/effects-es5.js:8:1 (node transfers: 13, worklist size: 1)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 14, worklist size: 1)
+doc/evaluation/effects-es5.js:2:2 (node transfers: 15, worklist size: 1)
+doc/evaluation/effects-es5.js:3:1 (node transfers: 23, worklist size: 1)
+doc/evaluation/effects-es5.js:9:14 (node transfers: 24, worklist size: 1)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 30, worklist size: 1)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 31, worklist size: 2)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 32, worklist size: 1)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 33, worklist size: 2)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 34, worklist size: 1)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 35, worklist size: 2)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 36, worklist size: 1)
+doc/evaluation/effects-es5.js:1:1 (node transfers: 37, worklist size: 1)
+===========  Scan ===========
+lastName:	doc/evaluation/effects-es5.js:6:2	->	"Reiser"
+person:	doc/evaluation/effects-es5.js:5:14	->	[@Object#node4]
+setAddress:	doc/evaluation/effects-es5.js:8:1	->	[@setAddress#fun1]
+person:	doc/evaluation/effects-es5.js:8:12	->	[@Object#node4]
+person:	doc/evaluation/effects-es5.js:9:14	->	[@Object#node4]
+address:	doc/evaluation/effects-es5.js:9:14	->	[@Object#node30]
+street:	doc/evaluation/effects-es5.js:9:14	->	"Bahnhofstrasse 12"
+p:	doc/evaluation/effects-es5.js:2:2	->	[@Object#node4]
+street:	doc/evaluation/effects-es5.js:2:24	->	"Bahnhofstrasse 12"
+street:	doc/evaluation/effects-es5.js:2:16	->	"Bahnhofstrasse 12"
+zip:	doc/evaluation/effects-es5.js:2:37	->	8001.0
+zip:	doc/evaluation/effects-es5.js:2:32	->	8001.0
+address:	doc/evaluation/effects-es5.js:2:2	->	[@Object#node30]
+doc/evaluation/effects-es5.js:2:32: [definite] Dead assignment, property zip is never read
+doc/evaluation/effects-es5.js:6:2: [definite] Dead assignment, property lastName is never read

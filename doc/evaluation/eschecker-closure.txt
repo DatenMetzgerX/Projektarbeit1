@@ -1,0 +1,8 @@
+Initial memory usage 41.03125
+./doc/evaluation/closure.js
+Final type environment in exit node:
+console -> {log: any.(any, any) -> undefined}
+currentId -> number
+uniqueId -> @ (33).() -> @ (32)
+Final memory usage: 43.453125
+Success

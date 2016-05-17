@@ -1,0 +1,35 @@
+%%%%%%%%%%-----PACKAGES
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage[utf8]{inputenc}
+\usepackage[style=ieee]{biblatex}
+\bibliography{bibliography}
+
+
+% this package can be used to improve spacing between words.
+\usepackage{microtype}
+
+%%%%%%%%%%-----Code listening examples
+\usepackage[outputdir=.texpadtmp,section]{minted}
+
+% \begin{javascriptcode}...
+\newminted{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex}
+
+% \javascript/code/
+\newmintinline{javascript}{}
+
+% \javascriptfile{name}
+\newmintedfile{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex}
+
+%%% DOCUMENT Properties
+\title{Type Inference and Type Checking for JavaScript Strict Mode}
+
+\author{Micha Reiser
+}
+\author{\affiliation{
+		University of Applied Sciences Rapperswil\\
+    	Supervised by Luc Bläser\\
+    	FS2016 (\today)
+}	}
+
+\hyphenation{ECMAScript}

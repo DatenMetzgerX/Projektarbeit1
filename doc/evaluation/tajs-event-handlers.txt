@@ -1,0 +1,37 @@
+===========  Loading files ===========
+Loading ./doc/evaluation/event-handlers-es5.js
+===========  Data flow analysis ===========
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 1, worklist size: 1)
+./doc/evaluation/event-handlers-es5.js:7:14 (node transfers: 4, worklist size: 1)
+./doc/evaluation/event-handlers-es5.js:7:14 (node transfers: 8, worklist size: 1)
+./doc/evaluation/event-handlers-es5.js:7:14 (node transfers: 9, worklist size: 1)
+./doc/evaluation/event-handlers-es5.js:10:2 (node transfers: 12, worklist size: 2)
+./doc/evaluation/event-handlers-es5.js:10:2 (node transfers: 18, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:11:2 (node transfers: 19, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:11:2 (node transfers: 25, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 26, worklist size: 2)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 27, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 28, worklist size: 2)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 29, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 30, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:2:6 (node transfers: 31, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:2:6 (node transfers: 35, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:2:2 (node transfers: 36, worklist size: 4)
+./doc/evaluation/event-handlers-es5.js:3:3 (node transfers: 37, worklist size: 5)
+./doc/evaluation/event-handlers-es5.js:5:1 (node transfers: 38, worklist size: 4)
+./doc/evaluation/event-handlers-es5.js:5:1 (node transfers: 39, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 40, worklist size: 2)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 41, worklist size: 4)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 42, worklist size: 3)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 43, worklist size: 2)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 44, worklist size: 2)
+./doc/evaluation/event-handlers-es5.js:1:1 (node transfers: 45, worklist size: 1)
+===========  Scan ===========
+./doc/evaluation/event-handlers-es5.js:3:3: [definite] ReferenceError, reading absent variable console
+./doc/evaluation/event-handlers-es5.js:2:6: [maybe] TypeError, call to non-function
+./doc/evaluation/event-handlers-es5.js:10:2: [maybe] TypeError, accessing property of null/undefined
+./doc/evaluation/event-handlers-es5.js:10:2: [maybe] TypeError, call to non-function
+./doc/evaluation/event-handlers-es5.js:11:2: [maybe] TypeError, call to non-function
+./doc/evaluation/event-handlers-es5.js:2:6: [maybe] Reading absent property getModifierState
+./doc/evaluation/event-handlers-es5.js:10:2: [maybe] Reading absent property addEventListener
+./doc/evaluation/event-handlers-es5.js:11:2: [maybe] Reading absent property addEventListener

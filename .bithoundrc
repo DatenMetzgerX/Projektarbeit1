@@ -2,6 +2,7 @@
   "ignore": [
   	"examples/**",
   	"test/cfg/test-cases/**",
+	"doc/evaluation/**",
     "**/deps/**",
     "**/node_modules/**",
     "**/thirdparty/**",

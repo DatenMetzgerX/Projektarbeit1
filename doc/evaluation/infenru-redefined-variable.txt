@@ -1,0 +1,7 @@
+redefined-variable.js:2:1: Error: 
+  Failed unifying:  Undefined
+             With:  {name: String}
+          Because:  
+  Failed unifying:  {name: String}
+             With:  Undefined
+

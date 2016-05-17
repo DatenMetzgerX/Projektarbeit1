@@ -1,0 +1,25 @@
+\section{Algorithm}\label{sec:algorithm}
+The classical approach for type inference is the Hindley Milner algorithm~\cite{Milner1978}. The Hindley Milner algorithm infers the principal type for every variable in a program. This is sufficient for languages where the type of a variable does not change over its lifespan but is not for JavaScript. A common pattern in JavaScript is to first declare the variables and defer their initialization. A pattern that has its roots in variable hoisting. Besides deferred initialization, it is also completely legal JavaScript code if values of different types are assigned to the same variable.  Therefore, the principal type is insufficient for JavaScript and requires that the types of variables are kept distinct between different positions in the program. This is achieved by using a data flow based analysis. The described algorithm combines the Hindley Milner algorithm W with abstract interpretation. 
+
+The control graph used for the data flow analysis is statement based. For each statement in the program one control flow graph node is created. Each edge represents a potential control flow between two statements. The control flow graph is not created on expression level to reduce the number of nodes and therefore the number of states required required in the data flow analysis.  
+
+The analysis uses the work list algorithm~\cite{NielsonNielsonHankin1999} to traverse the control flow nodes in forward order. The analysis is not path sensitive. The order of the nodes is the same as the order of the statements in the program. The transfer function infers the type for the statement and its expressions using the Hindley Milner algorithm W.  The in and out state of the data flow analysis is the type environment. If a node has multiple in branches, then the type environments of these branches are joined by unification. The union of the two type environments contains the mappings of both environments, conflicting mappings are merged using the $unify$ function of the Hindley Milner algorithm.
+
+\begin{align*}
+	\Gamma_1 \cup \Gamma_2 &= \lbrace (x, \tau) \vert x \in \Gamma_1 \vee x \in \Gamma_2 \rbrace \\
+	\tau &= \begin{cases}
+		unify(\Gamma_1(x), \Gamma_2(x)) & x \in \Gamma_1 \wedge x \in \Gamma_2 \\
+		\Gamma_1(x) & x \in \Gamma_1 \wedge x \notin \Gamma_2 \\
+		\Gamma_2(x) & x \in \Gamma_2\wedge x \notin \Gamma_1
+	\end{cases}
+\end{align*}
+
+The algorithm uses inlining to handle function calls. If a function is called, then the function body is evaluated in the callers context making the algorithm context sensitive. Using the type environment of the caller is insufficient for the analysis of the function body as the called function might access variables from its declaration scope. Therefore, the mappings from the function declaration type environment are added to the callers type environment. The sum of the two type environment contains the mappings from both type environments. If a mapping exists in both type environments, then the type of the callers type environment is used. The mapping of the callers type environment needs to be used, as the type of a variable might have changed since the function has been declared. The equation defining how two type environments are added follows.
+
+\begin{align*}
+	\Gamma_1 + \Gamma_2 &= \lbrace (x, \tau) | x \in \Gamma_1 \vee x \in \Gamma_2 \rbrace \\
+	\tau &= \begin{cases}
+		\Gamma_2(x) & x \notin \Gamma_1 \\
+		\Gamma_1(x) & \text{otherwise}
+	\end{cases}
+\end{align*}

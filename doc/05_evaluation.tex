@@ -1,0 +1,75 @@
+\section{Evaluation}\label{sec:evaluation}
+As part of this work, the tool ESChecker~\cite{Reiser2016} has been implemented. It applies the described algorithm. The set of implemented JavaScript features is not sufficient to perform an evaluation using real life projects. The implementation covers the basic operations but has no support for classes, modules or prototyping. The support for object is limited to object expressions and subtyping of object uses structural typing (duck typing). The evaluation uses sample listenings to compare the implementation with Flow, TAJS, and infernu\footnote{The evaluation uses the following versions: Flow 0.24.1, TAJS 0.9-7, infernu 0.0.0.1.}. Infernu and TAJS do not support ES5 and therefore ES5 equivalents of the listings are used.
+
+\subsection{Variable Redefinement}
+In JavaScript, values of different types can be assigned to the same variable. Therefore the same variable can have different types at different positions in the program. The following listing defers the initialization of the variable.
+
+\javascriptfile{./evaluation/redefined-variable.js}
+
+Infernu is the only tool that rejects the program. Infernu defines a strict type system that does not allow assignments to variables with incompatible types. In this example, an object value is assigned to a variable of type \texttt{undefined}. 
+
+\subsection{Closures}
+JavaScript supports closures, allowing functions to read and modify variables from the outer scope. The analysis needs to be context sensitive to support closures. 
+
+\javascriptfile{./evaluation/closure.js}
+
+Closures are supported by all evaluated tools.
+
+\subsection{Side Effects}
+A function call can have side effects to the enclosing scope of the function declarations or the passed arguments. In the following example, a new property \texttt{address} is assigned to the passed in object. The analysis needs to reflect these side effects in the callers context.
+
+\javascriptfile{./evaluation/effects.js}
+
+Infernu rejects the program as the types of function call arguments are sealed. Flow rejects the program for the same reason. Flow does this intentionally to detect spelling errors. Therefore, only already defined properties can be accessed of function arguments. 
+
+The program is accepted by TAJS and ESChecker.
+
+\subsection{Function Overloading}
+JavaScript does not provide built in support for function overloading. A function can only have one definition. But the number of arguments passed to a function has not to exactly match the number of parameters in the function declaration. This allows optional arguments and therefore function overloading. The following example provides a \texttt{range} function that can be called with one or up to three arguments\footnote{The implementation cannot use the default parameters of ES6 as the semantic of the passed arguments depends on the number of arguments. If the function is called with a single argument, then this argument specifies the \texttt{end} and not the \texttt{start}.}. 
+
+\javascriptfile{./evaluation/function-overloading.js}
+
+Infernu rejects the program, because it does not support optional arguments. A function must be invoked with exactly the same number of arguments as parameters defined in the function declaration. The other tools type check the program correctly.
+
+\subsection{Callbacks}
+Callbacks are commonly used in JavaScript for asynchronous and functional programing. Functions can be passed as values. This requires that the flow of function values is tracked. The following example implements the \texttt{map} function and applies it to a an array of numbers with a function that doubles the values. The \texttt{map} function calls a callback for every array element and puts the result in the resulting array. The example also contains a second application of the \texttt{map} function with an array of strings to test if the type inference algorithm supports rank-1 polymorphism~\cite{Pierce2002}.
+
+\javascriptfile{./evaluation/callbacks.js}
+
+Flow is the only tool that rejects this example. Flow does not to support type inference for rank-1 polymorphic functions. The example type checks if either the map function is attributed with type annotations or \texttt{map} is only applied once or with arrays of equal types. 
+
+\subsection{Built in Types}
+JavaScript defines built in objects and functions. These functions are natively implemented and not available as JavaScript source code, hence the source code cannot be analyzed by the type inference algorithm. This requires that native object and functions are defined in the type checker or that it provides an external declaration of these. The following example uses the native \texttt{map} and \texttt{reduce} functions\footnote{As infernu does not support optional arguments, all callback arguments have been added to the callbacks of \texttt{map} and \texttt{reduce} before analyzing the example with infernu.}. The order of the arguments passed to the \texttt{reduce} function is intentionally incorrect to verify if the type checker validates callbacks passed to built in functions. The first argument of \texttt{reduce} is the callback, the second the initialization value of the accumulator. 
+
+\javascriptfile{./evaluation/built-ins.js}
+
+Infernu rejects the example as it does not support the built in \texttt{reduce} method. TAJS rejects the example as it does not support the built in \texttt{map} method. Flow and ESChecker correctly type the application of the \texttt{map} function and reject the application of the \texttt{reduce} function.
+
+\subsection{Dynamic Object Manipulation}
+Object creation or changing the object structure can be performed dynamically by using reflection like code. Such code uses computed property names, something that requires reflection in statically typed languages. The following example is an implementation of the common \texttt{defaults} function. The \texttt{defaults} function accepts two objects. The method adds the properties of the \texttt{source} object that are missing in the \texttt{target} object to the \texttt{target} object. This pattern is commonly used to initialize absent properties with default values for option-objects.
+
+\javascriptfile{./evaluation/dynamic-object-manipulation.js}
+
+A precise and sound analysis needs to unroll the for loop on line three to know which properties are copied from the \texttt{source} to the \texttt{target} object on line four. Unrolling requires that the analysis understands the semantics of \texttt{Object.keys}. 
+
+The example initializes a plain object with default values on line eleven. The initialized option object is then used on line 15, but the property name \texttt{rnds} for \texttt{rounds} is misspelled. TAJS is the only implementation that detects the misspelled property name. Flow and ESChecker are unsound for dynamic code and therefore do not report any errors. Infernu rejects the program as \texttt{for in} loops are not supported.
+
+\subsection{DOM Events}
+JavaScript is often used in web applications to add dynamic effects. Interactions can be added using the DOM-API. A type checker needs to model the DOM-API, as needed for other built in types like arrays. Besides the defined DOM types and methods, a type checker needs also to model the DOM events~\cite{JensenMadsenMoller2011}. Reacting to user input is done by registering a listener for a particular event on a specific DOM-Element, like an input field. The API for registering listeners is generic, but the event passed to the listener depends on the event type. A \texttt{keydown} event passes a \texttt{KeyboardEvent} object to the listener. The \texttt{KeyboardEvent} has additional properties allowing the identification of the pressed key. The type of the event is defined by the event name passed during the listener registration as shown in the following example on line 10 and 12.
+
+\javascriptfile{./evaluation/event-handlers.js}
+
+The registration on line 10 for the \texttt{keydown} is correct, as the \texttt{KeyboardEvent} defines the \texttt{getModifierState} used in the listener on line 2. The registration for the \texttt{blur} event is erroneous, as the \texttt{blur} event defines no method \texttt{getModifierState}. 
+
+TAJS is the only tool that detects the malicious invocation of the \texttt{getModifierState} method in case a \texttt{blur} event is triggered as potential error. But TAJS also reports a warning that the variable \texttt{input} can potentially be null online 10 and 11, regardless of the preceding null check on line 9.. The same is true for ESChecker, but it reports an error instead of a warning and therefore rejects the whole program. The problem of ESChecker lies in the fact that it is neither path sensitive not does it evaluate the test condition. Infernu fails to type check the given example as it does not model the DOM API. Flow does not reject the given program but neither detects the invocation of the not defined function \texttt{getModifierState} for the \texttt{blur} event. 
+
+A special handling for DOM events is beneficial, as it adds additional type safety. But events are not only used when interacting with the DOM, but also if frameworks are being used. Various frameworks like Backbone or Angular use events internally and as part of their API.  This requires that their event model is integrated into the type checker too to achieve type safety. Because a type checker cannot Therefore, an external definition of the events is desired.
+
+\subsection{The Impact of Frameworks on Type Inference}
+Frameworks are a special challenge for type inference as they make heavy use of dynamic invocations.  Frameworks are implemented according to the inversion of control principle, the framework invokes the application, not visa versa. This inverses the --- for type inference important --- control and data flow. 
+
+Inferring the correct type is often only possible if the type of the arguments are known. Without an actual invocation, these are unknown. The following example shows an Angular~\cite{Angular} controller implementation. The implementation loads the persons using the \texttt{\$http} service. By mistake, the \texttt{get} method has been misspelled. 
+
+\javascriptfile{./evaluation/angular-controller.js}
+
+The problem shown by this example is that type inference for code using a framework with dynamic invocation is impossible for a framework agnostic type checker as the control and data flow cannot be inferred using static analysis. The \texttt{\$http} service accepted in the constructor on line 3 is a service that is injected by angular at runtime. The implementation to inject is resolved by name, therefore no explicit connection between the service usage and the service implementation exists. But the type of \texttt{\$http} must be known to perform type checking. As the type for \texttt{\$http} is not known, type checking without type annotations is not possible for the given example.

@@ -1,0 +1,10 @@
+Initial memory usage 40.56640625
+./doc/evaluation/function-overloading.js
+Final type environment in exit node:
+console -> {log: any.(any, any) -> number}
+r -> number[]
+r2 -> number[]
+r3 -> number[]
+range -> @ (36).(@ (32), @ (33), @ (34)) -> @ (35)
+Final memory usage: 45.67578125
+Success
