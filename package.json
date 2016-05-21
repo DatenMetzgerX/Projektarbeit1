@@ -1,22 +1,22 @@
 {
   "name": "eschecker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Type Checker for ECMAScript",
   "preferGlobal": true,
   "bin": {
-	"eschecker": "index.js"
+    "eschecker": "index.js"
   },
   "directories": {
     "example": "examples",
-	"doc": "doc",
-	"lib": "lib"
+    "doc": "doc",
+    "lib": "lib"
   },
   "engines": {
     "node": ">=5.0.0"
   },
   "scripts": {
     "start": "gulp watch",
-	"prepublish": "gulp default",
+    "prepublish": "gulp default",
     "build": "gulp default",
     "test": "mocha --inline-diffs --compilers js:babel-register './test/**/*.spec.js'",
     "testWatch": "mocha --watch --compilers js:babel-register --watch-extensions dot './test/**/*.spec.js'",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "babel-code-frame": "^6.7.7",
-	"babel-generator": "^6.7.7",
+    "babel-generator": "^6.7.7",
     "babel-traverse": "^6.7.6",
     "babel-types": "^6.7.7",
     "babylon": "^6.7.0",
@@ -63,8 +63,8 @@
     "commander": "^2.9.0",
     "immutable": "^3.8.1",
     "lodash": "^4.11.1",
-	"glob": "^7.0.3",
-	"graphviz": "0.0.8",
+    "glob": "^7.0.3",
+    "graphviz": "0.0.8",
     "pkginfo": "^0.4.0",
     "resolve": "^1.1.7"
   },
