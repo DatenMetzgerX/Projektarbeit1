@@ -1,0 +1,13 @@
+.idea
+.vscode
+.bithoundrc
+.babelrc
+.editorconfig
+.eslintrc.yml
+.travis.yml
+node_modules
+graph.png
+coverage
+esdoc
+*.bak
+doc/.texpadtmp
