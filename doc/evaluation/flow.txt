@@ -1,24 +1,25 @@
 built-ins.js:4
-  4: const sum = array.reduce(0, 
-                 ^ call of method `reduce`. Function cannot be called on any member of intersection type
-  4: const sum = array.reduce(0, 
-                 ^ intersection
+  4: const sum = array.reduce(0, (accum, x) => accum + x);
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call of method `reduce`. Function cannot be called on any member of intersection type
+  4: const sum = array.reduce(0, (accum, x) => accum + x);
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ intersection
   Member 1:
   199:     reduce<U>(
-           ^ polymorphic type: function type. See lib: /private/tmp/flow/flowlib_2f08267d/core.js:199
+           ^ polymorphic type: function type. See lib: /private/tmp/flow/flowlib_351aad00/core.js:199
   Error:
-    4: const sum = array.reduce(0, 
+    4: const sum = array.reduce(0, (accum, x) => accum + x);
                                 ^ number. This type is incompatible with
   200:       callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: Array<T>) => U,
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_2f08267d/core.js:200
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_351aad00/core.js:200
   Member 2:
   203:     reduce<U>(
-           ^ polymorphic type: function type. See lib: /private/tmp/flow/flowlib_2f08267d/core.js:203
+           ^ polymorphic type: function type. See lib: /private/tmp/flow/flowlib_351aad00/core.js:203
   Error:
-    4: const sum = array.reduce(0, 
+    4: const sum = array.reduce(0, (accum, x) => accum + x);
                                 ^ number. This type is incompatible with
   204:       callbackfn: (previousValue: T|U, currentValue: T, currentIndex: number, array: Array<T>) => U
- 
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_351aad00/core.js:204
+
 callbacks.js:13
  13: const lengths = map(names, name => name.length);
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function call
@@ -32,19 +33,27 @@ callbacks.js:13
                                              ^^^^^^ property `length`. Property not found in
  13: const lengths = map(names, name => name.length);
                                         ^^^^ Number
-effects.js:8
-  8: setAddress(person, "Bahnhofstrasse 12", 8001);
+
+effects.js:6
+  6: setAddress(person, "Bahnhofstrasse 12", 8001);
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function call
   2: 	p.address = { street, zip } ;
      	  ^^^^^^^ property `address`. Property not found in
   2: 	p.address = { street, zip } ;
      	^ object literal
 
-effects.js:9
-  9: const street = person.address.street;
+effects.js:7
+  7: const street = person.address.street;
                            ^^^^^^^ property `address`. Property not found in
-  9: const street = person.address.street;
+  7: const street = person.address.street;
                     ^^^^^^ object literal
 
+this-binding.js:11
+ 11: log("Invalid alias, this.messages is undefined");
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function call
+  5: 		this.messages.push(m);
+     		     ^^^^^^^^ property `messages`. Property cannot be accessed on
+global object
 
-Found 5 errors
+
+Found 6 errors

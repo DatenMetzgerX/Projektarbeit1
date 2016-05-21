@@ -1,8 +1,7 @@
 function defaults(target, source) {
 	target = target === undefined ? {} : target;
-	for (const key of Object.keys(source)) {
-		target[key] = target[key] ===
-			undefined ? source[key] : target[key];
+	for (const key of Object.keys(source)) { 
+		target[key] = target[key] === undefined ? source[key] : target[key];
 	}
 
 	return target;
