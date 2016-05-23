@@ -8,7 +8,7 @@ import {TypeInferenceContext} from "../../../lib/type-inference/type-inference-c
 import {TypeEnvironment} from "../../../lib/type-inference/type-environment";
 import {Program} from "../../../lib/semantic-model/program";
 import {Scope} from "../../../lib/semantic-model/scope";
-import {ObjectType, NumberType, VoidType, FunctionType, MaybeType, StringType, TypeVariable, ArrayType, BooleanType, NullType} from "../../../lib/semantic-model/types";
+import {ObjectType, NumberType, VoidType, FunctionType, MaybeType, StringType, TypeVariable, ArrayType, BooleanType, NullType, AnyType} from "../../../lib/semantic-model/types";
 import {SymbolFlags, Symbol} from "../../../lib/semantic-model/symbol";
 
 describe("CallExpressionRefinementRule", function () {
@@ -70,6 +70,16 @@ describe("CallExpressionRefinementRule", function () {
 
 				// assert
 				expect(rule.refine(callExpression, context)).to.be.instanceOf(VoidType);
+			});
+
+			it("returns any if the called function any", function () {
+				// arrange
+				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
+				
+				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(AnyType.create());
+				
+				// assert
+				expect(rule.refine(callExpression, context)).to.be.instanceOf(AnyType);
 			});
 
 			it("sets this to void if the callee is not a member expression", function () {
