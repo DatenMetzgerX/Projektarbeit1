@@ -1,10 +1,14 @@
-//  currentId : Number
-var currentId = 0;
-
-//       uniqueId : a.(() -> Number)
-function uniqueId() {
-	return ++currentId;
+//       createUniqueIdGenerator : a.(() -> b.(() -> Number))
+function createUniqueIdGenerator() {
+//          currentId : Number
+	var currentId = 0;
+	
+	return function() {
+		return ++currentId;
+	}
 }
 
-uniqueId();
+//  generator : (() -> Number)
+var generator = createUniqueIdGenerator();
+generator();
 

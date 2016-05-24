@@ -1,14 +1,15 @@
-Initial memory usage 40.5625
-./doc/evaluation/callbacks.js
+Initial memory usage 40.3671875
+./callbacks
 Final type environment in exit node:
-anonymous:10:27 -> @ (51).(@ (50)) -> undefined
-anonymous:13:27 -> @ (81).(@ (80)) -> undefined
+Object -> {keys: any.({}) -> string[]}
+anonymous:10:27 -> @ (56).(@ (54)) -> @ (55)
+anonymous:13:27 -> @ (89).(@ (87)) -> @ (88)
 array -> number[]
 console -> {log: any.(any, any) -> undefined}
 document -> {getElementById: any.(string) -> Maybe<{addEventListener: any.(string, any.({bubbles: boolean, cancelable: boolean, defaultPrevented: boolean, type: string, preventDefault: any.() -> undefined, stopImmediatePropagation: any.() -> undefined, stopPropagation: any.() -> undefined}) -> any, any, any) -> undefined}>}
-doubled -> undefined[]
-lengths -> undefined[]
-map -> @ (45).(@ (42), @ (43)) -> @ (44)
+doubled -> number[]
+lengths -> number[]
+map -> @ (49).(@ (46), @ (47)) -> @ (48)
 names -> string[]
-Final memory usage: 46.44921875
+Final memory usage: 46.33203125
 Success

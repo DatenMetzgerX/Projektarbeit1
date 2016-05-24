@@ -1,7 +1,10 @@
-var currentId = 0;
-
-function uniqueId() {
-	return ++currentId;
+function createUniqueIdGenerator() {
+	var currentId = 0;
+	
+	return function() {
+		return ++currentId;
+	}
 }
 
-uniqueId();
+var generator = createUniqueIdGenerator();
+generator();

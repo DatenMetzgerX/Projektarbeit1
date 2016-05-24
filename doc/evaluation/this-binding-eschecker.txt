@@ -1,0 +1,13 @@
+Initial memory usage 40.06640625
+./this-binding.js
+Type inference failed for node 
+  3 | 	messages: [],
+  4 | 	log: function (m) {
+> 5 | 		this.messages.push(m);
+    | 		    ^
+  6 | 	}
+  7 | }
+  8 | 
+Error: Type inference failure: Potential null pointer
+	when accessing 	property messages on null or not
+	 initialized object of type undefined.
