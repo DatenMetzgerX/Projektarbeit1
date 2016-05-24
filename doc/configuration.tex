@@ -1,9 +1,13 @@
 %%%%%%%%%%-----PACKAGES
+\usepackage{booktabs}
+\usepackage[utf8]{inputenc}
+\usepackage{biblatex}
+\bibliography{bibliography}
 \usepackage{hyperref}
 \usepackage{cleveref}
-\usepackage[utf8]{inputenc}
-\usepackage[style=ieee]{biblatex}
-\bibliography{bibliography}
+\hypersetup{allcolors = {black}, colorlinks}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 
 
 % this package can be used to improve spacing between words.
@@ -19,7 +23,7 @@
 \newmintinline{javascript}{}
 
 % \javascriptfile{name}
-\newmintedfile{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex}
+\newmintedfile{javascript}{tabsize=2, linenos=true, fontsize=\scriptsize, xleftmargin=3.5ex, mathescape, breaklines=true}
 
 %%% DOCUMENT Properties
 \title{Type Inference and Type Checking for JavaScript Strict Mode}
@@ -29,7 +33,7 @@
 \author{\affiliation{
 		University of Applied Sciences Rapperswil\\
     	Supervised by Luc Bläser\\
-    	FS2016 (\today)
+    	ST2016 (\today)
 }	}
 
 \hyphenation{ECMAScript}

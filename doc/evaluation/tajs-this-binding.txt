@@ -1,0 +1,22 @@
+===========  Loading files ===========
+Loading ./this-binding-es5.js
+===========  Data flow analysis ===========
+./this-binding-es5.js:1:1 (node transfers: 1, worklist size: 1)
+./this-binding-es5.js:1:1 (node transfers: 4, worklist size: 1)
+./this-binding-es5.js:3:12 (node transfers: 7, worklist size: 1)
+./this-binding-es5.js:3:2 (node transfers: 8, worklist size: 1)
+./this-binding-es5.js:9:1 (node transfers: 16, worklist size: 1)
+./this-binding-es5.js:4:7 (node transfers: 17, worklist size: 1)
+./this-binding-es5.js:5:3 (node transfers: 18, worklist size: 1)
+./this-binding-es5.js:5:3 (node transfers: 23, worklist size: 1)
+./this-binding-es5.js:6:2 (node transfers: 24, worklist size: 1)
+./this-binding-es5.js:10:11 (node transfers: 25, worklist size: 1)
+./this-binding-es5.js:11:1 (node transfers: 31, worklist size: 1)
+./this-binding-es5.js:4:7 (node transfers: 32, worklist size: 1)
+./this-binding-es5.js:5:3 (node transfers: 33, worklist size: 1)
+./this-binding-es5.js:6:2 (node transfers: 36, worklist size: 1)
+./this-binding-es5.js:1:1 (node transfers: 37, worklist size: 1)
+===========  Scan ===========
+./this-binding-es5.js:5:3: [maybe] TypeError, accessing property of null/undefined
+./this-binding-es5.js:5:3: [maybe] Reading 'this' yields the global object
+./this-binding-es5.js:5:3: [maybe] Reading absent property messages

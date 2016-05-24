@@ -1,9 +1,11 @@
 \section{Algorithm}\label{sec:algorithm}
-The classical approach for type inference is the Hindley Milner algorithm~\cite{Milner1978}. The Hindley Milner algorithm infers the principal type for every variable in a program. This is sufficient for languages where the type of a variable does not change over its lifespan but is not for JavaScript. A common pattern in JavaScript is to first declare the variables and defer their initialization. A pattern that has its roots in variable hoisting. Besides deferred initialization, it is also completely legal JavaScript code if values of different types are assigned to the same variable.  Therefore, the principal type is insufficient for JavaScript and requires that the types of variables are kept distinct between different positions in the program. This is achieved by using a data flow based analysis. The described algorithm combines the Hindley Milner algorithm W with abstract interpretation. 
+The classical approach for type inference is the Hindley-Milner algorithm~\cite{Milner1978}. The Hindley-Milner algorithm infers the principal type for every variable in a program. This is sufficient for languages restricting that the type of a variable does not change over its lifespan. In contrary, JavaScript has no such restriction allowing values of different types to be assigned to the same variable. For instance, a common JavaScript pattern is to first declare the variables and defer their initialization. The type of the variable after its declaration is \textit{void}. The initialization changes the type of the variable from \textit{void} to the type of the assigned value. Therefore, a single type for a variable in the whole program is insufficient for JavaScript. This requires that the variable types are kept distinct between different positions in the program. This is achieved by using data-flow analysis. The described algorithm combines the Hindley-Milner Algorithm W with abstract interpretation. 
 
-The control graph used for the data flow analysis is statement based. For each statement in the program one control flow graph node is created. Each edge represents a potential control flow between two statements. The control flow graph is not created on expression level to reduce the number of nodes and therefore the number of states required required in the data flow analysis.  
+\subsection{Data Flow Analysis}
 
-The analysis uses the work list algorithm~\cite{NielsonNielsonHankin1999} to traverse the control flow nodes in forward order. The analysis is not path sensitive. The order of the nodes is the same as the order of the statements in the program. The transfer function infers the type for the statement and its expressions using the Hindley Milner algorithm W.  The in and out state of the data flow analysis is the type environment. If a node has multiple in branches, then the type environments of these branches are joined by unification. The union of the two type environments contains the mappings of both environments, conflicting mappings are merged using the $unify$ function of the Hindley Milner algorithm.
+The control flow graph used for the data-flow analysis is statement-based. For each statement in the program, a control flow graph node is created. Each edge represents a potential control flow between two statements. A node in the control flow graph only represents a basic block if non of the statement's expressions introduce new control flows. For instance, a conditional expression creates two possible control flows --- one if the condition is true and another if the condition is not --- that are not represented in the control flow graph. The control flow graph is statement-based to reduce the number of states and therefore, the number of states required for the data flow analysis.
+
+The analysis uses the work list algorithm~\cite{NielsonNielsonHankin1999} to traverse the control flow nodes in forward order. The analysis is not path-sensitive. The order of the nodes is the same as the order of the statements in the program. The transfer function infers the type for the statement and its expressions using the Hindley-Milner Algorithm W.  The in and out state of the data-flow analysis is the type environment. If a node has multiple in branches, then the type environments of these branches are unified. The union of the two type environments contains the mappings of both environments, conflicting mappings are merged using the $unify$ function of the Hindley-Milner algorithm. The unification can be defined as follows.
 
 \begin{align*}
 	\Gamma_1 \cup \Gamma_2 &= \lbrace (x, \tau) \vert x \in \Gamma_1 \vee x \in \Gamma_2 \rbrace \\
@@ -14,12 +16,74 @@ The analysis uses the work list algorithm~\cite{NielsonNielsonHankin1999} to tra
 	\end{cases}
 \end{align*}
 
-The algorithm uses inlining to handle function calls. If a function is called, then the function body is evaluated in the callers context making the algorithm context sensitive. Using the type environment of the caller is insufficient for the analysis of the function body as the called function might access variables from its declaration scope. Therefore, the mappings from the function declaration type environment are added to the callers type environment. The sum of the two type environment contains the mappings from both type environments. If a mapping exists in both type environments, then the type of the callers type environment is used. The mapping of the callers type environment needs to be used, as the type of a variable might have changed since the function has been declared. The equation defining how two type environments are added follows.
+The important of the worklist algorithm are summarized in the \cref{tbl:properties-worklist-algorithm}. 
+
+\subsection{Function Invocation}
+
+\begin{table}
+	\ra{1.3}
+	\centering
+	\begin{tabular}{@{}l l@{}}\toprule
+	Property & Value \\ \midrule
+	Traversal Order & Forward \\
+	Node Order & Statement Order \\
+	Transfer Function & Hindley-Milner Algorithm W \\
+	In- / Out-State & Type Environment $\Gamma$ \\
+	Join Operation & $\Gamma_1 \cup \Gamma_2$ \\
+	Sensitivity & Flow and Context \\ \bottomrule
+	\end{tabular}
+	
+	\caption{Properties of the Worklist Algorithm}
+	\label{tbl:properties-worklist-algorithm}
+\end{table}
+
+The algorithm uses inlining for function calls. If a function is called, then the function body is evaluated in the caller's context making the algorithm context-sensitive. Using the type environment of the caller is insufficient for the analysis of the function body as the called function might access variables from its declaration scope. Therefore, the missing mappings from the function declaration type environment $\Gamma_{decl}$ are added to the caller's type environment $\Gamma_{caller}$. This is denoted as $\Gamma_{caller}\Big\lbrack\Gamma_{decl}\Big\rbrack$. The resulting type environment contains the mappings from both type environments. Mappings already present in the caller's type environment are not overridden with mappings from the function declaration type environment. This is important, as the type of a variable might have changed since the function declaration. This can be defined as follows.
 
 \begin{align*}
-	\Gamma_1 + \Gamma_2 &= \lbrace (x, \tau) | x \in \Gamma_1 \vee x \in \Gamma_2 \rbrace \\
+	\Gamma_{caller}\Big\lbrack\Gamma_{decl}\Big\rbrack &= \lbrace (x, \tau) | x \in \Gamma_{caller} \vee x \in \Gamma_{decl} \rbrace \\
 	\tau &= \begin{cases}
-		\Gamma_2(x) & x \notin \Gamma_1 \\
-		\Gamma_1(x) & \text{otherwise}
+		\Gamma_{decl}(x) & x \notin \Gamma_{caller} \\
+		\Gamma_{caller}(x) & \text{otherwise}
 	\end{cases}
 \end{align*}
+
+\subsection{Type System}\label{sec:type-system}
+The type system is designed to infer the types for arbitrary JavaScript code without the need for type annotations. The precision of the inferred type degrades for very dynamic code fragments. The current type system infers the types of all terms and has no support for type annotations. The type system is designed to catch the following errors.
+
+\begin{enumerate}
+	\item Reading of or assigning to an undeclared variable\label{item:absent-values}
+	\item Accessing a property of \textit{null} or \textit{undefined}\label{item:nullable}
+	\item Invoking a non-function value
+	\item Invoking a function with missing or incompatible arguments
+	\item Applying an operator with illegal operands\label{item:illegal-operands}
+\end{enumerate}
+
+The defined type system does not distinguish errors by their severity. 
+
+\paragraph{Maybe Type}
+The type system distinguishes between absent values, values that may be present, and values that are present for certain. This is needed to detect access to properties on \textit{undefined} or \textit{null} values causing runtime exceptions. The values \textit{null} and \textit{void} are modeled as unit types and represent values that are absent for certain. Potentially absent values are represented by the type \textit{Maybe\textless T\textgreater}. The type represents a value that is present for some paths but is not for others. It includes the values \textit{void}, \textit{null}, and all values defined by \textit{T}. Access to a property of a value that may be absent needs to be guarded by a null check.
+
+\paragraph{Record Type}
+Objects supporting members are represented as record types. A record type consists of a set of members. A member is defined by a unique label and the type. The object expression \textit{\{ name: "Test", age: 18 \}} is represented as record type with two members. The labels of the members are \textit{name} and \textit{age}, the members have the type \textit{string} and \textit{number}.  
+
+The type system uses structural typing for record types. Therefore, a type $\tau_1$ is a subtype of $\tau_2$ if $\tau_1$ has at least the same members as $\tau_2$ and the type of each of these members is a subtype of the corresponding member in $\tau_2$. The type system does not support nominal typing. Nominal typing is required to support classes  and prototype based type checking. The type system does not support classes nor prototypes, therefore nominal typing is not supported either. 
+
+\paragraph{Array Type}
+The array type \textit{T[]} describes an array containing elements of type \textit{T}. The array type is a specialized record type. The elements contained in an array need to be homogenous. Heterogenous arrays are not supported as the type system does not define a union type. A union type allows values of different types, e.g., the union \enquote{\textit{string} or \textit{number}} contains either \textit{string} or \textit{number} values. 
+
+The array type does not track the element type by the element's position in the array. Accessing element members of an heterogenous array therefore requires a type check if the element is of the expected type. To increase the precision for small, static arrays, a tuple type can be defined. The tuple type tracks the type for every position in the array. Accessing a tuple element therefore does not require an explicit type guard. 
+
+\paragraph{Function Type}
+The function type describes a function or method. A function type is characterized by the type of its arguments and its return type, but also the type of the value referenced by \textit{this}. The structure of \textit{this} is defined by the accessed members of \textit{this} inside the function body. The type for \textit{this} is not implicitly defined by the object to which the method belongs. 
+
+The presented algorithm uses inlining for invocations of non-native functions. The exact type of a function is  not inferred. The inferred type for a function declaration uses type variables for the type of \textit{this}, the arguments, and the return value. Type checking of the function body is performed for every invocation by replacing the type variables with the actual types used in the invocation. 
+
+The function type is also used to describe native functions of the host-environment. Type checking an invocation of a native function requires testing if the actual \textit{this} type and the type of the passed arguments are subtypes of the expected type. The \textit{Maybe} allows defining optional arguments for functions.
+
+The implementation does not yet support invoking a function using \textit{call} nor \textit{apply}. Binding the referenced value of \textit{this} using \textit{bind} or the \textit{this} of the outer scope by using arrow functions are not supported either.
+
+\paragraph{Any Type}
+The type system models the special type \textit{any}. The type \textit{any} is a super and subtype of all types. The type inference uses the \textit{any} type as backdoor whenever the type cannot be inferred. Accessing a property of an \textit{any} value yields \textit{any}. An \textit{any} value can be invoked as functions with arbitrary arguments, which returns \textit{any}. Type checking is completely disabled for \textit{any} values. Therefore, an inferred \textit{any} value inherently leads to unsafe code.
+
+\paragraph{Limitations}
+The presented type system supports only a limited set of JavaScript features. It neither has support for classes nor prototype based objects. It does not support the ECMAScript module syntax and therefore all analyzable programs are limited to a single file. Also the type system does not model all features precisely. The plus and compare operators are limited to numbers, even though \textit{strings} can be concatenated using the plus operand and any object with a \textit{valueOf} method can be compared. 
