@@ -72,12 +72,27 @@ describe("CallExpressionRefinementRule", function () {
 				expect(rule.refine(callExpression, context)).to.be.instanceOf(VoidType);
 			});
 
+			it("returns the type of the body of the arrow function if the body is an expression", function () {
+				// arrange
+				const callExpression = t.callExpression(t.identifier("log"), []);
+				const declaration = t.arrowFunctionExpression([], t.identifier("x"));
+				declaration.expression = true;
+				declaration.scope = new Scope();
+				declaration.scope.addSymbol(new Symbol("this", SymbolFlags.Variable));
+
+				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(new FunctionType(TypeVariable.create(), [TypeVariable.create()], VoidType.create(), declaration));
+				typeInferenceAnalysis.infer.withArgs(declaration.body).returns(StringType.create());
+
+				// assert
+				expect(rule.refine(callExpression, context)).to.be.instanceOf(StringType);
+			});
+
 			it("returns any if the called function any", function () {
 				// arrange
 				const callExpression = t.callExpression(t.identifier("log"), [t.stringLiteral("Hy")]);
-				
+
 				typeInferenceAnalysis.infer.withArgs(callExpression.callee).returns(AnyType.create());
-				
+
 				// assert
 				expect(rule.refine(callExpression, context)).to.be.instanceOf(AnyType);
 			});
