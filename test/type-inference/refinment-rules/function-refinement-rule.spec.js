@@ -207,6 +207,19 @@ describe("FunctionRefinementRule", function () {
 			// assert
 			expect(func.declaration).to.equal(functionDeclaration);
 		});
+
+		it("uses a type variable if the function declaration body is an expression", function () {
+			// arrange
+			const arrowFunction = t.arrowFunctionExpression([], t.identifier("x"));
+			arrowFunction.expression = true;
+			program.symbolTable.setSymbol(arrowFunction, new Symbol("anonymous function 1"));
+
+			// act
+			const func = FunctionRefinementRule.inferFunctionType(arrowFunction, context);
+
+			// assert
+			expect(func.returnType).to.be.instanceOf(TypeVariable);
+		});
 	});
 
 	describe("refine", function () {
