@@ -1,6 +1,6 @@
 {
   "name": "eschecker",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Type Checker for ECMAScript",
   "preferGlobal": true,
   "bin": {
