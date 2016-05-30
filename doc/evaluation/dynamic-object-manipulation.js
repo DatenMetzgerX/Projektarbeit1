@@ -7,10 +7,5 @@ function defaults(target, source) {
 	return target;
 }
 
-let options = defaults({}, {
-	rounds: 1000,
-	precision: 1
-});
-for (let i = 1; i < options.rnds; ++i) {
-	// ...
-}
+let options = defaults({}, {rounds: 1000, step: 1});
+const end = options.rnds * options.step;

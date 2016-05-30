@@ -1,8 +1,10 @@
-Initial memory usage 41.03125
-./doc/evaluation/closure.js
+Initial memory usage 40.38671875
+./closure
 Final type environment in exit node:
+Object -> {keys: any.({}) -> string[]}
 console -> {log: any.(any, any) -> undefined}
-currentId -> number
-uniqueId -> @ (33).() -> @ (32)
-Final memory usage: 43.453125
+createUniqueIdGenerator -> @ (47).() -> @ (46)
+document -> {getElementById: any.(string) -> Maybe<{addEventListener: any.(string, any.({bubbles: boolean, cancelable: boolean, defaultPrevented: boolean, type: string, preventDefault: any.() -> undefined, stopImmediatePropagation: any.() -> undefined, stopPropagation: any.() -> undefined}) -> any, any, any) -> undefined}>}
+generator -> @ (51).() -> @ (50)
+Final memory usage: 44.24609375
 Success

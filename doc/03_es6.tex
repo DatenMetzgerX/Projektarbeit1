@@ -1,10 +1,10 @@
 \section{Benefits of Strict Mode}\label{sec:strict-mode}
-Strict mode has been introduced in ECMAScript 5. Strict mode allows to opt in to a restricted variant of JavaScript. Strict mode is not only a subset of JavaScript, it intentionally changes the semantics from normal code. It eliminates silent errors by throwing exceptions instead. It also prohibits some error-prone and hard-to-optimize syntaxes and semantics from earlier ECMAScript versions. 
+Strict mode has been introduced in ECMAScript 5. It allows to opt in to a restricted variant of JavaScript. Strict mode is not only a subset of JavaScript, it intentionally changes the semantics from normal code. It eliminates silent errors by throwing exceptions instead. It also prohibits some error-prone and hard-to-optimize syntaxes and semantics from earlier ECMAScript versions. 
 
 Strict mode can be explicitly enabled by adding the \textit{"use strict"} directive before any other statement in a file or function. Using the directive in a file enables strict mode for the whole file, using it in a function enables strict mode for a specific function. Strict mode is enforced for scripts using ECMAScript 6 modules~\cite[10.2.1]{Ecma2015}. Therefore, it can be expected that newer code is using strict mode. The analysis only supports code written in strict mode to take advantages of the changed semantics. A description of the changed semantics with an effect to the analysis follows.
 
-\paragraph{Prohibited With Statement}
-The \textit{with} statement is prohibited in strict mode~\cite[Annex C]{Ecma2015}. Inside the \textit{with} statement object-properties can be accessed without the need to use member expressions. In the following example, the identifier \textit{x} on line three either references the property \textit{obj.x} or the variable \textit{x} defined on line one.
+\paragraph{Prohibited \textit{with} Statement}
+The \textit{with} statement is prohibited in strict mode~\cite[Annex C]{Ecma2015}. Inside the \textit{with} statement object properties can be accessed without the need to use member expressions. In the following example, the identifier \textit{x} on line three either references the property \textit{obj.x} or the variable \textit{x} defined on line one.
 
 \begin{javascriptcode}
 var x = 17;
@@ -13,7 +13,7 @@ with (obj) {
 }
 \end{javascriptcode}
 
-If the object \textit{obj} has a property \textit{x}, then the identifier references the property, otherwise it references the variable \textit{x}. This behavior makes lexical scoping a non-trivial task~\cite{JensenMollerThiemann2009}. The prohibition of the \textit{with} statement allows static scoping.
+If the object \textit{obj} has a property \textit{x}, then the identifier references the property \textit{obj.x}, otherwise it references the variable \textit{x}. This behavior makes lexical scoping a non-trivial task~\cite{JensenMollerThiemann2009}. The prohibition of the \textit{with} statement allows static scoping.
 
 \paragraph{Assignment to non-declared Variables}
-An Assignment to a non-declared variable introduces a global variable in non-strict mode. Strict mode prohibits assignments to non-declared variables and throws an error instead. Variables can not be implicitly declared in strict mode. Therefore, accessing a not yet known variable is always an error.
+An assignment to a non-declared variable introduces a global variable in non-strict mode. Strict mode prohibits assignments to non-declared variables and throws an error instead. Variables can not be implicitly declared in strict mode. Therefore, accessing a not yet known variable is always an error.

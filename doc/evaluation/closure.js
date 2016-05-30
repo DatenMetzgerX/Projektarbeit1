@@ -1,7 +1,8 @@
-let currentId = 0;
-
-function uniqueId() {
-	return ++currentId;
+function createUniqueIdGenerator() {
+	let currentId = 0;
+	
+	return () => ++currentId;
 }
 
-uniqueId();
+const generator = createUniqueIdGenerator();
+generator();

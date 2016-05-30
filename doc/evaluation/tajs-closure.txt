@@ -1,15 +1,16 @@
 ===========  Loading files ===========
-Loading doc/evaluation/closure-es5.js
+Loading closure-es5.js
 ===========  Data flow analysis ===========
-doc/evaluation/closure-es5.js:1:1 (node transfers: 1, worklist size: 1)
-doc/evaluation/closure-es5.js:1:17 (node transfers: 4, worklist size: 1)
-doc/evaluation/closure-es5.js:7:1 (node transfers: 7, worklist size: 1)
-doc/evaluation/closure-es5.js:3:1 (node transfers: 8, worklist size: 1)
-doc/evaluation/closure-es5.js:4:11 (node transfers: 9, worklist size: 1)
-doc/evaluation/closure-es5.js:5:1 (node transfers: 14, worklist size: 1)
-doc/evaluation/closure-es5.js:1:1 (node transfers: 15, worklist size: 1)
+closure-es5.js:1:1 (node transfers: 1, worklist size: 1)
+closure-es5.js:9:17 (node transfers: 4, worklist size: 1)
+closure-es5.js:9:17 (node transfers: 5, worklist size: 1)
+closure-es5.js:1:1 (node transfers: 6, worklist size: 1)
+closure-es5.js:2:18 (node transfers: 8, worklist size: 1)
+closure-es5.js:7:1 (node transfers: 11, worklist size: 1)
+closure-es5.js:9:17 (node transfers: 12, worklist size: 1)
+closure-es5.js:10:1 (node transfers: 14, worklist size: 1)
+closure-es5.js:4:9 (node transfers: 15, worklist size: 1)
+closure-es5.js:5:12 (node transfers: 16, worklist size: 1)
+closure-es5.js:6:2 (node transfers: 21, worklist size: 1)
+closure-es5.js:1:1 (node transfers: 22, worklist size: 1)
 ===========  Scan ===========
-currentId:	doc/evaluation/closure-es5.js:1:17	->	0.0
-uniqueId:	doc/evaluation/closure-es5.js:7:1	->	[@uniqueId#fun1]
-currentId:	doc/evaluation/closure-es5.js:4:11	->	0.0
-currentId:	doc/evaluation/closure-es5.js:4:9	->	1.0

@@ -7,7 +7,5 @@ function defaults(target, source) {
 	return target;
 }
 
-var options = defaults({}, { rounds: 1000, precision: 1 });
-for (var i = 1; i < options.rnds; ++i) {
-	// ...
-}
+var options = defaults({}, { rounds: 1000, step: 1 });
+var end = options.rnds * options.step;
