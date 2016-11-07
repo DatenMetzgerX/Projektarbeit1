@@ -1,6 +1,6 @@
-[![Coverage Status](https://coveralls.io/repos/github/DatenMetzgerX/ESChecker/badge.svg?branch=master)](https://coveralls.io/github/DatenMetzgerX/ESChecker?branch=master)
-[![bitHound Overall Score](https://www.bithound.io/github/DatenMetzgerX/ESChecker/badges/score.svg)](https://www.bithound.io/github/DatenMetzgerX/ESChecker)
-[![Build Status](https://travis-ci.org/DatenMetzgerX/ESChecker.svg?branch=master)](https://travis-ci.org/DatenMetzgerX/ESChecker)
+[![Coverage Status](https://coveralls.io/repos/github/DatenMetzgerX/MichaReiser/badge.svg?branch=master)](https://coveralls.io/github/MichaReiser/ESChecker?branch=master)
+[![bitHound Overall Score](https://www.bithound.io/github/MichaReiser/ESChecker/badges/score.svg)](https://www.bithound.io/github/MichaReiser/ESChecker)
+[![Build Status](https://travis-ci.org/MichaReiser/ESChecker.svg?branch=master)](https://travis-ci.org/MichaReiser/ESChecker)
 
 # ESChecker
 
